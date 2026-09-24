@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Frontend.Call;
+package Call;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

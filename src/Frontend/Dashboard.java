@@ -5,9 +5,11 @@ package Frontend;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import Frontend.Call.Category;
-import Frontend.Call.Product;
-import Frontend.Call.Stock;
+import Call.Category;
+import Call.Product;
+import Call.Stock;
+import Backend.DBConnection;
+import Backend.bCategory;
 
 import java.awt.Font;
 import java.awt.Graphics;
@@ -46,6 +48,8 @@ import javax.swing.table.DefaultTableModel;
 public class Dashboard extends javax.swing.JFrame {
     private double bHeight = 0.0;
     private int loggedInUserId = 1;
+    
+    bCategory bCat = new bCategory();
     /**
      * Creates new form Cashier
      */
@@ -57,27 +61,7 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     public void setCategoryTable() {
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("SELECT category_id, category_name FROM categories");
-            ResultSet rs = ps.executeQuery();
-
-            DefaultTableModel model = (DefaultTableModel) categoryTable.getModel();
-            model.setRowCount(0);
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("category_id"),
-                    rs.getString("category_name"),
-                });
-            }
-
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bCat.setCat(categoryTable);
     }
     
     public void setProductTable() {
@@ -809,6 +793,11 @@ public class Dashboard extends javax.swing.JFrame {
         totalSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
 
         cashAmountSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        cashAmountSalesTF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cashAmountSalesTFActionPerformed(evt);
+            }
+        });
         cashAmountSalesTF.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 cashAmountSalesTFKeyReleased(evt);
@@ -872,7 +861,7 @@ public class Dashboard extends javax.swing.JFrame {
             salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(salesBackgroundLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(salesBackgroundLayout.createSequentialGroup()
