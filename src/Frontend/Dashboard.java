@@ -246,6 +246,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
+        categoryTable.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         categoryTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -793,11 +794,7 @@ public class Dashboard extends javax.swing.JFrame {
         totalSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
 
         cashAmountSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        cashAmountSalesTF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cashAmountSalesTFActionPerformed(evt);
-            }
-        });
+        
         cashAmountSalesTF.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 cashAmountSalesTFKeyReleased(evt);
