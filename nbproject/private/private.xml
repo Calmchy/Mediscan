@@ -5,10 +5,10 @@
         <group>
             <file>file:/home/manatad/github/Mediscan/src/Backend/bProduct.java</file>
             <file>file:/home/manatad/github/Mediscan/src/Backend/bCategory.java</file>
-            <file>file:/home/manatad/github/Mediscan/src/Backend/DBConnection.java</file>
             <file>file:/home/manatad/github/Mediscan/src/Backend/bStocks.java</file>
             <file>file:/home/manatad/github/Mediscan/src/Frontend/Dashboard.java</file>
             <file>file:/home/manatad/github/Mediscan/src/Call/Product.java</file>
+            <file>file:/home/manatad/github/Mediscan/src/Call/Stock.java</file>
         </group>
     </open-files>
 </project-private>
