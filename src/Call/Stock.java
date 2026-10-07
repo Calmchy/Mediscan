@@ -5,6 +5,7 @@
  */
 package Call;
 
+import Backend.DBConnection;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -26,6 +27,7 @@ public class Stock extends javax.swing.JDialog {
         setTitle("ADD STOCK");
         Title.setText("ADD STOCK");
         loadProducts();
+        setupPacksAutoCalc();
     }
     
     public Stock(java.awt.Frame parent, boolean modal, int stockId) {
@@ -35,12 +37,63 @@ public class Stock extends javax.swing.JDialog {
         setTitle("EDIT STOCK");
         Title.setText("EDIT STOCK");
         loadProducts();
+        setupPacksAutoCalc();
         loadStockData();
+    }
+    
+    private Integer getPackSizeByProductName(String productName) {
+        try {
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT pack_size FROM products WHERE name = ?");
+            ps.setString(1, productName);
+            ResultSet rs = ps.executeQuery();
+ 
+            Integer packSize = null;
+            if (rs.next()) {
+                Object val = rs.getObject("pack_size");
+                if (val != null) packSize = rs.getInt("pack_size");
+            }
+ 
+            rs.close();
+            ps.close();
+            con.close();
+            return packSize;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+    
+    private void setupPacksAutoCalc() {
+        stockPReceivedTF.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                String selectedProduct = (String) stockProductNameCB.getSelectedItem();
+                String packsText = stockPReceivedTF.getText().trim();
+ 
+                if (selectedProduct == null || packsText.isEmpty()) {
+                    return;
+                }
+ 
+                Integer packSize = getPackSizeByProductName(selectedProduct);
+                if (packSize == null) {
+                    return; // no pack_size for this product (e.g. unit_type = piece) — nothing to calculate
+                }
+ 
+                try {
+                    int packs = Integer.parseInt(packsText);
+                    stockQtyTF.setText(String.valueOf(packs * packSize));
+                } catch (NumberFormatException e) {
+                    // still typing — ignore
+                }
+            }
+        });
     }
     
     private void loadProducts() {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT name FROM products");
             ResultSet rs = ps.executeQuery();
  
@@ -58,9 +111,8 @@ public class Stock extends javax.swing.JDialog {
     }
     
     private int getProductIdByName(String productName) throws Exception {
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-        PreparedStatement ps = con.prepareStatement(
-            "SELECT product_id FROM products WHERE name = ?");
+        Connection con = DBConnection.getConnection();
+        PreparedStatement ps = con.prepareStatement("SELECT product_id FROM products WHERE name = ?");
         ps.setString(1, productName);
         ResultSet rs = ps.executeQuery();
  
@@ -78,10 +130,10 @@ public class Stock extends javax.swing.JDialog {
     private void loadStockData() {
         try {
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement(
-                "SELECT p.name, ps.batch_no, ps.quantity, ps.expiry_date "
-              + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
-              + "WHERE ps.stock_id = ?");
+            PreparedStatement ps = con.prepareStatement("SELECT p.name, ps.batch_no, ps.quantity, ps.expiry_date "
+                    + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
+                    + "WHERE ps.stock_id = ?");
+            
             ps.setInt(1, stockId);
             ResultSet rs = ps.executeQuery();
  
@@ -320,11 +372,12 @@ public class Stock extends javax.swing.JDialog {
                 return;
             }
  
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
+            Connection con = DBConnection.getConnection();
  
             if (stockId == -1) {
-                PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO product_stock (product_id, batch_no, quantity, expiry_date) VALUES (?, ?, ?, ?)");
+                PreparedStatement ps = con.prepareStatement("INSERT INTO product_stock (product_id, batch_no, quantity, expiry_date) "
+                        + "VALUES (?, ?, ?, ?)");
+                
                 ps.setInt(1, productId);
                 ps.setString(2, batchNo);
                 ps.setInt(3, quantity);
@@ -333,8 +386,9 @@ public class Stock extends javax.swing.JDialog {
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Stock added successfully!");
             } else {
-                PreparedStatement ps = con.prepareStatement(
-                    "UPDATE product_stock SET product_id=?, batch_no=?, quantity=?, expiry_date=? WHERE stock_id=?");
+                PreparedStatement ps = con.prepareStatement("UPDATE product_stock "
+                        + "SET product_id=?, batch_no=?, quantity=?, expiry_date=? WHERE stock_id=?");
+                
                 ps.setInt(1, productId);
                 ps.setString(2, batchNo);
                 ps.setInt(3, quantity);
@@ -359,6 +413,7 @@ public class Stock extends javax.swing.JDialog {
         stockBatchNoTF.setText("");
         stockQtyTF.setText("");
         stockExpiryDateFF.setText("");
+        stockPReceivedTF.setText("");
     }//GEN-LAST:event_stockClearBtnActionPerformed
         
     /**

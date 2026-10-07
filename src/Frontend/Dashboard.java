@@ -5,11 +5,14 @@ package Frontend;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import Backend.DBConnection;
 import Call.Category;
 import Call.Product;
 import Call.Stock;
-import Backend.DBConnection;
+
 import Backend.bCategory;
+import Backend.bProduct;
+import Backend.bStocks;
 
 import java.awt.Font;
 import java.awt.Graphics;
@@ -50,6 +53,8 @@ public class Dashboard extends javax.swing.JFrame {
     private int loggedInUserId = 1;
     
     bCategory bCat = new bCategory();
+    bProduct bProd = new bProduct();
+    bStocks bSto = new bStocks();
     /**
      * Creates new form Cashier
      */
@@ -65,63 +70,11 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     public void setProductTable() {
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            String sql = "SELECT p.product_id, p.name, p.brand, c.category_name, p.cost_price, p.selling_price, p.requires_prescription, p.minimum_age FROM products p LEFT JOIN categories c ON p.category_id = c.category_id";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-
-            DefaultTableModel model = (DefaultTableModel) productsTable.getModel();
-            model.setRowCount(0);
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("product_id"),
-                    rs.getString("name"),
-                    rs.getString("brand"),
-                    rs.getString("category_name"),
-                    rs.getDouble("cost_price"),
-                    rs.getDouble("selling_price"),
-                    rs.getBoolean("requires_prescription"),
-                    rs.getInt("minimum_age")
-                });
-            }
-
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bProd.setProd(productsTable);
     }
     
     public void setStockTable() {
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            String sql = "SELECT ps.stock_id, p.name, ps.batch_no, ps.quantity, ps.expiry_date, ps.date_received FROM product_stock ps JOIN products p ON ps.product_id = p.product_id";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-
-            DefaultTableModel model = (DefaultTableModel) stockTable.getModel();
-            model.setRowCount(0);
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("stock_id"),
-                    rs.getString("name"),
-                    rs.getString("batch_no"),
-                    rs.getInt("quantity"),
-                    rs.getDate("expiry_date"),
-                    rs.getDate("date_received")
-                });
-            }
-
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bSto.setStock(stockTable);
     }
 
     /**
@@ -199,14 +152,14 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         salesUnitTF = new javax.swing.JTextField();
-        totalSalesTF = new javax.swing.JTextField();
+        changeSalesTF = new javax.swing.JTextField();
         cashAmountSalesTF = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         salesRemoveItemBtn = new javax.swing.JButton();
         salesRemoveAllBtn = new javax.swing.JButton();
         jLabel16 = new javax.swing.JLabel();
-        changeSalesTF = new javax.swing.JLabel();
+        totalSalesTF = new javax.swing.JLabel();
         transactionTab = new javax.swing.JPanel();
         accountsTab = new javax.swing.JPanel();
 
@@ -249,6 +202,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         categoryTable.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        categoryTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         categoryTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -376,6 +330,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         productTab.setBackground(new java.awt.Color(204, 204, 204));
 
+        productsTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         productsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -510,6 +465,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         tabPannel.addTab("PRODUCTS", productTab);
 
+        stockTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         stockTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -642,6 +598,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         tabPannel.addTab("STOCK", stockTab);
 
+        salesTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         salesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -803,9 +760,9 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
-        totalSalesTF.setEditable(false);
-        totalSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        totalSalesTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        changeSalesTF.setEditable(false);
+        changeSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        changeSalesTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
         cashAmountSalesTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         cashAmountSalesTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -846,9 +803,9 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel16.setText("CHANGE:");
 
-        changeSalesTF.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        changeSalesTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        changeSalesTF.setText("1000");
+        totalSalesTF.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        totalSalesTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalSalesTF.setText("1000");
 
         javax.swing.GroupLayout salesBackgroundLayout = new javax.swing.GroupLayout(salesBackground);
         salesBackground.setLayout(salesBackgroundLayout);
@@ -876,9 +833,9 @@ public class Dashboard extends javax.swing.JFrame {
                             .addGroup(salesBackgroundLayout.createSequentialGroup()
                                 .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(changeSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 69, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -899,10 +856,11 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel14)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(19, 19, 19))
@@ -982,7 +940,7 @@ public class Dashboard extends javax.swing.JFrame {
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
-
+ 
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
         model.setRowCount(0);
         recalcTotal();
@@ -1019,11 +977,11 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void salesProductIDScanTFKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_salesProductIDScanTFKeyReleased
         String idText = salesProductIDScanTF.getText().trim();
-
+ 
         if (idText.isEmpty()) {
             return;
         }
-
+ 
         int productId;
         try {
             productId = Integer.parseInt(idText);
@@ -1032,24 +990,27 @@ public class Dashboard extends javax.swing.JFrame {
             clearScanFields();
             return;
         }
-
+ 
         try {
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            String sql = "SELECT p.name, p.brand, c.category_name, p.selling_price, p.requires_prescription, p.is_age_restricted, p.minimum_age FROM products p LEFT JOIN categories c ON p.category_id = c.category_id WHERE p.product_id = ?";
+            String sql = "SELECT p.name, p.brand, c.category_name, p.selling_price, p.requires_prescription, p.is_age_restricted, p.minimum_age, p.unit_type "
+                    + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
+                    + "WHERE p.product_id = ?";
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
-
+ 
             if (rs.next()) {
                 salesProductNameTF.setText(rs.getString("name"));
                 salesCategoryTF.setText(rs.getString("category_name"));
                 salesPriceTF1.setText(rs.getString("brand"));
                 salesPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
+                salesUnitTF.setText(rs.getString("unit_type"));
                 salesQuantityTF.setText("1");
-
+ 
                 boolean requiresRx = rs.getBoolean("requires_prescription");
                 boolean ageRestricted = rs.getBoolean("is_age_restricted");
-
+ 
                 if (requiresRx) {
                     JOptionPane.showMessageDialog(this,
                         "This item requires a prescription. Please verify before adding.",
@@ -1061,16 +1022,16 @@ public class Dashboard extends javax.swing.JFrame {
                         "This item is age-restricted (" + minAge + "+). Please verify ID before adding.",
                         "Age Verification Required", JOptionPane.WARNING_MESSAGE);
                 }
-
+ 
             } else {
                 JOptionPane.showMessageDialog(this, "No product found with that ID.");
                 clearScanFields();
             }
-
+ 
             rs.close();
             ps.close();
             con.close();
-
+ 
         } catch (Exception e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(this, "Error looking up product: " + e.getMessage());
@@ -1084,20 +1045,20 @@ public class Dashboard extends javax.swing.JFrame {
     private void salesAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salesAddBtnActionPerformed
         String idText = salesProductIDScanTF.getText().trim();
         String name = salesProductNameTF.getText().trim();
-        String category = salesCategoryTF.getText().trim();
         String brand = salesPriceTF1.getText().trim();
         String priceText = salesPriceTF.getText().trim();
+        String unit = salesUnitTF.getText().trim();
         String qtyText = salesQuantityTF.getText().trim();
-
+ 
         if (idText.isEmpty() || name.isEmpty() || priceText.isEmpty() || qtyText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please scan a valid product first.");
             return;
         }
-
+ 
         int productId;
         double price;
         int quantity;
-
+ 
         try {
             productId = Integer.parseInt(idText);
             price = Double.parseDouble(priceText);
@@ -1110,34 +1071,33 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Quantity and Price must be valid numbers.");
             return;
         }
-
+ 
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
-
-        // check if this product is already in the cart — merge quantity/subtotal instead of duplicating
+        
         for (int row = 0; row < model.getRowCount(); row++) {
             int existingId = Integer.parseInt(model.getValueAt(row, 1).toString());
             if (existingId == productId) {
-                int existingQty = Integer.parseInt(model.getValueAt(row, 6).toString());
+                int existingQty = Integer.parseInt(model.getValueAt(row, 5).toString());
                 int newQty = existingQty + quantity;
                 double newSubtotal = newQty * price;
-
-                model.setValueAt(newQty, row, 6);
+ 
+                model.setValueAt(newQty, row, 5);
                 model.setValueAt(newSubtotal, row, 7);
-
+ 
                 clearScanFields();
                 recalcTotal();
                 return;
             }
         }
-
+ 
         // not in cart yet — add as a new row
         double subtotal = price * quantity;
         int rowNumber = model.getRowCount() + 1;
-
+ 
         model.addRow(new Object[]{
-            rowNumber, productId, name, category, brand, price, quantity, subtotal
+            rowNumber, productId, name, brand, price, quantity, unit, subtotal
         });
-
+ 
         clearScanFields();
         recalcTotal();
     }//GEN-LAST:event_salesAddBtnActionPerformed
@@ -1147,13 +1107,13 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "ENTER AN AMOUNT.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+ 
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
         if (model.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Cart is empty.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+ 
         double total, cash;
         try {
             total = Double.parseDouble(totalSalesTF.getText());
@@ -1162,32 +1122,35 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Invalid amount entered.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+ 
         double change = cash - total;
         changeSalesTF.setText(String.valueOf(change));
-
+ 
         if (cash < total) {
             JOptionPane.showMessageDialog(this, "INSUFFICIENT AMOUNT.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+ 
         ArrayList<String> rItemName = new ArrayList<>();
         ArrayList<String> rQty = new ArrayList<>();
         ArrayList<String> rPrice = new ArrayList<>();
+        ArrayList<String> rUnit = new ArrayList<>();
         ArrayList<String> rSubtotal = new ArrayList<>();
         ArrayList<Integer> rProductId = new ArrayList<>();
-
+ 
+        // columns are: # | ID | NAME | BRAND | PRICE | QTY | UNIT | SUBTOTAL  (indices 0-7)
         for (int row = 0; row < model.getRowCount(); row++) {
             rProductId.add(Integer.parseInt(model.getValueAt(row, 1).toString()));
             rItemName.add(model.getValueAt(row, 2).toString());
-            rQty.add(model.getValueAt(row, 6).toString());
-            rPrice.add(model.getValueAt(row, 5).toString());
+            rPrice.add(model.getValueAt(row, 4).toString());
+            rQty.add(model.getValueAt(row, 5).toString());
+            rUnit.add(model.getValueAt(row, 6).toString());
             rSubtotal.add(model.getValueAt(row, 7).toString());
         }
-
+ 
         try {
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-
+ 
             String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount, payment_method) VALUES (?, ?, ?, ?)";
             PreparedStatement orderPs = con.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
             orderPs.setInt(1, loggedInUserId);
@@ -1195,23 +1158,23 @@ public class Dashboard extends javax.swing.JFrame {
             orderPs.setDouble(3, total);
             orderPs.setString(4, "cash");
             orderPs.executeUpdate();
-
+ 
             ResultSet keys = orderPs.getGeneratedKeys();
             int orderId = -1;
             if (keys.next()) {
                 orderId = keys.getInt(1);
             }
             orderPs.close();
-
+ 
             String itemSql = "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal, id_verified) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement itemPs = con.prepareStatement(itemSql);
-
+ 
             for (int i = 0; i < rProductId.size(); i++) {
                 int productId = rProductId.get(i);
                 int qty = Integer.parseInt(rQty.get(i));
                 double price = Double.parseDouble(rPrice.get(i));
                 double subtotal = Double.parseDouble(rSubtotal.get(i));
-
+ 
                 itemPs.setInt(1, orderId);
                 itemPs.setInt(2, productId);
                 itemPs.setInt(3, qty);
@@ -1219,27 +1182,27 @@ public class Dashboard extends javax.swing.JFrame {
                 itemPs.setDouble(5, subtotal);
                 itemPs.setBoolean(6, false);
                 itemPs.executeUpdate();
-
+ 
                 deductStockFEFO(con, productId, qty);
             }
             itemPs.close();
             con.close();
-
+ 
         } catch (Exception e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(this, "Error saving order: " + e.getMessage());
             return;
         }
-
+ 
         bHeight = rItemName.size();
         PrinterJob pj = PrinterJob.getPrinterJob();
-        pj.setPrintable(new BillPrintable(rItemName, rQty, rPrice, rSubtotal, total, cash, change), getPageFormat(pj));
+        pj.setPrintable(new BillPrintable(rItemName, rQty, rPrice, rUnit, rSubtotal, total, cash, change), getPageFormat(pj));
         try {
             pj.print();
         } catch (PrinterException ex) {
             ex.printStackTrace();
         }
-
+ 
         model.setRowCount(0);
         totalSalesTF.setText("");
         cashAmountSalesTF.setText("");
@@ -1268,12 +1231,12 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Please select a stock entry to delete.");
             return;
         }
-
+ 
         int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS STOCK ENTRY?", "CONFIRMATION", 0);
         if (x != 0) {
             return;
         }
-
+ 
         try {
             int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
@@ -1282,7 +1245,7 @@ public class Dashboard extends javax.swing.JFrame {
             ps.executeUpdate();
             ps.close();
             con.close();
-
+ 
             JOptionPane.showMessageDialog(null, "Delete successful");
             setStockTable();
         } catch (Exception e) {
@@ -1298,7 +1261,7 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
         int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
-
+ 
         Stock stk = new Stock(this, true, stockId);
         stk.setVisible(true);
         setStockTable();
@@ -1331,12 +1294,12 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Please select a product to delete.");
             return;
         }
-
+ 
         int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS PRODUCT?", "CONFIRMATION", 0);
         if (x != 0) {
             return;
         }
-
+ 
         try {
             int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
@@ -1345,7 +1308,7 @@ public class Dashboard extends javax.swing.JFrame {
             ps.executeUpdate();
             ps.close();
             con.close();
-
+ 
             JOptionPane.showMessageDialog(null, "Delete successful");
             setProductTable();
         } catch (Exception e) {
@@ -1361,7 +1324,7 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
         int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
-
+ 
         Product prod = new Product(this, true, productId);
         prod.setVisible(true);
         setProductTable();
@@ -1394,12 +1357,12 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Please select a category to delete.");
             return;
         }
-
+ 
         int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS CATEGORY?", "CONFIRMATION", 0);
         if (x != 0) {
             return;
         }
-
+ 
         try {
             int categoryId = Integer.parseInt(categoryTable.getValueAt(i, 0).toString());
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
@@ -1408,7 +1371,7 @@ public class Dashboard extends javax.swing.JFrame {
             ps.executeUpdate();
             ps.close();
             con.close();
-
+ 
             JOptionPane.showMessageDialog(null, "Delete successful");
             setCategoryTable();
         } catch (Exception e) {
@@ -1424,7 +1387,7 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
         int categoryId = Integer.parseInt(categoryTable.getValueAt(i, 0).toString());
-
+ 
         Category cat = new Category(this, true, categoryId);
         cat.setVisible(true);
         setCategoryTable();
@@ -1436,22 +1399,13 @@ public class Dashboard extends javax.swing.JFrame {
         setCategoryTable();
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 
-    
-        
-    
-
-
-    
-
-
-    
-
     private void clearScanFields() {
         salesProductIDScanTF.setText("");
         salesProductNameTF.setText("");
         salesCategoryTF.setText("");
         salesPriceTF1.setText("");
         salesPriceTF.setText("");
+        salesUnitTF.setText("");
         salesQuantityTF.setText("1");
     }
 
@@ -1461,7 +1415,7 @@ public class Dashboard extends javax.swing.JFrame {
             changeSalesTF.setText("");
             return;
         }
-
+ 
         try {
             double cash = Double.parseDouble(cashText);
             double change = cash - total;
@@ -1474,18 +1428,14 @@ public class Dashboard extends javax.swing.JFrame {
     private void recalcTotal() {
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
         double total = 0.0;
-
+ 
         for (int row = 0; row < model.getRowCount(); row++) {
             total += Double.parseDouble(model.getValueAt(row, 7).toString());
         }
-
+ 
         totalSalesTF.setText(String.valueOf(total));
         recalcChange(total);
     }
-
-
-
-
 
     private void renumberRows() {
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
@@ -1494,21 +1444,19 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
 
-
-
     private void deductStockFEFO(Connection con, int productId, int quantityToDeduct) throws Exception {
         String selectSql = "SELECT stock_id, quantity FROM product_stock WHERE product_id = ? AND quantity > 0 ORDER BY expiry_date ASC";
         PreparedStatement selectPs = con.prepareStatement(selectSql);
         selectPs.setInt(1, productId);
         ResultSet rs = selectPs.executeQuery();
-
+ 
         int remaining = quantityToDeduct;
         while (rs.next() && remaining > 0) {
             int stockId = rs.getInt("stock_id");
             int available = rs.getInt("quantity");
             int deduct = Math.min(available, remaining);
             remaining -= deduct;
-
+ 
             PreparedStatement updatePs = con.prepareStatement("UPDATE product_stock SET quantity = ? WHERE stock_id = ?");
             updatePs.setInt(1, available - deduct);
             updatePs.setInt(2, stockId);
@@ -1519,66 +1467,67 @@ public class Dashboard extends javax.swing.JFrame {
     }
 
     public class BillPrintable implements Printable {
-        private ArrayList<String> itemName, quantity, itemPrice, subtotal;
+        private ArrayList<String> itemName, quantity, itemPrice, unit, subtotal;
         private double total, cash, change;
-
+ 
         public BillPrintable(ArrayList<String> itemName, ArrayList<String> quantity,
-                              ArrayList<String> itemPrice, ArrayList<String> subtotal,
+                              ArrayList<String> itemPrice, ArrayList<String> unit, ArrayList<String> subtotal,
                               double total, double cash, double change) {
             this.itemName = itemName;
             this.quantity = quantity;
             this.itemPrice = itemPrice;
+            this.unit = unit;
             this.subtotal = subtotal;
             this.total = total;
             this.cash = cash;
             this.change = change;
         }
-
+ 
         @Override
         public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
             int result = NO_SUCH_PAGE;
-
+ 
             if (pageIndex == 0) {
                 Graphics2D g2d = (Graphics2D) graphics;
                 g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
-
+ 
                 int y = 20;
                 int yShift = 10;
                 int headerRectHeight = 15;
-
+ 
                 LocalDateTime now = LocalDateTime.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                 String currentDateTime = now.format(formatter);
-
+ 
                 g2d.setFont(new Font("Monospaced", Font.PLAIN, 6));
                 String divider = "--------------------------------";
                 int dividerWidth = g2d.getFontMetrics().stringWidth(divider);
                 int rightEdge = 12 + dividerWidth; // matches where the divider line actually ends
-
+ 
                 g2d.drawString(divider, 12, y); y += yShift;
                 g2d.drawString(" MEDISCAN POS ", 12, y); y += yShift;
                 g2d.drawString(" Retail Pharmacy ", 12, y); y += yShift;
                 g2d.drawString(" " + currentDateTime + " ", 12, y); y += yShift;
                 g2d.drawString(divider, 12, y); y += headerRectHeight;
                 g2d.drawString(divider, 10, y); y += headerRectHeight;
-
+ 
                 // one item per two lines: name on its own line, then Qty x Price ... Subtotal, right-aligned
                 for (int i = 0; i < itemName.size(); i++) {
                     g2d.drawString(" " + itemName.get(i), 10, y); y += yShift;
-
+ 
                     int qty = Integer.parseInt(quantity.get(i));
                     double price = Double.parseDouble(itemPrice.get(i));
                     double sub = Double.parseDouble(subtotal.get(i));
-
-                    String line = String.format("  %d x %.2f", qty, price);
+ 
+                    String line = String.format("  %d %s x %.2f", qty, unit.get(i), price);
                     String subText = String.format("%.2f", sub);
                     int subX = rightEdge - g2d.getFontMetrics().stringWidth(subText);
-
+ 
                     g2d.drawString(line, 10, y);
                     g2d.drawString(subText, subX, y);
                     y += yShift;
                 }
-
+ 
                 g2d.drawString(divider, 10, y); y += yShift;
                 g2d.drawString(String.format(" Total amount: %.2f ", total), 10, y); y += yShift;
                 g2d.drawString(divider, 10, y); y += yShift;
@@ -1588,10 +1537,10 @@ public class Dashboard extends javax.swing.JFrame {
                 g2d.drawString("********************************", 10, y); y += yShift;
                 g2d.drawString(" THANK YOU, COME AGAIN! ", 10, y); y += yShift;
                 g2d.drawString("********************************", 10, y); y += yShift;
-
+ 
                 result = PAGE_EXISTS;
             }
-
+ 
             return result;
         }
     }
@@ -1607,18 +1556,18 @@ public class Dashboard extends javax.swing.JFrame {
     public PageFormat getPageFormat(PrinterJob pj) {
         PageFormat pf = pj.defaultPage();
         Paper paper = pf.getPaper();
-
+ 
         double bodyHeight = bHeight;
         double headerHeight = 5.0;
         double footerHeight = 5.0;
         double width = cm_to_pp(8);
         double height = cm_to_pp(headerHeight + bodyHeight + footerHeight);
-
+ 
         paper.setSize(width, height);
         paper.setImageableArea(0, 10, width, height - cm_to_pp(1));
         pf.setOrientation(PageFormat.PORTRAIT);
         pf.setPaper(paper);
-
+ 
         return pf;
     }
 
@@ -1666,7 +1615,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton categoryRefreshBtn;
     private javax.swing.JPanel categoryTab;
     private javax.swing.JTable categoryTable;
-    private javax.swing.JLabel changeSalesTF;
+    private javax.swing.JTextField changeSalesTF;
     private javax.swing.JButton deleteCategoryBtn;
     private javax.swing.JButton deleteProductBtn;
     private javax.swing.JButton deleteStockBtn;
@@ -1730,7 +1679,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel stockTab;
     private javax.swing.JTable stockTable;
     private javax.swing.JTabbedPane tabPannel;
-    private javax.swing.JTextField totalSalesTF;
+    private javax.swing.JLabel totalSalesTF;
     private javax.swing.JPanel transactionTab;
     // End of variables declaration//GEN-END:variables
 }

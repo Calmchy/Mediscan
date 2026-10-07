@@ -5,8 +5,9 @@
  */
 package Call;
 
+import Backend.DBConnection;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
@@ -27,6 +28,7 @@ public class Product extends javax.swing.JDialog {
         productAddBtn.setText("Add");
         loadCategories();
         setupAgeRestrictedToggle();
+        setupUnitTypeToggle();
     }
     
     public Product(java.awt.Frame parent, boolean modal, int productId) {
@@ -37,12 +39,13 @@ public class Product extends javax.swing.JDialog {
         productAddBtn.setText("Update");
         loadCategories();
         setupAgeRestrictedToggle();
+        setupUnitTypeToggle();
         loadProductData();
     }
     
     private void loadCategories() {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement("SELECT category_name FROM categories");
             ResultSet rs = ps.executeQuery();
  
@@ -60,9 +63,8 @@ public class Product extends javax.swing.JDialog {
     }
     
     private int getCategoryIdByName(String categoryName) throws Exception {
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-        PreparedStatement ps = con.prepareStatement(
-            "SELECT category_id FROM categories WHERE category_name = ?");
+        Connection con = DBConnection.getConnection();
+        PreparedStatement ps = con.prepareStatement("SELECT category_id FROM categories WHERE category_name = ?");
         ps.setString(1, categoryName);
         ResultSet rs = ps.executeQuery();
  
@@ -88,14 +90,33 @@ public class Product extends javax.swing.JDialog {
         });
     }
     
+    private void setupUnitTypeToggle() {
+        if (productUTypeCB.getItemCount() == 0) {
+            productUTypeCB.addItem("tablet");
+            productUTypeCB.addItem("piece");
+        }
+ 
+        boolean isTablet = "tablet".equals(productUTypeCB.getSelectedItem());
+        productSellingPriceTF1.setEnabled(isTablet);
+ 
+        productUTypeCB.addItemListener(e -> {
+            boolean tablet = "tablet".equals(productUTypeCB.getSelectedItem());
+            productSellingPriceTF1.setEnabled(tablet);
+            if (!tablet) {
+                productSellingPriceTF1.setText("");
+            }
+        });
+    }
+    
     private void loadProductData() {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement(
-                "SELECT p.name, p.brand, c.category_name, p.cost_price, p.selling_price, "
-              + "p.requires_prescription, p.is_age_restricted, p.minimum_age "
-              + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
-              + "WHERE p.product_id = ?");
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT p.name, p.brand, c.category_name, p.cost_price, p.selling_price, "
+                    + "p.requires_prescription, p.is_age_restricted, p.minimum_age, "
+                    + "p.unit_type, p.pack_size "
+                    + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
+                    + "WHERE p.product_id = ?");
+            
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
  
@@ -106,6 +127,13 @@ public class Product extends javax.swing.JDialog {
                 productSellingPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
                 productRPresCB.setSelected(rs.getBoolean("requires_prescription"));
                 productAgeRestCB.setSelected(rs.getBoolean("is_age_restricted"));
+                productUTypeCB.setSelectedItem(rs.getString("unit_type"));
+ 
+                Object packSize = rs.getObject("pack_size");
+                if (packSize != null) {
+                    productSellingPriceTF1.setText(packSize.toString());
+                    productSellingPriceTF1.setEnabled(true);
+                }
  
                 Object minAge = rs.getObject("minimum_age");
                 if (minAge != null) {
@@ -373,12 +401,24 @@ public class Product extends javax.swing.JDialog {
         boolean ageRestricted = productAgeRestCB.isSelected();
         String minAgeText = productMinAgeTF.getText().trim();
         String selectedCategory = (String) productCategoryCB.getSelectedItem();
-
+        String unitType = (String) productUTypeCB.getSelectedItem();
+        String packSizeText = productSellingPriceTF1.getText().trim();
+ 
         if (name.isEmpty() || selectedCategory == null || costText.isEmpty() || sellText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
             return;
         }
-
+ 
+        Integer packSize = null;
+        if ("tablet".equals(unitType) && !packSizeText.isEmpty()) {
+            try {
+                packSize = Integer.parseInt(packSizeText);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Pack Size must be a whole number.");
+                return;
+            }
+        }
+ 
         double costPrice, sellingPrice;
         try {
             costPrice = Double.parseDouble(costText);
@@ -387,7 +427,7 @@ public class Product extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Cost Price and Selling Price must be valid numbers.");
             return;
         }
-
+ 
         Integer minimumAge = null;
         if (ageRestricted) {
             if (minAgeText.isEmpty()) {
@@ -401,7 +441,7 @@ public class Product extends javax.swing.JDialog {
                 return;
             }
         }
-
+ 
         if (sellingPrice < costPrice) {
             int confirm = JOptionPane.showConfirmDialog(this,
                 "Selling price is lower than cost price. Continue anyway?",
@@ -410,20 +450,21 @@ public class Product extends javax.swing.JDialog {
                 return;
             }
         }
-
+ 
         try {
             int categoryId = getCategoryIdByName(selectedCategory);
             if (categoryId == -1) {
                 JOptionPane.showMessageDialog(this, "Selected category could not be found.");
                 return;
             }
-
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-
+ 
+            Connection con = DBConnection.getConnection();
+ 
             if (productId == -1) {
-                PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO products (name, brand, category_id, cost_price, selling_price, "
-                    + "requires_prescription, is_age_restricted, minimum_age) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, cost_price, selling_price, "
+                        + "requires_prescription, is_age_restricted, minimum_age, unit_type, pack_size) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
@@ -432,13 +473,16 @@ public class Product extends javax.swing.JDialog {
                 ps.setBoolean(6, requiresRx);
                 ps.setBoolean(7, ageRestricted);
                 if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
+                ps.setString(9, unitType);
+                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
                 ps.executeUpdate();
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Product added successfully!");
             } else {
-                PreparedStatement ps = con.prepareStatement(
-                    "UPDATE products SET name=?, brand=?, category_id=?, cost_price=?, selling_price=?, "
-                    + "requires_prescription=?, is_age_restricted=?, minimum_age=? WHERE product_id=?");
+                PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, cost_price=?, selling_price=?, "
+                        + "requires_prescription=?, is_age_restricted=?, minimum_age=?, unit_type=?, pack_size=? "
+                        + "WHERE product_id=?");
+                
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
@@ -447,15 +491,17 @@ public class Product extends javax.swing.JDialog {
                 ps.setBoolean(6, requiresRx);
                 ps.setBoolean(7, ageRestricted);
                 if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
-                ps.setInt(9, productId);
+                ps.setString(9, unitType);
+                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
+                ps.setInt(11, productId);
                 ps.executeUpdate();
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Product updated successfully!");
             }
-
+ 
             con.close();
             dispose();
-
+ 
         } catch (Exception e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
@@ -472,6 +518,8 @@ public class Product extends javax.swing.JDialog {
         productAgeRestCB.setSelected(false);
         productMinAgeTF.setText("");
         productMinAgeTF.setEnabled(false);
+        if (productUTypeCB.getItemCount() > 0) productUTypeCB.setSelectedIndex(0);
+        productSellingPriceTF1.setText("");
     }//GEN-LAST:event_productClearBtnActionPerformed
 
     /**
