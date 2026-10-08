@@ -5,7 +5,6 @@ package Frontend;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import Backend.DBConnection;
 import Call.Category;
 import Call.Product;
 import Call.Stock;
@@ -44,6 +43,14 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+
 /**
  *
  * @author chyril
@@ -51,6 +58,8 @@ import javax.swing.table.DefaultTableModel;
 public class Dashboard extends javax.swing.JFrame {
     private double bHeight = 0.0;
     private int loggedInUserId = 1;
+    private int orderId;
+    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes";
     
     bCategory bCat = new bCategory();
     bProduct bProd = new bProduct();
@@ -75,6 +84,55 @@ public class Dashboard extends javax.swing.JFrame {
     
     public void setStockTable() {
         bSto.setStock(stockTable);
+    }
+    
+    private BufferedImage generateBarcodeImage(String data, int width, int height) {
+        try {
+            Code128Writer writer = new Code128Writer();
+            BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.CODE_128, width, height);
+            return MatrixToImageWriter.toBufferedImage(bitMatrix);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private void saveBarcodeToFile(String data) {
+        try {
+            File folder = new File(BARCODE_FOLDER);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            Code128Writer writer = new Code128Writer();
+            BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.CODE_128, 300, 100);
+
+            Path path = new File(folder, data + ".png").toPath();
+            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+            System.out.println("Barcode saved: " + path.toString());
+        } catch (Exception e) {
+            System.out.println("Barcode save failed: " + e.getMessage());
+        }
+    }
+    
+    public PageFormat getPageFormat(PrinterJob pj) {
+        PageFormat pf = pj.defaultPage();
+        Paper paper = pf.getPaper();
+
+        double bodyHeight = bHeight;
+        double headerHeight = 5.0;
+        double footerHeight = 5.0;
+        double barcodeHeight = 2.5;
+        double width = cm_to_pp(8);
+        double height = cm_to_pp(headerHeight + bodyHeight + footerHeight + barcodeHeight);
+
+        paper.setSize(width, height);
+        paper.setImageableArea(0, 10, width, height - cm_to_pp(1));
+        pf.setOrientation(PageFormat.PORTRAIT);
+        pf.setPaper(paper);
+
+        return pf;
     }
 
     /**
@@ -1160,7 +1218,7 @@ public class Dashboard extends javax.swing.JFrame {
             orderPs.executeUpdate();
  
             ResultSet keys = orderPs.getGeneratedKeys();
-            int orderId = -1;
+            orderId = -1;
             if (keys.next()) {
                 orderId = keys.getInt(1);
             }
@@ -1196,7 +1254,8 @@ public class Dashboard extends javax.swing.JFrame {
  
         bHeight = rItemName.size();
         PrinterJob pj = PrinterJob.getPrinterJob();
-        pj.setPrintable(new BillPrintable(rItemName, rQty, rPrice, rUnit, rSubtotal, total, cash, change), getPageFormat(pj));
+        saveBarcodeToFile(String.valueOf(orderId));
+        pj.setPrintable(new BillPrintable(rItemName, rQty, rPrice, rUnit, rSubtotal, total, cash, change, orderId), getPageFormat(pj));
         try {
             pj.print();
         } catch (PrinterException ex) {
@@ -1469,10 +1528,11 @@ public class Dashboard extends javax.swing.JFrame {
     public class BillPrintable implements Printable {
         private ArrayList<String> itemName, quantity, itemPrice, unit, subtotal;
         private double total, cash, change;
- 
+        private int orderId;
+
         public BillPrintable(ArrayList<String> itemName, ArrayList<String> quantity,
                               ArrayList<String> itemPrice, ArrayList<String> unit, ArrayList<String> subtotal,
-                              double total, double cash, double change) {
+                              double total, double cash, double change, int orderId) {
             this.itemName = itemName;
             this.quantity = quantity;
             this.itemPrice = itemPrice;
@@ -1481,53 +1541,53 @@ public class Dashboard extends javax.swing.JFrame {
             this.total = total;
             this.cash = cash;
             this.change = change;
+            this.orderId = orderId;
         }
- 
+
         @Override
         public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
             int result = NO_SUCH_PAGE;
- 
+
             if (pageIndex == 0) {
                 Graphics2D g2d = (Graphics2D) graphics;
                 g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
- 
+
                 int y = 20;
                 int yShift = 10;
                 int headerRectHeight = 15;
- 
+
                 LocalDateTime now = LocalDateTime.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                 String currentDateTime = now.format(formatter);
- 
+
                 g2d.setFont(new Font("Monospaced", Font.PLAIN, 6));
                 String divider = "--------------------------------";
                 int dividerWidth = g2d.getFontMetrics().stringWidth(divider);
-                int rightEdge = 12 + dividerWidth; // matches where the divider line actually ends
- 
+                int rightEdge = 12 + dividerWidth;
+
                 g2d.drawString(divider, 12, y); y += yShift;
                 g2d.drawString(" MEDISCAN POS ", 12, y); y += yShift;
                 g2d.drawString(" Retail Pharmacy ", 12, y); y += yShift;
                 g2d.drawString(" " + currentDateTime + " ", 12, y); y += yShift;
                 g2d.drawString(divider, 12, y); y += headerRectHeight;
                 g2d.drawString(divider, 10, y); y += headerRectHeight;
- 
-                // one item per two lines: name on its own line, then Qty x Price ... Subtotal, right-aligned
+
                 for (int i = 0; i < itemName.size(); i++) {
                     g2d.drawString(" " + itemName.get(i), 10, y); y += yShift;
- 
+
                     int qty = Integer.parseInt(quantity.get(i));
                     double price = Double.parseDouble(itemPrice.get(i));
                     double sub = Double.parseDouble(subtotal.get(i));
- 
+
                     String line = String.format("  %d %s x %.2f", qty, unit.get(i), price);
                     String subText = String.format("%.2f", sub);
                     int subX = rightEdge - g2d.getFontMetrics().stringWidth(subText);
- 
+
                     g2d.drawString(line, 10, y);
                     g2d.drawString(subText, subX, y);
                     y += yShift;
                 }
- 
+
                 g2d.drawString(divider, 10, y); y += yShift;
                 g2d.drawString(String.format(" Total amount: %.2f ", total), 10, y); y += yShift;
                 g2d.drawString(divider, 10, y); y += yShift;
@@ -1537,10 +1597,19 @@ public class Dashboard extends javax.swing.JFrame {
                 g2d.drawString("********************************", 10, y); y += yShift;
                 g2d.drawString(" THANK YOU, COME AGAIN! ", 10, y); y += yShift;
                 g2d.drawString("********************************", 10, y); y += yShift;
- 
+
+                String orderIdText = String.valueOf(orderId);
+                BufferedImage barcodeImg = generateBarcodeImage(orderIdText, 140, 40);
+                if (barcodeImg != null) {
+                    int barcodeX = (int) ((rightEdge - 140) / 2.0) + 10;
+                    g2d.drawImage(barcodeImg, barcodeX, y, null);
+                    y += 45;
+                    g2d.drawString(" " + orderIdText + " ", barcodeX + 50, y);
+                }
+
                 result = PAGE_EXISTS;
             }
- 
+
             return result;
         }
     }
@@ -1551,24 +1620,6 @@ public class Dashboard extends javax.swing.JFrame {
 
     protected static double toPPI(double inch) {
         return inch * 72d;
-    }
-
-    public PageFormat getPageFormat(PrinterJob pj) {
-        PageFormat pf = pj.defaultPage();
-        Paper paper = pf.getPaper();
- 
-        double bodyHeight = bHeight;
-        double headerHeight = 5.0;
-        double footerHeight = 5.0;
-        double width = cm_to_pp(8);
-        double height = cm_to_pp(headerHeight + bodyHeight + footerHeight);
- 
-        paper.setSize(width, height);
-        paper.setImageableArea(0, 10, width, height - cm_to_pp(1));
-        pf.setOrientation(PageFormat.PORTRAIT);
-        pf.setPaper(paper);
- 
-        return pf;
     }
 
     /**
