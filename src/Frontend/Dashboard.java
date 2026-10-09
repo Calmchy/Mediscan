@@ -118,26 +118,18 @@ public class Dashboard extends javax.swing.JFrame {
     
     public PageFormat getPageFormat(PrinterJob pj) {
         PageFormat pf = pj.defaultPage();
-        Paper paper = new Paper();
+        Paper paper = pf.getPaper();
 
-        // 80mm receipt width
-        double width = 80.0 / 25.4 * 72.0;
-
-        // Give the receipt plenty of height for testing
-        double height = 297.0 / 25.4 * 72.0;
+        double bodyHeight = bHeight;
+        double headerHeight = 5.0;
+        double footerHeight = 5.0;
+        double width = cm_to_pp(8);
+        double height = cm_to_pp(headerHeight + bodyHeight + footerHeight);
 
         paper.setSize(width, height);
-
-        // Small margins
-        paper.setImageableArea(
-            5,
-            5,
-            width - 10,
-            height - 10
-        );
-
-        pf.setPaper(paper);
+        paper.setImageableArea(0, 10, width, height - cm_to_pp(1));
         pf.setOrientation(PageFormat.PORTRAIT);
+        pf.setPaper(paper);
 
         return pf;
     }
