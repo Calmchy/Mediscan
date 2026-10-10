@@ -5,6 +5,8 @@
  */
 package Call;
 
+import Backend.bCategory;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,11 +20,14 @@ import javax.swing.JOptionPane;
 public class Category extends javax.swing.JDialog {
     private int categoryId = -1;
     private String title = "ADD CATEGORY";
+    private java.awt.Frame parent;
+    
     /**
      * Creates new form addCategory
      */
     public Category(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        this.parent = parent;
         initComponents();
         title = "ADD CATEGORY";
         setTitle(title);
@@ -42,24 +47,9 @@ public class Category extends javax.swing.JDialog {
     }
     
     private void loadCategoryData() {
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement(
-                "SELECT category_name FROM categories WHERE category_id = ?");
-            ps.setInt(1, categoryId);
-            ResultSet rs = ps.executeQuery();
- 
-            if (rs.next()) {
-                categoryNameTF.setText(rs.getString("category_name"));
-            }
- 
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bCategory.loadCategory(categoryNameTF, categoryId);
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -193,41 +183,8 @@ public class Category extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
-        String name = categoryNameTF.getText().trim();
- 
-        if (name.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Category name cannot be empty.");
-            return;
-        }
- 
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
- 
-            if (categoryId == -1) {
-                PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO categories (category_name) VALUES (?)");
-                ps.setString(1, name);
-                ps.executeUpdate();
-                ps.close();
-                JOptionPane.showMessageDialog(this, "Category added successfully!");
-            } else {
-                PreparedStatement ps = con.prepareStatement(
-                    "UPDATE categories SET category_name = ? WHERE category_id = ?");
-                ps.setString(1, name);
-                ps.setInt(2, categoryId);
-                ps.executeUpdate();
-                ps.close();
-                JOptionPane.showMessageDialog(this, "Category updated successfully!");
-            }
- 
-            con.close();
-            dispose();
- 
-        } catch (java.sql.SQLIntegrityConstraintViolationException dup) {
-            JOptionPane.showMessageDialog(this, "That category name already exists.");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        if(bCategory.addCategory(parent, categoryNameTF, categoryId)) {
+           dispose(); 
         }
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 

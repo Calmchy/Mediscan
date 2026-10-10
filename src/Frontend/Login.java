@@ -54,13 +54,11 @@ public class Login extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMaximumSize(new java.awt.Dimension(339, 412));
         setMinimumSize(new java.awt.Dimension(339, 412));
         setResizable(false);
 
         Background.setBackground(new java.awt.Color(255, 255, 255));
         Background.setMaximumSize(new java.awt.Dimension(423, 515));
-        Background.setMinimumSize(null);
 
         headerBG.setBackground(new java.awt.Color(43, 138, 130));
 
@@ -116,6 +114,11 @@ public class Login extends javax.swing.JFrame {
 
         exitBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         exitBtn.setText("EXIT");
+        exitBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout BackgroundLayout = new javax.swing.GroupLayout(Background);
         Background.setLayout(BackgroundLayout);
@@ -170,6 +173,10 @@ public class Login extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_exitBtnActionPerformed
 
     /**
      * @param args the command line arguments

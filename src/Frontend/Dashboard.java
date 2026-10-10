@@ -61,7 +61,6 @@ public class Dashboard extends javax.swing.JFrame {
     private int orderId;
     private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes";
     
-    bCategory bCat = new bCategory();
     bProduct bProd = new bProduct();
     bStocks bSto = new bStocks();
     /**
@@ -76,7 +75,7 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     public void setCategoryTable() {
-        bCat.setCat(categoryTable);
+        bCategory.setCategory(categoryTable);
     }
     
     public void setProductTable() {
@@ -1412,62 +1411,19 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_categoryRefreshBtnActionPerformed
 
     private void printCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printCategoryBtnActionPerformed
-        try {
-            setCategoryTable();
-            MessageFormat header = new MessageFormat("Category List");
-            MessageFormat footer = new MessageFormat("-{0}-");
-            categoryTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bCategory.printCategory(categoryTable);
     }//GEN-LAST:event_printCategoryBtnActionPerformed
 
     private void deleteCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteCategoryBtnActionPerformed
-        int i = categoryTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a category to delete.");
-            return;
-        }
- 
-        int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS CATEGORY?", "CONFIRMATION", 0);
-        if (x != 0) {
-            return;
-        }
- 
-        try {
-            int categoryId = Integer.parseInt(categoryTable.getValueAt(i, 0).toString());
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("DELETE FROM categories WHERE category_id = ?");
-            ps.setInt(1, categoryId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
- 
-            JOptionPane.showMessageDialog(null, "Delete successful");
-            setCategoryTable();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Delete failed: " + e.getMessage());
-        }
+       bCategory.deleteCategory(categoryTable);
     }//GEN-LAST:event_deleteCategoryBtnActionPerformed
 
     private void editCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editCategoryBtnActionPerformed
-        int i = categoryTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a category to edit.");
-            return;
-        }
-        int categoryId = Integer.parseInt(categoryTable.getValueAt(i, 0).toString());
- 
-        Category cat = new Category(this, true, categoryId);
-        cat.setVisible(true);
-        setCategoryTable();
+        bCategory.editCategory(this, categoryTable);
     }//GEN-LAST:event_editCategoryBtnActionPerformed
 
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
-        Category cat = new Category(this, true);
-        cat.setVisible(true);
-        setCategoryTable();
+        bCategory.addCategory(this, categoryTable);
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 
     private void clearScanFields() {
