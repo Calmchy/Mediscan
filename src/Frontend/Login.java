@@ -37,10 +37,10 @@ public class Login extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         usernameTF = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        passwordTF = new javax.swing.JTextField();
         showPassCB = new javax.swing.JCheckBox();
         loginBtn = new javax.swing.JButton();
         exitBtn = new javax.swing.JButton();
+        passwordPF = new javax.swing.JPasswordField();
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -103,8 +103,6 @@ public class Login extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel3.setText("PASSWORD");
 
-        passwordTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-
         showPassCB.setText("SHOW PASSWORD");
 
         loginBtn.setBackground(new java.awt.Color(28, 107, 98));
@@ -119,6 +117,8 @@ public class Login extends javax.swing.JFrame {
                 exitBtnActionPerformed(evt);
             }
         });
+
+        passwordPF.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
 
         javax.swing.GroupLayout BackgroundLayout = new javax.swing.GroupLayout(Background);
         Background.setLayout(BackgroundLayout);
@@ -136,7 +136,7 @@ public class Login extends javax.swing.JFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(usernameTF)
-                    .addComponent(passwordTF, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(passwordPF, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         BackgroundLayout.setVerticalGroup(
@@ -149,8 +149,8 @@ public class Login extends javax.swing.JFrame {
                 .addComponent(usernameTF, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(passwordTF, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(passwordPF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(showPassCB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -223,7 +223,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JButton loginBtn;
-    private javax.swing.JTextField passwordTF;
+    private javax.swing.JPasswordField passwordPF;
     private javax.swing.JCheckBox showPassCB;
     private javax.swing.JLabel title;
     private javax.swing.JTextField usernameTF;
