@@ -103,7 +103,6 @@ create table orders (
     customer_id int,
     order_date datetime default current_timestamp,
     total_amount decimal(10,2) not null default 0.00,
-    payment_method enum('cash', 'card', 'insurance') not null default 'cash',
     foreign key (user_id) references users(user_id)
         on delete restrict on update cascade,
     foreign key (customer_id) references customers(customer_id)

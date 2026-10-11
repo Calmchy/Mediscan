@@ -60,6 +60,7 @@ public class Dashboard extends javax.swing.JFrame {
     private double bHeight = 0.0;
     private int orderId;
     private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes";
+    private boolean loadingFilters = false;
     
     bProduct bProd = new bProduct();
     bStocks bSto = new bStocks();
@@ -69,22 +70,95 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         setTitle("Dashboard");
         initComponents();
+        applyRolePermissions();
+        loadFilterCombos(); 
+        setupSearchListeners(); 
         setCategoryTable();
         setProductTable();
         setStockTable();
     }
     
+    private void applyRolePermissions() {
+        String role = Session.role == null ? "" : Session.role.toLowerCase();
+
+        // which tabs each role may use (edit these lists to match your rules)
+        java.util.List<String> allowed;
+        switch (role) {
+            case "admin":
+                allowed = java.util.Arrays.asList("CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "ACCOUNTS");
+                break;
+            case "pharmacist":
+                allowed = java.util.Arrays.asList("CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION");
+                break;
+            case "cashier":
+                allowed = java.util.Arrays.asList("SALES", "TRANSACTION");
+                break;
+            default:
+                allowed = java.util.Collections.emptyList(); // unknown role: lock everything
+        }
+
+        int firstEnabled = -1;
+        for (int i = 0; i < tabPannel.getTabCount(); i++) {
+            boolean ok = allowed.contains(tabPannel.getTitleAt(i));
+            tabPannel.setEnabledAt(i, ok);
+            if (ok && firstEnabled == -1) {
+                firstEnabled = i;
+            }
+        }
+
+        // make sure the visible tab is one the user may use
+        if (firstEnabled != -1 && !tabPannel.isEnabledAt(tabPannel.getSelectedIndex())) {
+            tabPannel.setSelectedIndex(firstEnabled);
+        }
+    }
+    
     public void setCategoryTable() {
-        bCategory.setCategory(categoryTable);
+        bCategory.setCategory(categoryTable, categorySearchTF.getText());
     }
     
     public void setProductTable() {
-        bProd.setProd(productsTable);
+        bProd.setProd(productsTable, productSearchTF.getText(), (String) productCategoryCB.getSelectedItem());
     }
     
     public void setStockTable() {
-        bSto.setStock(stockTable);
+        bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem());
     }
+    
+    private void loadFilterCombos() {
+        loadingFilters = true;
+        try {
+            bProd.loadCategoryFilter(productCategoryCB);
+            bSto.loadProductFilter(stockFilterProductCB);
+        } finally {
+            loadingFilters = false;
+        }
+    }
+    
+    private void setupSearchListeners() {
+        addSearchListener(categorySearchTF, () -> setCategoryTable());
+        addSearchListener(productSearchTF, () -> setProductTable());
+        addSearchListener(stockSearchTF, () -> setStockTable());
+
+        productCategoryCB.addActionListener(e -> { if (!loadingFilters) setProductTable(); });
+        stockFilterProductCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
+
+        // new categories/products added in other tabs show up in the combos when you switch tabs
+        tabPannel.addChangeListener(e -> {
+            loadFilterCombos();
+            setProductTable();
+            setStockTable();
+        });
+    }
+
+    private void addSearchListener(javax.swing.JTextField field, Runnable reload) {
+        field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
+        });
+    }
+    
+    
     
     private BufferedImage generateBarcodeImage(String data, int width, int height) {
         try {
@@ -494,7 +568,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(productSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(3, 3, 3)
                         .addComponent(productCategoryCB, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(productsRefreshBtn)))
@@ -562,6 +636,12 @@ public class Dashboard extends javax.swing.JFrame {
         });
         jScrollPane4.setViewportView(stockTable);
 
+        stockSearchTF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stockSearchTFActionPerformed(evt);
+            }
+        });
+
         jLabel2.setText("Search Batch No:");
 
         jLabel4.setText("Filter by Product:");
@@ -624,13 +704,14 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(printStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, stockBackgroundLayout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addGap(2, 2, 2)
-                        .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
                         .addGap(3, 3, 3)
+                        .addComponent(jLabel2)
+                        .addGap(6, 6, 6)
                         .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel4)
+                        .addGap(3, 3, 3)
+                        .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(stockRefreshBtn)))
                 .addContainerGap())
@@ -1081,6 +1162,12 @@ public class Dashboard extends javax.swing.JFrame {
                 salesPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
                 salesUnitTF.setText(rs.getString("unit_type"));
                 salesQuantityTF.setText("1");
+                
+                if (getAvailableStock(productId) <= 0) {
+                    JOptionPane.showMessageDialog(this, "\"" + rs.getString("name") + "\" is OUT OF STOCK.",
+                            "Out of Stock", JOptionPane.WARNING_MESSAGE);
+                    clearScanFields();
+                }
  
                 boolean requiresRx = rs.getBoolean("requires_prescription");
                 boolean ageRestricted = rs.getBoolean("is_age_restricted");
@@ -1176,18 +1263,59 @@ public class Dashboard extends javax.swing.JFrame {
         recalcTotal();
     }//GEN-LAST:event_salesAddBtnActionPerformed
 
+    private int getAvailableStock(int productId) throws Exception {
+        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM product_stock "
+                   + "WHERE product_id = ? AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)";
+        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+    
+    private void deductStockFEFO(Connection con, int productId, int quantityToDeduct, String productName) throws Exception {
+        // FEFO = first expired, first out. Skips expired batches; batches with no expiry are used last.
+        // FOR UPDATE locks the rows so two terminals can't sell the same units at once.
+        String selectSql = "SELECT stock_id, quantity FROM product_stock "
+                + "WHERE product_id = ? AND quantity > 0 "
+                + "AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE) "
+                + "ORDER BY expiry_date IS NULL, expiry_date ASC FOR UPDATE";
+
+        int remaining = quantityToDeduct;
+        try (PreparedStatement selectPs = con.prepareStatement(selectSql)) {
+            selectPs.setInt(1, productId);
+            try (ResultSet rs = selectPs.executeQuery()) {
+                while (rs.next() && remaining > 0) {
+                    int stockId = rs.getInt("stock_id");
+                    int available = rs.getInt("quantity");
+                    int deduct = Math.min(available, remaining);
+                    remaining -= deduct;
+
+                    try (PreparedStatement updatePs = con.prepareStatement(
+                            "UPDATE product_stock SET quantity = quantity - ? WHERE stock_id = ?")) {
+                        updatePs.setInt(1, deduct);
+                        updatePs.setInt(2, stockId);
+                        updatePs.executeUpdate();
+                    }
+                }
+            }
+        }
+    }
+    
     private void salesCheckoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salesCheckoutBtnActionPerformed
         if (cashAmountSalesTF.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "ENTER AN AMOUNT.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
- 
+
         DefaultTableModel model = (DefaultTableModel) salesTable.getModel();
         if (model.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Cart is empty.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
- 
+
         double total, cash;
         try {
             total = Double.parseDouble(totalSalesTF.getText());
@@ -1196,22 +1324,22 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Invalid amount entered.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
- 
+
         double change = cash - total;
         changeSalesTF.setText(String.valueOf(change));
- 
+
         if (cash < total) {
             JOptionPane.showMessageDialog(this, "INSUFFICIENT AMOUNT.", "", JOptionPane.WARNING_MESSAGE);
             return;
         }
- 
+
         ArrayList<String> rItemName = new ArrayList<>();
         ArrayList<String> rQty = new ArrayList<>();
         ArrayList<String> rPrice = new ArrayList<>();
         ArrayList<String> rUnit = new ArrayList<>();
         ArrayList<String> rSubtotal = new ArrayList<>();
         ArrayList<Integer> rProductId = new ArrayList<>();
- 
+
         // columns are: # | ID | NAME | BRAND | PRICE | QTY | UNIT | SUBTOTAL  (indices 0-7)
         for (int row = 0; row < model.getRowCount(); row++) {
             rProductId.add(Integer.parseInt(model.getValueAt(row, 1).toString()));
@@ -1221,34 +1349,39 @@ public class Dashboard extends javax.swing.JFrame {
             rUnit.add(model.getValueAt(row, 6).toString());
             rSubtotal.add(model.getValueAt(row, 7).toString());
         }
- 
+
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
- 
-            String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount, payment_method) VALUES (?, ?, ?, ?)";
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
+            con.setAutoCommit(false); // order + items + stock deduction succeed or fail together
+
+            String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount) VALUES (?, ?, ?)";
             PreparedStatement orderPs = con.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
             orderPs.setInt(1, Session.userId);
             orderPs.setNull(2, java.sql.Types.INTEGER);
             orderPs.setDouble(3, total);
-            orderPs.setString(4, "cash");
             orderPs.executeUpdate();
- 
+
             ResultSet keys = orderPs.getGeneratedKeys();
             orderId = -1;
             if (keys.next()) {
                 orderId = keys.getInt(1);
             }
+            keys.close();
             orderPs.close();
- 
+
             String itemSql = "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal, id_verified) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement itemPs = con.prepareStatement(itemSql);
- 
+
             for (int i = 0; i < rProductId.size(); i++) {
                 int productId = rProductId.get(i);
                 int qty = Integer.parseInt(rQty.get(i));
                 double price = Double.parseDouble(rPrice.get(i));
                 double subtotal = Double.parseDouble(rSubtotal.get(i));
- 
+
+                // throws if there isn't enough unexpired stock -> whole sale is rolled back
+                deductStockFEFO(con, productId, qty, rItemName.get(i));
+
                 itemPs.setInt(1, orderId);
                 itemPs.setInt(2, productId);
                 itemPs.setInt(3, qty);
@@ -1256,18 +1389,27 @@ public class Dashboard extends javax.swing.JFrame {
                 itemPs.setDouble(5, subtotal);
                 itemPs.setBoolean(6, false);
                 itemPs.executeUpdate();
- 
-                deductStockFEFO(con, productId, qty);
             }
             itemPs.close();
+
+            con.commit();
             con.close();
- 
+
         } catch (Exception e) {
+            try {
+                if (con != null) {
+                    con.rollback();
+                    con.close();
+                }
+            } catch (Exception ignore) {
+            }
             System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error saving order: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Sale not completed: " + e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
             return;
         }
- 
+
+        setStockTable(); // refresh the stock tab so the new quantities show
+
         bHeight = rItemName.size();
         PrinterJob pj = PrinterJob.getPrinterJob();
         saveBarcodeToFile(String.valueOf(orderId));
@@ -1277,7 +1419,7 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (PrinterException ex) {
             ex.printStackTrace();
         }
- 
+
         model.setRowCount(0);
         totalSalesTF.setText("");
         cashAmountSalesTF.setText("");
@@ -1436,6 +1578,10 @@ public class Dashboard extends javax.swing.JFrame {
         new Login().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_logoutDashboardBtnActionPerformed
+
+    private void stockSearchTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockSearchTFActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_stockSearchTFActionPerformed
 
     private void clearScanFields() {
         salesProductIDScanTF.setText("");

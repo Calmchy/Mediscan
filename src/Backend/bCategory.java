@@ -31,6 +31,32 @@ public class bCategory {
         }
     }
     
+    // para pag butang og data sa category table
+    public static void setCategory(javax.swing.JTable table, String keyword) {
+        String sql = "SELECT category_id, category_name FROM categories "
+                   + "WHERE category_name LIKE ? ORDER BY category_id";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword.trim() + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.setRowCount(0);
+                while (rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getInt("category_id"),
+                        rs.getString("category_name")
+                    });
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public static void setCategory(javax.swing.JTable table) {
+        setCategory(table, "");
+    }
+    
     public static void addCategory(java.awt.Frame parent, javax.swing.JTable categoryTable) {
         Category cat = new Category(parent, true);
         cat.setVisible(true);
@@ -125,31 +151,6 @@ public class bCategory {
             MessageFormat header = new MessageFormat("Category List");
             MessageFormat footer = new MessageFormat("-{0}-");
             categoryTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    // para pag butang og data sa category table
-    public static void setCategory(javax.swing.JTable table) {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT category_id, category_name FROM categories");
-            ResultSet rs = ps.executeQuery();
-
-            DefaultTableModel model = (DefaultTableModel) table.getModel();
-            model.setRowCount(0);
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("category_id"),
-                    rs.getString("category_name"),
-                });
-            }
-
-            rs.close();
-            ps.close();
-            con.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
