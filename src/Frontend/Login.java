@@ -5,18 +5,26 @@
  */
 package Frontend;
 
+import Backend.Session;
+import Backend.bUser;
+import Call.NewPassword;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Calmchy
  */
 public class Login extends javax.swing.JFrame {
-
+    bUser bUsr = new bUser();
+    private char defaultEcho;
     /**
      * Creates new form Login
      */
     public Login() {
         setTitle("LOGIN");
         initComponents();
+        defaultEcho = passwordPF.getEchoChar();
+        getRootPane().setDefaultButton(loginBtn);
     }
 
     /**
@@ -104,11 +112,21 @@ public class Login extends javax.swing.JFrame {
         jLabel3.setText("PASSWORD");
 
         showPassCB.setText("SHOW PASSWORD");
+        showPassCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showPassCBActionPerformed(evt);
+            }
+        });
 
         loginBtn.setBackground(new java.awt.Color(28, 107, 98));
         loginBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         loginBtn.setForeground(new java.awt.Color(255, 255, 255));
         loginBtn.setText("LOGIN");
+        loginBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginBtnActionPerformed(evt);
+            }
+        });
 
         exitBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         exitBtn.setText("EXIT");
@@ -177,6 +195,47 @@ public class Login extends javax.swing.JFrame {
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         System.exit(0);
     }//GEN-LAST:event_exitBtnActionPerformed
+
+    private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+        String username = usernameTF.getText().trim();
+        String password = new String(passwordPF.getPassword());
+
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your username and password.");
+            return;
+        }
+
+        try {
+            if (!bUsr.login(username, password)) {
+                JOptionPane.showMessageDialog(this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                passwordPF.setText("");
+                passwordPF.requestFocus();
+                return;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Cannot connect to the database: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // first login with a temporary password: must set a new one before entering
+        if (Session.mustChangePassword) {
+            NewPassword np = new NewPassword(this, true);
+            np.setVisible(true);
+
+            if (Session.mustChangePassword) { // dialog closed or cancelled without saving
+                Session.clear();
+                passwordPF.setText("");
+                return;
+            }
+        }
+
+        new Dashboard().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_loginBtnActionPerformed
+
+    private void showPassCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showPassCBActionPerformed
+        passwordPF.setEchoChar(showPassCB.isSelected() ? (char) 0 : defaultEcho);
+    }//GEN-LAST:event_showPassCBActionPerformed
 
     /**
      * @param args the command line arguments

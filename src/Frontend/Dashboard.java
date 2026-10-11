@@ -5,6 +5,7 @@ package Frontend;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import Backend.Session;
 import Call.Category;
 import Call.Product;
 import Call.Stock;
@@ -57,7 +58,6 @@ import java.nio.file.Path;
  */
 public class Dashboard extends javax.swing.JFrame {
     private double bHeight = 0.0;
-    private int loggedInUserId = 1;
     private int orderId;
     private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes";
     
@@ -239,6 +239,11 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setText(" ");
 
         logoutDashboardBtn.setText("Logout");
+        logoutDashboardBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logoutDashboardBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout headerLayout = new javax.swing.GroupLayout(header);
         header.setLayout(headerLayout);
@@ -1222,7 +1227,7 @@ public class Dashboard extends javax.swing.JFrame {
  
             String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount, payment_method) VALUES (?, ?, ?, ?)";
             PreparedStatement orderPs = con.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
-            orderPs.setInt(1, loggedInUserId);
+            orderPs.setInt(1, Session.userId);
             orderPs.setNull(2, java.sql.Types.INTEGER);
             orderPs.setDouble(3, total);
             orderPs.setString(4, "cash");
@@ -1425,6 +1430,12 @@ public class Dashboard extends javax.swing.JFrame {
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
         bCategory.addCategory(this, categoryTable);
     }//GEN-LAST:event_addCategoryBtnActionPerformed
+
+    private void logoutDashboardBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutDashboardBtnActionPerformed
+        Session.clear();
+        new Login().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_logoutDashboardBtnActionPerformed
 
     private void clearScanFields() {
         salesProductIDScanTF.setText("");

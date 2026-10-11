@@ -15,6 +15,7 @@ create table users (
     role enum('admin', 'pharmacist', 'cashier') not null default 'cashier',
     created_by int default null,
     created_at timestamp default current_timestamp,
+    must_change_password tinyint(1) NOT NULL DEFAULT 1
     foreign key (created_by) references users(user_id)
         on delete set null on update cascade
 );

@@ -10,10 +10,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author chyril
- */
 public class bCategory {
     // function para sa Category dialog
     public static void loadCategory(javax.swing.JTextField categoryNameTF, int categoryId) {

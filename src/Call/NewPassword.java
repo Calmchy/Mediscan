@@ -5,18 +5,28 @@
  */
 package Call;
 
+import Backend.Session;
+import Backend.bUser;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Calmchy
  */
 public class NewPassword extends javax.swing.JDialog {
-
+    bUser bUsr = new bUser();
+    private char defaultEcho;
     /**
      * Creates new form NewJDialog
      */
     public NewPassword(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setTitle("SET NEW PASSWORD");
+        defaultEcho = currentPassPF.getEchoChar();
+        usernameDisplayTF.setText(Session.fullName);
+        jLabel5.setText("(" + Session.role + ")");
+        getRootPane().setDefaultButton(saveBtn);
     }
 
     /**
@@ -43,13 +53,12 @@ public class NewPassword extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         showPassBtn = new javax.swing.JCheckBox();
         saveBtn = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        cancelBtn = new javax.swing.JButton();
         currentPassPF = new javax.swing.JPasswordField();
         newPassPF = new javax.swing.JPasswordField();
         conNewPassPF = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setMaximumSize(null);
         setMinimumSize(null);
         setResizable(false);
 
@@ -74,7 +83,7 @@ public class NewPassword extends javax.swing.JDialog {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         headerBGLayout.setVerticalGroup(
             headerBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -152,15 +161,30 @@ public class NewPassword extends javax.swing.JDialog {
         jLabel9.setText("CONFIRM NEW PASSWORD");
 
         showPassBtn.setText("SHOW PASSWORD");
+        showPassBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showPassBtnActionPerformed(evt);
+            }
+        });
 
         saveBtn.setBackground(new java.awt.Color(28, 107, 98));
         saveBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         saveBtn.setForeground(new java.awt.Color(255, 255, 255));
         saveBtn.setText("SAVE");
         saveBtn.setBorder(null);
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
 
-        jButton2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jButton2.setText("CANCEL");
+        cancelBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        cancelBtn.setText("CANCEL");
+        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBtnActionPerformed(evt);
+            }
+        });
 
         currentPassPF.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
 
@@ -185,7 +209,7 @@ public class NewPassword extends javax.swing.JDialog {
                     .addGroup(backgroundLayout.createSequentialGroup()
                         .addComponent(saveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(cancelBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(newPassPF, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(conNewPassPF))
                 .addContainerGap())
@@ -213,7 +237,7 @@ public class NewPassword extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(saveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cancelBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -230,6 +254,45 @@ public class NewPassword extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        String current = new String(currentPassPF.getPassword());
+        String newPass = new String(newPassPF.getPassword());
+        String confirm = new String(conNewPassPF.getPassword());
+
+        String error = bUsr.checkNewPassword(current, newPass, confirm);
+        if (error != null) {
+            JOptionPane.showMessageDialog(this, error, "Cannot Save", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            if (!bUsr.changePassword(Session.userId, current, newPass)) {
+                JOptionPane.showMessageDialog(this, "Current password is incorrect.", "Cannot Save", JOptionPane.ERROR_MESSAGE);
+                currentPassPF.setText("");
+                currentPassPF.requestFocus();
+                return;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Session.mustChangePassword = false;
+        JOptionPane.showMessageDialog(this, "Password changed successfully!");
+        dispose();
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
+        dispose();
+    }//GEN-LAST:event_cancelBtnActionPerformed
+
+    private void showPassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showPassBtnActionPerformed
+        char echo = showPassBtn.isSelected() ? (char) 0 : defaultEcho;
+        currentPassPF.setEchoChar(echo);
+        newPassPF.setEchoChar(echo);
+        conNewPassPF.setEchoChar(echo);
+    }//GEN-LAST:event_showPassBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -278,10 +341,10 @@ public class NewPassword extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel background;
+    private javax.swing.JButton cancelBtn;
     private javax.swing.JPasswordField conNewPassPF;
     private javax.swing.JPasswordField currentPassPF;
     private javax.swing.JPanel headerBG;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

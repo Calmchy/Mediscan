@@ -5,10 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author manatad
- */
 public class bProduct {
     
     public void setProd(javax.swing.JTable table) {
