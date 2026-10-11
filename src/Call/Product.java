@@ -18,13 +18,16 @@ import javax.swing.JOptionPane;
  */
 public class Product extends javax.swing.JDialog {
     private int productId = -1;
+    private String title;
     /**
      * Creates new form NewJDialog
      */
     public Product(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        setTitle("ADD PRODUCT");
+        title = "ADD PRODUCT";
+        setTitle(title);
+        Title.setText(title);
         productAddBtn.setText("Add");
         loadCategories();
         setupAgeRestrictedToggle();
@@ -35,7 +38,9 @@ public class Product extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         this.productId = productId;
-        setTitle("EDIT PRODUCT");
+        title = "EDIT PRODUCT";
+        setTitle(title);
+        Title.setText(title);
         productAddBtn.setText("Update");
         loadCategories();
         setupAgeRestrictedToggle();

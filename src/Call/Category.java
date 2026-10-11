@@ -17,13 +17,16 @@ import javax.swing.JOptionPane;
  */
 public class Category extends javax.swing.JDialog {
     private int categoryId = -1;
+    private String title = "ADD CATEGORY";
     /**
      * Creates new form addCategory
      */
     public Category(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        setTitle("ADD CATEGORY");
+        title = "ADD CATEGORY";
+        setTitle(title);
+        Title.setText(title);
         addCategoryBtn.setText("Add");
     }
     
@@ -31,7 +34,9 @@ public class Category extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         this.categoryId = categoryId;
-        setTitle("EDIT CATEGORY");
+        title = "EDIT CATEGORY";
+        setTitle(title);
+        Title.setText(title);
         addCategoryBtn.setText("Update");
         loadCategoryData();
     }

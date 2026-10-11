@@ -68,6 +68,7 @@ public class Dashboard extends javax.swing.JFrame {
      * Creates new form Cashier
      */
     public Dashboard() {
+        setTitle("Dashboard");
         initComponents();
         setCategoryTable();
         setProductTable();
@@ -149,13 +150,14 @@ public class Dashboard extends javax.swing.JFrame {
         header = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        logoutDashboardBtn = new javax.swing.JButton();
         tabPannel = new javax.swing.JTabbedPane();
         categoryTab = new javax.swing.JPanel();
         categoryBackground = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         categoryTable = new javax.swing.JTable();
         jLabel7 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        categorySearchTF = new javax.swing.JTextField();
         addCategoryBtn = new javax.swing.JButton();
         editCategoryBtn = new javax.swing.JButton();
         deleteCategoryBtn = new javax.swing.JButton();
@@ -166,9 +168,9 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         productsTable = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        productSearchTF = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        productCategoryCB = new javax.swing.JComboBox<>();
         addProductBtn = new javax.swing.JButton();
         editProductBtn = new javax.swing.JButton();
         deleteProductBtn = new javax.swing.JButton();
@@ -178,10 +180,10 @@ public class Dashboard extends javax.swing.JFrame {
         stockBackground = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         stockTable = new javax.swing.JTable();
-        searchBatchTF = new javax.swing.JTextField();
+        stockSearchTF = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        filterProductCB = new javax.swing.JComboBox<>();
+        stockFilterProductCB = new javax.swing.JComboBox<>();
         addStockBtn = new javax.swing.JButton();
         editStockBtn = new javax.swing.JButton();
         deleteStockBtn = new javax.swing.JButton();
@@ -237,6 +239,8 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/logo-64.png"))); // NOI18N
         jLabel3.setText(" ");
 
+        logoutDashboardBtn.setText("Logout");
+
         javax.swing.GroupLayout headerLayout = new javax.swing.GroupLayout(header);
         header.setLayout(headerLayout);
         headerLayout.setHorizontalGroup(
@@ -246,17 +250,23 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(logoutDashboardBtn)
+                .addContainerGap())
         );
         headerLayout.setVerticalGroup(
             headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(headerLayout.createSequentialGroup()
                 .addGap(20, 20, 20)
-                .addGroup(headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(logoutDashboardBtn)
+                    .addGroup(headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
+
+        tabPannel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         categoryTable.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         categoryTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -343,11 +353,11 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteCategoryBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printCategoryBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 209, Short.MAX_VALUE))
+                        .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(categoryBackgroundLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(3, 3, 3)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(categorySearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(categoryRefreshBtn)))
                 .addContainerGap())
@@ -358,10 +368,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(categoryBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(categorySearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(categoryRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(categoryBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(printCategoryBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -473,15 +483,15 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 209, Short.MAX_VALUE))
+                        .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(productBackgroundLayout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(3, 3, 3)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(productSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(productCategoryCB, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(productsRefreshBtn)))
                 .addContainerGap())
@@ -492,12 +502,12 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(productBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(productSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(productCategoryCB, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(productsRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(productBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -507,7 +517,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jTextField2.getAccessibleContext().setAccessibleName("");
+        productSearchTF.getAccessibleContext().setAccessibleName("");
 
         javax.swing.GroupLayout productTabLayout = new javax.swing.GroupLayout(productTab);
         productTab.setLayout(productTabLayout);
@@ -608,15 +618,15 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 209, Short.MAX_VALUE))
+                        .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, stockBackgroundLayout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(2, 2, 2)
-                        .addComponent(filterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel2)
                         .addGap(3, 3, 3)
-                        .addComponent(searchBatchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(stockRefreshBtn)))
                 .addContainerGap())
@@ -626,10 +636,10 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(stockBackgroundLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(stockBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(filterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel2)
-                    .addComponent(searchBatchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(stockRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane4)
@@ -834,11 +844,11 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jLabel14.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel14.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel14.setText("TOTAL:");
+        jLabel14.setText("TOTAL");
 
-        jLabel15.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel15.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel15.setText("CASH AMOUNT:");
 
@@ -856,11 +866,12 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jLabel16.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel16.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel16.setText("CHANGE:");
 
-        totalSalesTF.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        totalSalesTF.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        totalSalesTF.setForeground(new java.awt.Color(43, 138, 130));
         totalSalesTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         totalSalesTF.setText("1000");
 
@@ -894,7 +905,7 @@ public class Dashboard extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 69, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         salesBackgroundLayout.setVerticalGroup(
@@ -907,20 +918,18 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(salesRemoveItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(salesRemoveAllBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel15)
-                    .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel14)))
+                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(salesBackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(19, 19, 19))
+                .addContainerGap())
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
@@ -941,11 +950,11 @@ public class Dashboard extends javax.swing.JFrame {
         transactionTab.setLayout(transactionTabLayout);
         transactionTabLayout.setHorizontalGroup(
             transactionTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1009, Short.MAX_VALUE)
+            .addGap(0, 1012, Short.MAX_VALUE)
         );
         transactionTabLayout.setVerticalGroup(
             transactionTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 567, Short.MAX_VALUE)
+            .addGap(0, 577, Short.MAX_VALUE)
         );
 
         tabPannel.addTab("TRANSACTION", transactionTab);
@@ -954,14 +963,16 @@ public class Dashboard extends javax.swing.JFrame {
         accountsTab.setLayout(accountsTabLayout);
         accountsTabLayout.setHorizontalGroup(
             accountsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1009, Short.MAX_VALUE)
+            .addGap(0, 1012, Short.MAX_VALUE)
         );
         accountsTabLayout.setVerticalGroup(
             accountsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 567, Short.MAX_VALUE)
+            .addGap(0, 577, Short.MAX_VALUE)
         );
 
         tabPannel.addTab("ACCOUNTS", accountsTab);
+
+        tabPannel.setSelectedIndex(3);
 
         javax.swing.GroupLayout backgroundLayout = new javax.swing.GroupLayout(background);
         background.setLayout(backgroundLayout);
@@ -977,6 +988,8 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tabPannel))
         );
+
+        tabPannel.getAccessibleContext().setAccessibleDescription("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -1545,71 +1558,114 @@ public class Dashboard extends javax.swing.JFrame {
 
         @Override
         public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-            int result = NO_SUCH_PAGE;
-
-            if (pageIndex == 0) {
-                Graphics2D g2d = (Graphics2D) graphics;
-                g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
-
-                int y = 20;
-                int yShift = 10;
-                int headerRectHeight = 15;
-
-                LocalDateTime now = LocalDateTime.now();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-                String currentDateTime = now.format(formatter);
-
-                g2d.setFont(new Font("Monospaced", Font.PLAIN, 6));
-                String divider = "--------------------------------";
-                int dividerWidth = g2d.getFontMetrics().stringWidth(divider);
-                int rightEdge = 12 + dividerWidth;
-
-                g2d.drawString(divider, 12, y); y += yShift;
-                g2d.drawString(" MEDISCAN POS ", 12, y); y += yShift;
-                g2d.drawString(" Retail Pharmacy ", 12, y); y += yShift;
-                g2d.drawString(" " + currentDateTime + " ", 12, y); y += yShift;
-                g2d.drawString(divider, 12, y); y += headerRectHeight;
-                g2d.drawString(divider, 10, y); y += headerRectHeight;
-
-                for (int i = 0; i < itemName.size(); i++) {
-                    g2d.drawString(" " + itemName.get(i), 10, y); y += yShift;
-
-                    int qty = Integer.parseInt(quantity.get(i));
-                    double price = Double.parseDouble(itemPrice.get(i));
-                    double sub = Double.parseDouble(subtotal.get(i));
-
-                    String line = String.format("  %d %s x %.2f", qty, unit.get(i), price);
-                    String subText = String.format("%.2f", sub);
-                    int subX = rightEdge - g2d.getFontMetrics().stringWidth(subText);
-
-                    g2d.drawString(line, 10, y);
-                    g2d.drawString(subText, subX, y);
-                    y += yShift;
-                }
-
-                g2d.drawString(divider, 10, y); y += yShift;
-                g2d.drawString(String.format(" Total amount: %.2f ", total), 10, y); y += yShift;
-                g2d.drawString(divider, 10, y); y += yShift;
-                g2d.drawString(String.format(" Cash : %.2f ", cash), 10, y); y += yShift;
-                g2d.drawString(divider, 10, y); y += yShift;
-                g2d.drawString(String.format(" Change : %.2f ", change), 10, y); y += yShift;
-                g2d.drawString("********************************", 10, y); y += yShift;
-                g2d.drawString(" THANK YOU, COME AGAIN! ", 10, y); y += yShift;
-                g2d.drawString("********************************", 10, y); y += yShift;
-
-                String orderIdText = String.valueOf(orderId);
-                BufferedImage barcodeImg = generateBarcodeImage(orderIdText, 140, 40);
-                if (barcodeImg != null) {
-                    int barcodeX = (int) ((rightEdge - 140) / 2.0) + 10;
-                    g2d.drawImage(barcodeImg, barcodeX, y, null);
-                    y += 45;
-                    g2d.drawString(" " + orderIdText + " ", barcodeX + 50, y);
-                }
-
-                result = PAGE_EXISTS;
+            if (pageIndex > 0) {
+                return NO_SUCH_PAGE;
             }
 
-            return result;
+            Graphics2D g2d = (Graphics2D) graphics;
+            g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
+
+            Font normalFont = new Font("Monospaced", Font.PLAIN, 7);
+            Font boldFont = new Font("Monospaced", Font.BOLD, 8);
+            g2d.setFont(normalFont);
+            java.awt.FontMetrics fm = g2d.getFontMetrics();
+
+            // every line on the receipt shares this ONE left edge and ONE right edge
+            int margin = 12;
+            double paperWidth = pageFormat.getImageableWidth();
+            double charW = fm.stringWidth(repeatChar('-', 20)) / 20.0;
+            int cols = (int) ((paperWidth - (margin * 2)) / charW);
+            String divider = repeatChar('-', cols);
+            String stars = repeatChar('*', cols);
+            int blockWidth = fm.stringWidth(divider);
+            int left = (int) ((paperWidth - blockWidth) / 2);
+            int right = left + blockWidth;
+            int indent = fm.stringWidth("  ");
+            int lineH = 10;
+            int y = 15;
+
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            // logo, centered
+            java.net.URL logoUrl = getClass().getResource("/Images/logo-128.png");
+            if (logoUrl != null) {
+                java.awt.Image logo = new ImageIcon(logoUrl).getImage();
+                int logoSize = 48;
+                g2d.drawImage(logo, left + (blockWidth - logoSize) / 2, y, logoSize, logoSize, null);
+                y += logoSize + 10;
+            }
+
+            // header, centered
+            g2d.setFont(boldFont);
+            drawCentered(g2d, "MEDISCAN POS", left, right, y); y += lineH + 1;
+            g2d.setFont(normalFont);
+            drawCentered(g2d, "Retail Pharmacy", left, right, y); y += lineH;
+            drawCentered(g2d, currentDateTime, left, right, y); y += lineH;
+            g2d.drawString(divider, left, y); y += lineH + 4;
+
+            // items: name on line 1, "qty unit x price ........ subtotal" on line 2
+            for (int i = 0; i < itemName.size(); i++) {
+                int qty = Integer.parseInt(quantity.get(i));
+                double price = Double.parseDouble(itemPrice.get(i));
+                double sub = Double.parseDouble(subtotal.get(i));
+
+                String name = itemName.get(i);
+                while (name.length() > 1 && fm.stringWidth(name) > blockWidth) {
+                    name = name.substring(0, name.length() - 1);
+                }
+                g2d.drawString(name, left, y); y += lineH;
+
+                String detail = String.format("%d %s x %.2f", qty, unit.get(i), price);
+                String subText = String.format("%.2f", sub);
+                g2d.drawString(detail, left + indent, y);
+                g2d.drawString(subText, right - fm.stringWidth(subText), y);
+                y += lineH + 2;
+            }
+
+            // totals: label on the left edge, amount on the right edge
+            g2d.drawString(divider, left, y); y += lineH;
+            g2d.setFont(boldFont);
+            drawLeftRight(g2d, "TOTAL", String.format("%.2f", total), left, right, y); y += lineH;
+            g2d.setFont(normalFont);
+            drawLeftRight(g2d, "CASH", String.format("%.2f", cash), left, right, y); y += lineH;
+            drawLeftRight(g2d, "CHANGE", String.format("%.2f", change), left, right, y); y += lineH;
+            g2d.drawString(divider, left, y); y += lineH + 2;
+
+            // thank you
+            g2d.drawString(stars, left, y); y += lineH;
+            drawCentered(g2d, "THANK YOU, COME AGAIN!", left, right, y); y += lineH;
+            g2d.drawString(stars, left, y); y += lineH + 6;
+
+            // barcode, centered and never wider than the receipt block
+            String orderIdText = String.valueOf(orderId);
+            int barcodeW = Math.min(140, blockWidth);
+            int barcodeH = 36;
+            BufferedImage barcodeImg = generateBarcodeImage(orderIdText, barcodeW * 3, barcodeH * 3);
+            if (barcodeImg != null) {
+                g2d.drawImage(barcodeImg, left + (blockWidth - barcodeW) / 2, y, barcodeW, barcodeH, null);
+                y += barcodeH + 10;
+                drawCentered(g2d, orderIdText, left, right, y);
+            }
+
+            return PAGE_EXISTS;
+        }
+
+        private String repeatChar(char c, int count) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < count; i++) {
+                sb.append(c);
+            }
+            return sb.toString();
+        }
+
+        private void drawCentered(Graphics2D g2d, String text, int left, int right, int y) {
+            int textWidth = g2d.getFontMetrics().stringWidth(text);
+            g2d.drawString(text, left + ((right - left) - textWidth) / 2, y);
+        }
+
+        private void drawLeftRight(Graphics2D g2d, String leftText, String rightText, int left, int right, int y) {
+            g2d.drawString(leftText, left, y);
+            g2d.drawString(rightText, right - g2d.getFontMetrics().stringWidth(rightText), y);
         }
     }
 
@@ -1663,6 +1719,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTextField cashAmountSalesTF;
     private javax.swing.JPanel categoryBackground;
     private javax.swing.JButton categoryRefreshBtn;
+    private javax.swing.JTextField categorySearchTF;
     private javax.swing.JPanel categoryTab;
     private javax.swing.JTable categoryTable;
     private javax.swing.JTextField changeSalesTF;
@@ -1672,9 +1729,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton editCategoryBtn;
     private javax.swing.JButton editProductBtn;
     private javax.swing.JButton editStockBtn;
-    private javax.swing.JComboBox<String> filterProductCB;
     private javax.swing.JPanel header;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1699,12 +1754,13 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JButton logoutDashboardBtn;
     private javax.swing.JButton printCategoryBtn;
     private javax.swing.JButton printProductBtn;
     private javax.swing.JButton printStockBtn;
     private javax.swing.JPanel productBackground;
+    private javax.swing.JComboBox<String> productCategoryCB;
+    private javax.swing.JTextField productSearchTF;
     private javax.swing.JPanel productTab;
     private javax.swing.JButton productsRefreshBtn;
     private javax.swing.JTable productsTable;
@@ -1723,9 +1779,10 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel salesTab;
     private javax.swing.JTable salesTable;
     private javax.swing.JTextField salesUnitTF;
-    private javax.swing.JTextField searchBatchTF;
     private javax.swing.JPanel stockBackground;
+    private javax.swing.JComboBox<String> stockFilterProductCB;
     private javax.swing.JButton stockRefreshBtn;
+    private javax.swing.JTextField stockSearchTF;
     private javax.swing.JPanel stockTab;
     private javax.swing.JTable stockTable;
     private javax.swing.JTabbedPane tabPannel;
