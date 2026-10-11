@@ -59,7 +59,7 @@ import java.nio.file.Path;
 public class Dashboard extends javax.swing.JFrame {
     private double bHeight = 0.0;
     private int orderId;
-    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes";
+    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes/";
     private boolean loadingFilters = false;
     
     bProduct bProd = new bProduct();
@@ -76,6 +76,35 @@ public class Dashboard extends javax.swing.JFrame {
         setCategoryTable();
         setProductTable();
         setStockTable();
+    }
+    
+    private void generateMissingBarcodes() {
+        int created = 0, skipped = 0;
+
+        try (Connection con = Backend.DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT product_id FROM products ORDER BY product_id");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String id = String.valueOf(rs.getInt("product_id"));
+                File file = new File(BARCODE_FOLDER, id + ".png");
+
+                if (file.exists()) {
+                    skipped++;
+                    continue;
+                }
+                saveBarcodeToFile(id);
+                created++;
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    "Barcodes created: " + created + "\nAlready existed: " + skipped
+                    + "\n\nFolder: " + BARCODE_FOLDER);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error generating barcodes: " + e.getMessage());
+        }
     }
     
     private void applyRolePermissions() {
@@ -249,6 +278,7 @@ public class Dashboard extends javax.swing.JFrame {
         deleteProductBtn = new javax.swing.JButton();
         printProductBtn = new javax.swing.JButton();
         productsRefreshBtn = new javax.swing.JButton();
+        genBarProductBtn = new javax.swing.JButton();
         stockTab = new javax.swing.JPanel();
         stockBackground = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -545,6 +575,14 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        genBarProductBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        genBarProductBtn.setText("GENERATE BARCODE");
+        genBarProductBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                genBarProductBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout productBackgroundLayout = new javax.swing.GroupLayout(productBackground);
         productBackground.setLayout(productBackgroundLayout);
         productBackgroundLayout.setHorizontalGroup(
@@ -561,7 +599,9 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 216, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(genBarProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 7, Short.MAX_VALUE))
                     .addGroup(productBackgroundLayout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(3, 3, 3)
@@ -591,7 +631,8 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(addProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(editProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(deleteProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(printProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(printProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(genBarProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -1583,6 +1624,10 @@ public class Dashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_stockSearchTFActionPerformed
 
+    private void genBarProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genBarProductBtnActionPerformed
+        generateMissingBarcodes();
+    }//GEN-LAST:event_genBarProductBtnActionPerformed
+
     private void clearScanFields() {
         salesProductIDScanTF.setText("");
         salesProductNameTF.setText("");
@@ -1842,6 +1887,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton editCategoryBtn;
     private javax.swing.JButton editProductBtn;
     private javax.swing.JButton editStockBtn;
+    private javax.swing.JButton genBarProductBtn;
     private javax.swing.JPanel header;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

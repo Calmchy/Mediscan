@@ -12,11 +12,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.Statement;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+
 /**
  *
  * @author chyril
  */
 public class Product extends javax.swing.JDialog {
+    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes/";
     private int productId = -1;
     private String title;
     /**
@@ -46,6 +56,27 @@ public class Product extends javax.swing.JDialog {
         setupAgeRestrictedToggle();
         setupUnitTypeToggle();
         loadProductData();
+    }
+    
+    private String generateBarcode(String productId) {
+        try {
+            File folder = new File(BARCODE_FOLDER);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            Code128Writer writer = new Code128Writer();
+            BitMatrix bitMatrix = writer.encode(productId, BarcodeFormat.CODE_128, 300, 100);
+
+            Path path = new File(folder, productId + ".png").toPath();
+            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+            System.out.println("Barcode saved: " + path);
+            return path.toString();
+        } catch (Exception e) {
+            System.out.println("Barcode generation failed: " + e.getMessage());
+            return null;
+        }
     }
     
     private void loadCategories() {
@@ -408,12 +439,12 @@ public class Product extends javax.swing.JDialog {
         String selectedCategory = (String) productCategoryCB.getSelectedItem();
         String unitType = (String) productUTypeCB.getSelectedItem();
         String packSizeText = productSellingPriceTF1.getText().trim();
- 
+
         if (name.isEmpty() || selectedCategory == null || costText.isEmpty() || sellText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
             return;
         }
- 
+
         Integer packSize = null;
         if ("tablet".equals(unitType) && !packSizeText.isEmpty()) {
             try {
@@ -423,7 +454,7 @@ public class Product extends javax.swing.JDialog {
                 return;
             }
         }
- 
+
         double costPrice, sellingPrice;
         try {
             costPrice = Double.parseDouble(costText);
@@ -432,7 +463,7 @@ public class Product extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Cost Price and Selling Price must be valid numbers.");
             return;
         }
- 
+
         Integer minimumAge = null;
         if (ageRestricted) {
             if (minAgeText.isEmpty()) {
@@ -446,7 +477,7 @@ public class Product extends javax.swing.JDialog {
                 return;
             }
         }
- 
+
         if (sellingPrice < costPrice) {
             int confirm = JOptionPane.showConfirmDialog(this,
                 "Selling price is lower than cost price. Continue anyway?",
@@ -455,21 +486,22 @@ public class Product extends javax.swing.JDialog {
                 return;
             }
         }
- 
+
         try {
             int categoryId = getCategoryIdByName(selectedCategory);
             if (categoryId == -1) {
                 JOptionPane.showMessageDialog(this, "Selected category could not be found.");
                 return;
             }
- 
+
             Connection con = DBConnection.getConnection();
- 
+
             if (productId == -1) {
+                // RETURN_GENERATED_KEYS lets us read the new product_id right after the insert
                 PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, cost_price, selling_price, "
                         + "requires_prescription, is_age_restricted, minimum_age, unit_type, pack_size) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
@@ -481,13 +513,29 @@ public class Product extends javax.swing.JDialog {
                 ps.setString(9, unitType);
                 if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
                 ps.executeUpdate();
+
+                int newId = -1;
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        newId = keys.getInt(1);
+                    }
+                }
                 ps.close();
-                JOptionPane.showMessageDialog(this, "Product added successfully!");
+
+                String message = "Product added successfully!";
+                if (newId != -1) {
+                    String barcodePath = generateBarcode(String.valueOf(newId));
+                    message += "\n\nProduct ID: " + newId;
+                    message += (barcodePath != null)
+                            ? "\nBarcode saved to:\n" + barcodePath
+                            : "\nBarcode could not be generated.";
+                }
+                JOptionPane.showMessageDialog(this, message);
             } else {
                 PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, cost_price=?, selling_price=?, "
                         + "requires_prescription=?, is_age_restricted=?, minimum_age=?, unit_type=?, pack_size=? "
                         + "WHERE product_id=?");
-                
+
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
@@ -503,10 +551,10 @@ public class Product extends javax.swing.JDialog {
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Product updated successfully!");
             }
- 
+
             con.close();
             dispose();
- 
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());

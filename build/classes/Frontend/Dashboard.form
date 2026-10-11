@@ -371,7 +371,9 @@
                                       <Component id="deleteProductBtn" min="-2" pref="186" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="printProductBtn" min="-2" pref="203" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="216" max="32767" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="genBarProductBtn" min="-2" pref="203" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
@@ -408,6 +410,7 @@
                                   <Component id="editProductBtn" min="-2" pref="45" max="-2" attributes="0"/>
                                   <Component id="deleteProductBtn" min="-2" pref="45" max="-2" attributes="0"/>
                                   <Component id="printProductBtn" min="-2" pref="45" max="-2" attributes="0"/>
+                                  <Component id="genBarProductBtn" alignment="3" min="-2" pref="45" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -523,6 +526,17 @@
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="productsRefreshBtnActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="genBarProductBtn">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Dialog" size="14" style="1"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="GENERATE BARCODE"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="genBarProductBtnActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
