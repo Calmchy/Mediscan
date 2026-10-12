@@ -13,9 +13,9 @@ create table users (
     last_name varchar(50) not null,
     middle_initial char(50),
     role enum('admin', 'pharmacist', 'cashier') not null default 'cashier',
+    must_change_password tinyint(1) NOT NULL DEFAULT 1,
     created_by int default null,
     created_at timestamp default current_timestamp,
-    must_change_password tinyint(1) NOT NULL DEFAULT 1
     foreign key (created_by) references users(user_id)
         on delete set null on update cascade
 );
@@ -101,6 +101,7 @@ create table orders (
     order_id int auto_increment primary key,
     user_id int not null,
     customer_id int,
+    order_type enum('walk_in', 'pickup') not null default 'walk_in',
     order_date datetime default current_timestamp,
     total_amount decimal(10,2) not null default 0.00,
     foreign key (user_id) references users(user_id)
