@@ -26,7 +26,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
  * @author chyril
  */
 public class Product extends javax.swing.JDialog {
-    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes/";
+    private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private int productId = -1;
     private String title;
     /**
@@ -60,7 +60,7 @@ public class Product extends javax.swing.JDialog {
     
     private String generateBarcode(String productId) {
         try {
-            File folder = new File(BARCODE_FOLDER);
+            File folder = new File(BARCODE_FOLDER_PRODUCT);
             if (!folder.exists()) {
                 folder.mkdirs();
             }
