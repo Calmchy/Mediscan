@@ -32,7 +32,7 @@ public class Category extends javax.swing.JDialog {
         title = "ADD CATEGORY";
         setTitle(title);
         Title.setText(title);
-        addCategoryBtn.setText("Add");
+        addCategoryBtn.setText("ADD");
     }
     
     public Category(java.awt.Frame parent, boolean modal, int categoryId) {
@@ -42,7 +42,7 @@ public class Category extends javax.swing.JDialog {
         title = "EDIT CATEGORY";
         setTitle(title);
         Title.setText(title);
-        addCategoryBtn.setText("Update");
+        addCategoryBtn.setText("UPDATE");
         loadCategoryData();
     }
     

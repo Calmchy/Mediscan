@@ -38,7 +38,7 @@ public class Product extends javax.swing.JDialog {
         title = "ADD PRODUCT";
         setTitle(title);
         Title.setText(title);
-        productAddBtn.setText("Add");
+        productAddBtn.setText("ADD");
         loadCategories();
         setupAgeRestrictedToggle();
         setupUnitTypeToggle();
@@ -51,7 +51,7 @@ public class Product extends javax.swing.JDialog {
         title = "EDIT PRODUCT";
         setTitle(title);
         Title.setText(title);
-        productAddBtn.setText("Update");
+        productAddBtn.setText("UPDATE");
         loadCategories();
         setupAgeRestrictedToggle();
         setupUnitTypeToggle();

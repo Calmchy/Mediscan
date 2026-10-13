@@ -26,6 +26,7 @@ public class Stock extends javax.swing.JDialog {
         initComponents();
         setTitle("ADD STOCK");
         Title.setText("ADD STOCK");
+        stockAddBtn.setText("ADD");
         loadProducts();
         setupPacksAutoCalc();
     }
@@ -36,6 +37,7 @@ public class Stock extends javax.swing.JDialog {
         this.stockId = stockId;
         setTitle("EDIT STOCK");
         Title.setText("EDIT STOCK");
+        stockAddBtn.setText("UPDATE");
         loadProducts();
         setupPacksAutoCalc();
         loadStockData();
@@ -143,7 +145,7 @@ public class Stock extends javax.swing.JDialog {
  
                 Date expiry = rs.getDate("expiry_date");
                 if (expiry != null) {
-                    stockExpiryDateFF.setText(expiry.toString());
+                    stockExpiryDateFF.setDate(expiry);
                 }
  
                 stockProductNameCB.setSelectedItem(rs.getString("name"));
@@ -176,11 +178,11 @@ public class Stock extends javax.swing.JDialog {
         jLabel14 = new javax.swing.JLabel();
         stockProductNameCB = new javax.swing.JComboBox<>();
         jLabel16 = new javax.swing.JLabel();
-        stockExpiryDateFF = new javax.swing.JFormattedTextField();
         stockAddBtn = new javax.swing.JButton();
         stockClearBtn = new javax.swing.JButton();
         jLabel13 = new javax.swing.JLabel();
         stockPReceivedTF = new javax.swing.JTextField();
+        stockExpiryDateFF = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -232,10 +234,6 @@ public class Stock extends javax.swing.JDialog {
         jLabel16.setForeground(new java.awt.Color(26, 32, 44));
         jLabel16.setText("EXPIRY DATE ( yyyy-MM-dd )");
 
-        stockExpiryDateFF.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
-        stockExpiryDateFF.setToolTipText("Format: yyyy-MM-dd (e.g. 2027-05-01)");
-        stockExpiryDateFF.setName(""); // NOI18N
-
         stockAddBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         stockAddBtn.setText("ADD");
         stockAddBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -256,6 +254,8 @@ public class Stock extends javax.swing.JDialog {
         jLabel13.setForeground(new java.awt.Color(26, 32, 44));
         jLabel13.setText("PACKS RECEIVED");
 
+        stockExpiryDateFF.setDateFormatString("yyyy-MM-dd");
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
@@ -263,6 +263,7 @@ public class Stock extends javax.swing.JDialog {
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(stockExpiryDateFF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
                         .addComponent(stockAddBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -270,7 +271,6 @@ public class Stock extends javax.swing.JDialog {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(stockExpiryDateFF, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                                 .addComponent(stockBatchNoTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                                 .addComponent(stockQtyTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                                 .addComponent(jLabel11)
@@ -305,16 +305,13 @@ public class Stock extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel16)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(stockExpiryDateFF, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stockExpiryDateFF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(stockClearBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(stockAddBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        stockExpiryDateFF.getAccessibleContext().setAccessibleName("");
-        stockExpiryDateFF.getAccessibleContext().setAccessibleDescription("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -338,7 +335,7 @@ public class Stock extends javax.swing.JDialog {
         String selectedProduct = (String) stockProductNameCB.getSelectedItem();
         String batchNo = stockBatchNoTF.getText().trim();
         String qtyText = stockQtyTF.getText().trim();
-        String expiryText = stockExpiryDateFF.getText().trim();
+        String expiryText = new java.text.SimpleDateFormat("yyyy-MM-dd").format(stockExpiryDateFF.getDate());
  
         if (selectedProduct == null || batchNo.isEmpty() || qtyText.isEmpty() || expiryText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all fields.");
@@ -412,7 +409,7 @@ public class Stock extends javax.swing.JDialog {
         if (stockProductNameCB.getItemCount() > 0) stockProductNameCB.setSelectedIndex(0);
         stockBatchNoTF.setText("");
         stockQtyTF.setText("");
-        stockExpiryDateFF.setText("");
+        stockExpiryDateFF.setDate(null);
         stockPReceivedTF.setText("");
     }//GEN-LAST:event_stockClearBtnActionPerformed
         
@@ -471,7 +468,7 @@ public class Stock extends javax.swing.JDialog {
     private javax.swing.JButton stockAddBtn;
     private javax.swing.JTextField stockBatchNoTF;
     private javax.swing.JButton stockClearBtn;
-    private javax.swing.JFormattedTextField stockExpiryDateFF;
+    private com.toedter.calendar.JDateChooser stockExpiryDateFF;
     private javax.swing.JTextField stockPReceivedTF;
     private javax.swing.JComboBox<String> stockProductNameCB;
     private javax.swing.JTextField stockQtyTF;

@@ -96,9 +96,10 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="stockExpiryDateFF" max="32767" attributes="0"/>
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="stockAddBtn" min="-2" pref="183" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -107,7 +108,6 @@
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="stockExpiryDateFF" pref="376" max="32767" attributes="0"/>
                                   <Component id="stockBatchNoTF" alignment="1" pref="376" max="32767" attributes="0"/>
                                   <Component id="stockQtyTF" alignment="1" pref="376" max="32767" attributes="0"/>
                                   <Component id="jLabel11" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -148,7 +148,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="stockExpiryDateFF" min="-2" pref="31" max="-2" attributes="0"/>
+                  <Component id="stockExpiryDateFF" min="-2" pref="32" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="stockClearBtn" max="32767" attributes="0"/>
@@ -221,19 +221,6 @@
             <Property name="text" type="java.lang.String" value="EXPIRY DATE ( yyyy-MM-dd )"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="stockExpiryDateFF">
-          <Properties>
-            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
-              <Format format="yyyy-MM-dd" subtype="-1" type="1"/>
-            </Property>
-            <Property name="toolTipText" type="java.lang.String" value="Format: yyyy-MM-dd (e.g. 2027-05-01)"/>
-            <Property name="name" type="java.lang.String" value="" noResource="true"/>
-          </Properties>
-          <AccessibilityProperties>
-            <Property name="AccessibleContext.accessibleName" type="java.lang.String" value=""/>
-            <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
-          </AccessibilityProperties>
-        </Component>
         <Component class="javax.swing.JButton" name="stockAddBtn">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -268,6 +255,11 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="stockPReceivedTF">
+        </Component>
+        <Component class="com.toedter.calendar.JDateChooser" name="stockExpiryDateFF">
+          <Properties>
+            <Property name="dateFormatString" type="java.lang.String" value="yyyy-MM-dd"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
