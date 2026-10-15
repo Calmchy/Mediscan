@@ -353,10 +353,10 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         transCashierCB = new javax.swing.JComboBox<>();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        transOrderListTable = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane6 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        transactionDetailsTable = new javax.swing.JTable();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
@@ -364,18 +364,18 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel27 = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
-        jLabel30 = new javax.swing.JLabel();
-        jLabel31 = new javax.swing.JLabel();
-        jLabel33 = new javax.swing.JLabel();
-        jLabel34 = new javax.swing.JLabel();
-        jLabel35 = new javax.swing.JLabel();
-        jLabel36 = new javax.swing.JLabel();
+        transOrderIDL = new javax.swing.JLabel();
+        transDateTimeL = new javax.swing.JLabel();
+        transCashierFNL = new javax.swing.JLabel();
+        transCustFNL = new javax.swing.JLabel();
+        transPaymentL = new javax.swing.JLabel();
+        transChangeL = new javax.swing.JLabel();
         jLabel37 = new javax.swing.JLabel();
-        jLabel38 = new javax.swing.JLabel();
+        transTotalTF = new javax.swing.JLabel();
         transReprintReceiptBtn = new javax.swing.JButton();
         transPrintListBtn = new javax.swing.JButton();
         jLabel39 = new javax.swing.JLabel();
-        jLabel40 = new javax.swing.JLabel();
+        transOrderTypeL = new javax.swing.JLabel();
         transFromDC = new com.toedter.calendar.JDateChooser();
         transToDC = new com.toedter.calendar.JDateChooser();
         accountsTab = new javax.swing.JPanel();
@@ -1238,7 +1238,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel21.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel21.setText("Cashier:");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        transOrderListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -1261,19 +1261,19 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setMinWidth(30);
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(55);
-            jTable1.getColumnModel().getColumn(0).setMaxWidth(80);
-            jTable1.getColumnModel().getColumn(1).setMinWidth(125);
-            jTable1.getColumnModel().getColumn(1).setPreferredWidth(125);
-            jTable1.getColumnModel().getColumn(1).setMaxWidth(125);
+        jScrollPane2.setViewportView(transOrderListTable);
+        if (transOrderListTable.getColumnModel().getColumnCount() > 0) {
+            transOrderListTable.getColumnModel().getColumn(0).setMinWidth(30);
+            transOrderListTable.getColumnModel().getColumn(0).setPreferredWidth(55);
+            transOrderListTable.getColumnModel().getColumn(0).setMaxWidth(80);
+            transOrderListTable.getColumnModel().getColumn(1).setMinWidth(125);
+            transOrderListTable.getColumnModel().getColumn(1).setPreferredWidth(125);
+            transOrderListTable.getColumnModel().getColumn(1).setMaxWidth(125);
         }
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        transactionDetailsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -1296,7 +1296,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane6.setViewportView(jTable2);
+        jScrollPane6.setViewportView(transactionDetailsTable);
 
         jLabel22.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel22.setText("TRANSACTION DETAILS");
@@ -1319,30 +1319,30 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel29.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel29.setText("Change");
 
-        jLabel30.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel30.setText("69");
+        transOrderIDL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transOrderIDL.setText("69");
 
-        jLabel31.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel31.setText("2026-10-10");
+        transDateTimeL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transDateTimeL.setText("2026-10-10");
 
-        jLabel33.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel33.setText("Liza Gomez");
+        transCashierFNL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transCashierFNL.setText("Liza Gomez");
 
-        jLabel34.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel34.setText("FirstN LastN");
+        transCustFNL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transCustFNL.setText("FirstN LastN");
 
-        jLabel35.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel35.setText("69696969.69");
+        transPaymentL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transPaymentL.setText("69696969.69");
 
-        jLabel36.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel36.setText("0");
+        transChangeL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transChangeL.setText("0");
 
         jLabel37.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jLabel37.setText("TOTAL");
 
-        jLabel38.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
-        jLabel38.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel38.setText("₱ 69696969.69");
+        transTotalTF.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        transTotalTF.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        transTotalTF.setText("₱ 69696969.69");
 
         transReprintReceiptBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         transReprintReceiptBtn.setText("REPRINT RECEIPT");
@@ -1361,10 +1361,10 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         jLabel39.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jLabel39.setText("Change");
+        jLabel39.setText("Order type");
 
-        jLabel40.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel40.setText("walk_in");
+        transOrderTypeL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transOrderTypeL.setText("walk_in");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -1377,31 +1377,31 @@ public class Dashboard extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel23)
                         .addGap(29, 29, 29)
-                        .addComponent(jLabel30, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(transOrderIDL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel31, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(transDateTimeL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel26)
                         .addGap(32, 32, 32)
-                        .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(transCashierFNL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel27)
                         .addGap(26, 26, 26)
-                        .addComponent(jLabel34, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(transCustFNL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel28)
                         .addGap(33, 33, 33)
-                        .addComponent(jLabel35, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE))
+                        .addComponent(transPaymentL, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel29)
                         .addGap(20, 20, 20)
-                        .addComponent(jLabel36, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(transChangeL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel39)
                         .addGap(20, 20, 20)
-                        .addComponent(jLabel40, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(transOrderTypeL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -1411,7 +1411,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGap(120, 120, 120)
                         .addComponent(jLabel37)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel38, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(transTotalTF, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 749, Short.MAX_VALUE)
                         .addGap(1, 1, 1)))
@@ -1427,31 +1427,31 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel23)
-                            .addComponent(jLabel30))
+                            .addComponent(transOrderIDL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel24)
-                            .addComponent(jLabel31))
+                            .addComponent(transDateTimeL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel26)
-                            .addComponent(jLabel33))
+                            .addComponent(transCashierFNL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel27)
-                            .addComponent(jLabel34))
+                            .addComponent(transCustFNL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel28)
-                            .addComponent(jLabel35))
+                            .addComponent(transPaymentL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel29)
-                            .addComponent(jLabel36))
+                            .addComponent(transChangeL))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel39)
-                            .addComponent(jLabel40))
+                            .addComponent(transOrderTypeL))
                         .addGap(0, 11, Short.MAX_VALUE))
                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1459,7 +1459,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(transPrintListBtn)
                     .addComponent(transReprintReceiptBtn)
                     .addComponent(jLabel37)
-                    .addComponent(jLabel38))
+                    .addComponent(transTotalTF))
                 .addContainerGap())
         );
 
@@ -2421,18 +2421,10 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
-    private javax.swing.JLabel jLabel35;
-    private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
-    private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel40;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -2451,8 +2443,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JButton logoutDashboardBtn;
     private javax.swing.JPanel mainDashboardTab;
     private javax.swing.JButton printCategoryBtn;
@@ -2491,14 +2481,24 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel totalSalesTF;
     private javax.swing.JComboBox<String> transCashierCB;
     private javax.swing.JComboBox<String> transCashierCB1;
+    private javax.swing.JLabel transCashierFNL;
+    private javax.swing.JLabel transChangeL;
+    private javax.swing.JLabel transCustFNL;
+    private javax.swing.JLabel transDateTimeL;
     private com.toedter.calendar.JDateChooser transFromDC;
+    private javax.swing.JLabel transOrderIDL;
     private javax.swing.JTextField transOrderIDTF;
     private javax.swing.JTextField transOrderIDTF1;
+    private javax.swing.JTable transOrderListTable;
+    private javax.swing.JLabel transOrderTypeL;
+    private javax.swing.JLabel transPaymentL;
     private javax.swing.JButton transPrintListBtn;
     private javax.swing.JButton transRefreshBtn;
     private javax.swing.JButton transReprintReceiptBtn;
     private com.toedter.calendar.JDateChooser transToDC;
+    private javax.swing.JLabel transTotalTF;
     private javax.swing.JPanel transactionBG;
+    private javax.swing.JTable transactionDetailsTable;
     private javax.swing.JPanel transactionTab;
     private javax.swing.JLabel userFullNameL;
     private javax.swing.JLabel userRoleL;
