@@ -232,7 +232,7 @@ public class Stock extends javax.swing.JDialog {
 
         jLabel16.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jLabel16.setForeground(new java.awt.Color(26, 32, 44));
-        jLabel16.setText("EXPIRY DATE ( yyyy-MM-dd )");
+        jLabel16.setText("EXPIRY DATE");
 
         stockAddBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         stockAddBtn.setText("ADD");

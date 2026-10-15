@@ -218,7 +218,7 @@
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="2c" green="20" red="1a" type="rgb"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="EXPIRY DATE ( yyyy-MM-dd )"/>
+            <Property name="text" type="java.lang.String" value="EXPIRY DATE"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="stockAddBtn">
