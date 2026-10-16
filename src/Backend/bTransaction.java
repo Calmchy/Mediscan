@@ -29,8 +29,9 @@ public class bTransaction {
     public static final String ALL_CASHIERS = "All Cashiers";
     private static final DecimalFormat MONEY = new DecimalFormat("#,##0.00");
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    
-    public void loadCashierFilter(JComboBox<String> combo) {
+ 
+    // ---------- 1. fill the Cashier combo box ----------
+    public static void loadCashierFilter(JComboBox<String> combo) {
         Object previous = combo.getSelectedItem();
         combo.removeAllItems();
         combo.addItem(ALL_CASHIERS);
@@ -48,12 +49,10 @@ public class bTransaction {
             combo.setSelectedItem(previous);
         }
     }
-    
-    private LocalDate toLocalDate(Date d) {
-        return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    }
-
-    public void setOrders(JTable table, String orderId, Date from, Date to, String cashier) {
+ 
+    // ---------- 2. fill the order list table (top table) ----------
+    // from / to come from JDateChooser.getDate() and may be null
+    public static void setOrders(JTable table, String orderId, Date from, Date to, String cashier) {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.order_id, o.order_date, CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
               + "COALESCE(SUM(oi.quantity), 0) AS items, o.total_amount "
@@ -68,7 +67,8 @@ public class bTransaction {
             try {
                 params.add(Integer.parseInt(orderId.trim()));
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Order ID must be a number.");
+                // not a number (yet) -> no match, no popup (this runs while the user types)
+                ((DefaultTableModel) table.getModel()).setRowCount(0);
                 return;
             }
         }
@@ -109,46 +109,64 @@ public class bTransaction {
             System.out.println(e.getMessage());
         }
     }
-    
-    public int getSelectedOrderId(JTable orderTable) {
+ 
+    private static LocalDate toLocalDate(Date d) {
+        return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+ 
+    // ---------- 3. get the order id of the selected row ----------
+    public static int getSelectedOrderId(JTable orderTable) {
         int row = orderTable.getSelectedRow();
         if (row < 0) {
             return -1;
         }
         return (int) orderTable.getValueAt(row, 0); // column 0 = Order ID
     }
-
-    public void loadOrderDetails(int orderId, JTable detailsTable,
+ 
+    // ---------- 4. fill TRANSACTION DETAILS (labels + items table) ----------
+    public static void loadOrderDetails(int orderId, JTable detailsTable,
             JLabel idL, JLabel dateTimeL, JLabel cashierL, JLabel customerL,
             JLabel paymentL, JLabel changeL, JLabel orderTypeL, JLabel totalL) {
- 
-        String headSql = "SELECT o.order_id, o.order_date, o.order_type, o.total_amount, "
-                + "o.payment_amount, o.change_amount, "
-                + "CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
-                + "CONCAT(c.first_name, ' ', c.last_name) AS customer "
-                + "FROM orders o "
-                + "JOIN users u ON o.user_id = u.user_id "
-                + "LEFT JOIN customers c ON o.customer_id = c.customer_id "
-                + "WHERE o.order_id = ?";
  
         String itemSql = "SELECT p.name, oi.quantity, p.unit_type, oi.unit_price, oi.subtotal "
                 + "FROM order_items oi JOIN products p ON oi.product_id = p.product_id "
                 + "WHERE oi.order_id = ? ORDER BY oi.order_item_id";
  
         try (Connection con = DBConnection.getConnection()) {
+            // works even if payment_amount / change_amount were not added to the DB yet
+            boolean hasPayment = hasColumn(con, "orders", "payment_amount")
+                    && hasColumn(con, "orders", "change_amount");
+ 
+            String headSql = "SELECT o.order_id, o.order_date, o.order_type, o.total_amount, "
+                    + (hasPayment ? "o.payment_amount, o.change_amount, "
+                                  : "0 AS payment_amount, 0 AS change_amount, ")
+                    + "CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
+                    + "CONCAT(c.first_name, ' ', c.last_name) AS customer "
+                    + "FROM orders o "
+                    + "JOIN users u ON o.user_id = u.user_id "
+                    + "LEFT JOIN customers c ON o.customer_id = c.customer_id "
+                    + "WHERE o.order_id = ?";
+ 
             try (PreparedStatement ps = con.prepareStatement(headSql)) {
                 ps.setInt(1, orderId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
+                        double total = rs.getDouble("total_amount");
+                        double payment = rs.getDouble("payment_amount");
+                        double change = rs.getDouble("change_amount");
+                        if (payment == 0) {      // old orders saved before payment tracking
+                            payment = total;
+                            change = 0;
+                        }
                         idL.setText(String.valueOf(rs.getInt("order_id")));
                         dateTimeL.setText(rs.getTimestamp("order_date").toLocalDateTime().format(DT_FMT));
                         cashierL.setText(rs.getString("cashier"));
                         String cust = rs.getString("customer");
                         customerL.setText(cust == null ? "Walk-in" : cust);
-                        paymentL.setText(MONEY.format(rs.getDouble("payment_amount")));
-                        changeL.setText(MONEY.format(rs.getDouble("change_amount")));
+                        paymentL.setText(MONEY.format(payment));
+                        changeL.setText(MONEY.format(change));
                         orderTypeL.setText(rs.getString("order_type"));
-                        totalL.setText("₱ " + MONEY.format(rs.getDouble("total_amount")));
+                        totalL.setText("\u20b1 " + MONEY.format(total));
                     }
                 }
             }
@@ -169,18 +187,28 @@ public class bTransaction {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("loadOrderDetails: " + e.getMessage());
         }
     }
-
-    public void clearOrderDetails(JTable detailsTable, JLabel... labels) {
+ 
+    private static boolean hasColumn(Connection con, String table, String column) throws java.sql.SQLException {
+        try (ResultSet rs = con.getMetaData().getColumns(con.getCatalog(), null, table, column)) {
+            return rs.next();
+        }
+    }
+ 
+    // ---------- 5. clear the details panel (nothing selected / after refresh) ----------
+    public static void clearOrderDetails(JTable detailsTable, JLabel... labels) {
         ((DefaultTableModel) detailsTable.getModel()).setRowCount(0);
         for (JLabel l : labels) {
             l.setText("");
         }
     }
-
-    public void reprintReceipt(int orderId, JTable detailsTable, String dateTime, String cashier, String customer, String payment, String change, String total) {
+ 
+    // ---------- 6. REPRINT RECEIPT ----------
+    public static void reprintReceipt(int orderId, JTable detailsTable,
+            String dateTime, String cashier, String customer,
+            String payment, String change, String total) {
         if (orderId < 0) {
             JOptionPane.showMessageDialog(null, "Select an order first.");
             return;
@@ -214,26 +242,19 @@ public class bTransaction {
             JTextArea area = new JTextArea(sb.toString());
             area.setFont(new java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 10));
             area.print(null, null, true, null, null, true);
-        } catch (PrinterException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-
-    /**
-     *
-     * @param orderTable
-     */
-    public void printList(JTable orderTable) {
+ 
+    // ---------- 7. PRINT LIST ----------
+    public static void printList(JTable orderTable) {
         try {
             MessageFormat header = new MessageFormat("Transaction List");
             MessageFormat footer = new MessageFormat("-{0}-");
             orderTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (PrinterException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-
-    void setOrders(javax.swing.JTable transOrderListTable, String string, Object object, Object object0, String ALL) {
-       throw new UnsupportedOperationException("Not supported yet.");
-   }
 }

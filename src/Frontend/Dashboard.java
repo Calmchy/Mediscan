@@ -67,21 +67,22 @@ public class Dashboard extends javax.swing.JFrame {
     
     bProduct bProd = new bProduct();
     bStocks bSto = new bStocks();
-    bTransaction bTrans = new bTransaction();
+    //bTransaction bTrans = new bTransaction();
     /**
      * Creates new form Cashier
      */
     public Dashboard() {
-        this.setUndecorated(true); // para waray window border
+        //this.setUndecorated(true); // para waray window border
         initComponents();
-        bTrans.loadCashierFilter(transCashierCB);
-        bTrans.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+        bTransaction.loadCashierFilter(transCashierCB);
+        bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
         
-        bTrans.setOrders(transOrderListTable, "", null, null, bTransaction.ALL_CASHIERS); 
-        bTrans.setOrders(transOrderListTable, transOrderIDTF.getText(),
-            transFromDC.getDate(), transToDC.getDate(),
-            (String) transCashierCB.getSelectedItem());
-        this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
+        addSearchListener(transOrderIDTF, () -> reloadOrders());     // your existing helper
+        transFromDC.addPropertyChangeListener("date", e -> reloadOrders());
+        transToDC.addPropertyChangeListener("date", e -> reloadOrders());
+        transCashierCB.addActionListener(e -> reloadOrders());
+        reloadOrders(); 
+        //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
         setTitle("Dashboard"); 
         applyRolePermissions();
         loadFilterCombos(); 
@@ -102,15 +103,28 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     private void showSelectedOrder() {
-        int id = bTrans.getSelectedOrderId(transOrderListTable);
+        int id = bTransaction.getSelectedOrderId(transOrderListTable);
         if (id < 0) {
-            bTrans.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL,
+            bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL,
                     transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
             return;
         }
-        bTrans.loadOrderDetails(id, transactionDetailsTable,
+        bTransaction.loadOrderDetails(id, transactionDetailsTable,
                 transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL,
                 transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+    }
+    
+    private void reloadOrders() {
+        int keepId = bTransaction.getSelectedOrderId(transOrderListTable);
+        bTransaction.setOrders(transOrderListTable, transOrderIDTF.getText(),
+                transFromDC.getDate(), transToDC.getDate(),
+                (String) transCashierCB.getSelectedItem());
+        for (int r = 0; r < transOrderListTable.getRowCount(); r++) {   // keep selection if still listed
+            if ((int) transOrderListTable.getValueAt(r, 0) == keepId) {
+                transOrderListTable.setRowSelectionInterval(r, r);
+                break;
+            }
+        }
     }
     
     private void generateMissingBarcodes() {
@@ -419,7 +433,8 @@ public class Dashboard extends javax.swing.JFrame {
         jMenu2.setText("jMenu2");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1014, 654));
+        setMinimumSize(new java.awt.Dimension(1024, 768));
+        setPreferredSize(new java.awt.Dimension(1024, 768));
 
         background.setBackground(new java.awt.Color(245, 247, 250));
 
@@ -494,11 +509,11 @@ public class Dashboard extends javax.swing.JFrame {
         mainDashboardTab.setLayout(mainDashboardTabLayout);
         mainDashboardTabLayout.setHorizontalGroup(
             mainDashboardTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1068, Short.MAX_VALUE)
+            .addGap(0, 1048, Short.MAX_VALUE)
         );
         mainDashboardTabLayout.setVerticalGroup(
             mainDashboardTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 606, Short.MAX_VALUE)
+            .addGap(0, 641, Short.MAX_VALUE)
         );
 
         tabPannel.addTab("DASHBOARD", mainDashboardTab);
@@ -588,7 +603,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteCategoryBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printCategoryBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 268, Short.MAX_VALUE))
+                        .addGap(0, 252, Short.MAX_VALUE))
                     .addGroup(categoryBGLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(3, 3, 3)
@@ -606,7 +621,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(categorySearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(categoryRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(categoryBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(printCategoryBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -728,7 +743,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(printProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(genBarProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 59, Short.MAX_VALUE))
+                        .addGap(0, 43, Short.MAX_VALUE))
                     .addGroup(productBGLayout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(3, 3, 3)
@@ -752,7 +767,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(productCategoryCB, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(productsRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(productBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addProductBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -864,7 +879,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(deleteStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(printStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 268, Short.MAX_VALUE))
+                        .addGap(0, 252, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, stockBGLayout.createSequentialGroup()
                         .addGap(3, 3, 3)
                         .addComponent(jLabel2)
@@ -1115,7 +1130,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(salesWarningRequireL, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         changeSalesTF.setEditable(false);
@@ -1358,8 +1373,9 @@ public class Dashboard extends javax.swing.JFrame {
         transChangeL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         transChangeL.setText("0");
 
-        jLabel37.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        jLabel37.setText("TOTAL");
+        jLabel37.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        jLabel37.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel37.setText("TOTAL:");
 
         transTotalTF.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
         transTotalTF.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1414,7 +1430,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel28)
                         .addGap(33, 33, 33)
-                        .addComponent(transPaymentL, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE))
+                        .addComponent(transPaymentL, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel29)
                         .addGap(20, 20, 20)
@@ -1429,12 +1445,12 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(transReprintReceiptBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(transPrintListBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(120, 120, 120)
-                        .addComponent(jLabel37)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(34, 34, 34)
+                        .addComponent(jLabel37, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(transTotalTF, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 749, Short.MAX_VALUE)
+                        .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 739, Short.MAX_VALUE)
                         .addGap(1, 1, 1)))
                 .addContainerGap())
         );
@@ -1473,14 +1489,14 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel39)
                             .addComponent(transOrderTypeL))
-                        .addGap(0, 11, Short.MAX_VALUE))
+                        .addGap(0, 19, Short.MAX_VALUE))
                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(transPrintListBtn)
                     .addComponent(transReprintReceiptBtn)
-                    .addComponent(jLabel37)
-                    .addComponent(transTotalTF))
+                    .addComponent(transTotalTF)
+                    .addComponent(jLabel37, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1532,7 +1548,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(transCashierCB, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(transRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
                 .addGap(65, 65, 65)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1574,7 +1590,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jLabel32)
                 .addGap(1, 1, 1)
                 .addComponent(transCashierCB1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(687, Short.MAX_VALUE))
+                .addContainerGap(669, Short.MAX_VALUE))
         );
         accountsBGLayout.setVerticalGroup(
             accountsBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1585,7 +1601,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(transCashierCB1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(transOrderIDTF1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel25))
-                .addContainerGap(565, Short.MAX_VALUE))
+                .addContainerGap(601, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout accountsTabLayout = new javax.swing.GroupLayout(accountsTab);
@@ -1907,11 +1923,13 @@ public class Dashboard extends javax.swing.JFrame {
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
             con.setAutoCommit(false); // order + items + stock deduction succeed or fail together
 
-            String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount) VALUES (?, ?, ?)";
+            String orderSql = "INSERT INTO orders (user_id, customer_id, total_amount, payment_amount, change_amount) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement orderPs = con.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS);
             orderPs.setInt(1, Session.userId);
             orderPs.setNull(2, java.sql.Types.INTEGER);
             orderPs.setDouble(3, total);
+            orderPs.setDouble(4, cash);
+            orderPs.setDouble(5, change);
             orderPs.executeUpdate();
 
             ResultSet keys = orderPs.getGeneratedKeys();
@@ -2136,19 +2154,20 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_genBarProductBtnActionPerformed
 
     private void transRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transRefreshBtnActionPerformed
-        bTrans.setOrders(transOrderListTable, transOrderIDTF.getText(),
+        bTransaction.setOrders(transOrderListTable, transOrderIDTF.getText(),
             transFromDC.getDate(), transToDC.getDate(),
             (String) transCashierCB.getSelectedItem());
+        reloadOrders();
     }//GEN-LAST:event_transRefreshBtnActionPerformed
 
     private void transReprintReceiptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transReprintReceiptBtnActionPerformed
-         bTrans.reprintReceipt(bTrans.getSelectedOrderId(transOrderListTable), transactionDetailsTable,
+         bTransaction.reprintReceipt(bTransaction.getSelectedOrderId(transOrderListTable), transactionDetailsTable,
             transDateTimeL.getText(), transCashierFNL.getText(), transCustFNL.getText(),
             transPaymentL.getText(), transChangeL.getText(), transTotalTF.getText());
     }//GEN-LAST:event_transReprintReceiptBtnActionPerformed
 
     private void transPrintListBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transPrintListBtnActionPerformed
-        bTrans.printList(transOrderListTable);
+        bTransaction.printList(transOrderListTable);
     }//GEN-LAST:event_transPrintListBtnActionPerformed
 
     private void tabPannelStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPannelStateChanged
