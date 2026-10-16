@@ -13,6 +13,7 @@ import Call.Stock;
 import Backend.bCategory;
 import Backend.bProduct;
 import Backend.bStocks;
+import Backend.bTransaction;
 
 import java.awt.Font;
 import java.awt.Graphics;
@@ -51,6 +52,7 @@ import com.google.zxing.oned.Code128Writer;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
+import static java.util.logging.Level.ALL;
 
 /**
  *
@@ -65,12 +67,20 @@ public class Dashboard extends javax.swing.JFrame {
     
     bProduct bProd = new bProduct();
     bStocks bSto = new bStocks();
+    bTransaction bTrans = new bTransaction();
     /**
      * Creates new form Cashier
      */
     public Dashboard() {
         this.setUndecorated(true); // para waray window border
         initComponents();
+        bTrans.loadCashierFilter(transCashierCB);
+        bTrans.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+        
+        bTrans.setOrders(transOrderListTable, "", null, null, bTransaction.ALL_CASHIERS); 
+        bTrans.setOrders(transOrderListTable, transOrderIDTF.getText(),
+            transFromDC.getDate(), transToDC.getDate(),
+            (String) transCashierCB.getSelectedItem());
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
         setTitle("Dashboard"); 
         applyRolePermissions();
@@ -80,10 +90,27 @@ public class Dashboard extends javax.swing.JFrame {
         setProductTable();
         setStockTable();
         
+        
+        transOrderListTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                showSelectedOrder();
+            }
+        });
+
         salesProductIDScanTF.setFocusable(true);
         salesProductIDScanTF.requestFocus();
-        
-        
+    }
+    
+    private void showSelectedOrder() {
+        int id = bTrans.getSelectedOrderId(transOrderListTable);
+        if (id < 0) {
+            bTrans.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL,
+                    transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+            return;
+        }
+        bTrans.loadOrderDetails(id, transactionDetailsTable,
+                transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL,
+                transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
     }
     
     private void generateMissingBarcodes() {
@@ -776,12 +803,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jScrollPane4.setViewportView(stockTable);
-
-        stockSearchTF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                stockSearchTFActionPerformed(evt);
-            }
-        });
 
         jLabel2.setText("Search Batch No:");
 
@@ -1511,9 +1532,9 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(transCashierCB, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(transRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .addGap(65, 65, 65)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2110,24 +2131,24 @@ public class Dashboard extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_logoutDashboardBtnActionPerformed
 
-    private void stockSearchTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockSearchTFActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_stockSearchTFActionPerformed
-
     private void genBarProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genBarProductBtnActionPerformed
         generateMissingBarcodes();
     }//GEN-LAST:event_genBarProductBtnActionPerformed
 
     private void transRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transRefreshBtnActionPerformed
-        // TODO add your handling code here:
+        bTrans.setOrders(transOrderListTable, transOrderIDTF.getText(),
+            transFromDC.getDate(), transToDC.getDate(),
+            (String) transCashierCB.getSelectedItem());
     }//GEN-LAST:event_transRefreshBtnActionPerformed
 
     private void transReprintReceiptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transReprintReceiptBtnActionPerformed
-        // TODO add your handling code here:
+         bTrans.reprintReceipt(bTrans.getSelectedOrderId(transOrderListTable), transactionDetailsTable,
+            transDateTimeL.getText(), transCashierFNL.getText(), transCustFNL.getText(),
+            transPaymentL.getText(), transChangeL.getText(), transTotalTF.getText());
     }//GEN-LAST:event_transReprintReceiptBtnActionPerformed
 
     private void transPrintListBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transPrintListBtnActionPerformed
-        // TODO add your handling code here:
+        bTrans.printList(transOrderListTable);
     }//GEN-LAST:event_transPrintListBtnActionPerformed
 
     private void tabPannelStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPannelStateChanged
