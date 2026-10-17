@@ -6,7 +6,7 @@
 package Call;
 
 import Backend.Session;
-import Backend.bUser;
+import Backend.bAuth;
 import javax.swing.JOptionPane;
 
 /**
@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
  * @author Calmchy
  */
 public class NewPassword extends javax.swing.JDialog {
-    bUser bUsr = new bUser();
+    bAuth bUsr = new bAuth();
     private char defaultEcho;
     /**
      * Creates new form NewJDialog

@@ -6,7 +6,7 @@
 package Frontend;
 
 import Backend.Session;
-import Backend.bUser;
+import Backend.bAuth;
 import Call.NewPassword;
 import javax.swing.JOptionPane;
 
@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
  * @author Calmchy
  */
 public class Login extends javax.swing.JFrame {
-    bUser bUsr = new bUser();
+    bAuth bUsr = new bAuth();
     private char defaultEcho;
     /**
      * Creates new form Login

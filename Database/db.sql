@@ -104,6 +104,8 @@ create table orders (
     order_type enum('walk_in', 'pickup') not null default 'walk_in',
     order_date datetime default current_timestamp,
     total_amount decimal(10,2) not null default 0.00,
+	payment_amount decimal(10,2) not null default 0.00,
+	change_amount decimal(10,2) not null default 0.00,
     foreign key (user_id) references users(user_id)
         on delete restrict on update cascade,
     foreign key (customer_id) references customers(customer_id)

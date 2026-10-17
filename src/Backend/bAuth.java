@@ -8,8 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class bUser {
-    // true if username + password are correct; also fills Session with the user's info
+public class bAuth {
     public boolean login(String username, String password) throws SQLException {
         String sql = "SELECT user_id, username, first_name, last_name, role, must_change_password "
                 + "FROM users WHERE username = ? AND password = ?";
@@ -34,7 +33,6 @@ public class bUser {
         return false;
     }
 
-    // returns an error message if the new password breaks a rule, or null if it is fine
     public String checkNewPassword(String current, String newPass, String confirm) {
         if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
             return "Please fill in all fields.";
@@ -51,8 +49,6 @@ public class bUser {
         return null;
     }
 
-    // checks the current password, then saves the new one and clears the first-login flag
-    // false = current password was wrong
     public boolean changePassword(int userId, String currentPassword, String newPassword) throws SQLException {
         String checkSql = "SELECT user_id FROM users WHERE user_id = ? AND password = ?";
         String updateSql = "UPDATE users SET password = ?, must_change_password = FALSE WHERE user_id = ?";
