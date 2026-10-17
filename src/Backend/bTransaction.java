@@ -1,6 +1,5 @@
 package Backend;
 
-import java.awt.print.PrinterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,16 +19,11 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author Calmchy
- */
 public class bTransaction {
     public static final String ALL_CASHIERS = "All Cashiers";
     private static final DecimalFormat MONEY = new DecimalFormat("#,##0.00");
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
  
-    // ---------- 1. fill the Cashier combo box ----------
     public static void loadCashierFilter(JComboBox<String> combo) {
         Object previous = combo.getSelectedItem();
         combo.removeAllItems();
@@ -49,9 +42,17 @@ public class bTransaction {
             combo.setSelectedItem(previous);
         }
     }
+    
+    public static void updateSummary(JTable orderTable, JLabel countL, JLabel totalSalesL) {
+        DefaultTableModel model = (DefaultTableModel) orderTable.getModel();
+        double sum = 0;
+        for (int r = 0; r < model.getRowCount(); r++) {
+            sum += Double.parseDouble(model.getValueAt(r, 4).toString());
+        }
+        countL.setText(String.valueOf(model.getRowCount()));
+        totalSalesL.setText("\u20b1 " + MONEY.format(sum));
+    }
  
-    // ---------- 2. fill the order list table (top table) ----------
-    // from / to come from JDateChooser.getDate() and may be null
     public static void setOrders(JTable table, String orderId, Date from, Date to, String cashier) {
         StringBuilder sql = new StringBuilder(
                 "SELECT o.order_id, o.order_date, CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
@@ -67,7 +68,6 @@ public class bTransaction {
             try {
                 params.add(Integer.parseInt(orderId.trim()));
             } catch (NumberFormatException e) {
-                // not a number (yet) -> no match, no popup (this runs while the user types)
                 ((DefaultTableModel) table.getModel()).setRowCount(0);
                 return;
             }
@@ -77,7 +77,7 @@ public class bTransaction {
             params.add(Timestamp.valueOf(toLocalDate(from).atStartOfDay()));
         }
         if (to != null) {
-            sql.append("AND o.order_date < ? "); // up to the end of the "To" day
+            sql.append("AND o.order_date < ? ");
             params.add(Timestamp.valueOf(toLocalDate(to).plusDays(1).atStartOfDay()));
         }
         if (cashier != null && !cashier.equals(ALL_CASHIERS)) {
@@ -114,16 +114,14 @@ public class bTransaction {
         return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
  
-    // ---------- 3. get the order id of the selected row ----------
     public static int getSelectedOrderId(JTable orderTable) {
         int row = orderTable.getSelectedRow();
         if (row < 0) {
             return -1;
         }
-        return (int) orderTable.getValueAt(row, 0); // column 0 = Order ID
+        return (int) orderTable.getValueAt(row, 0);
     }
  
-    // ---------- 4. fill TRANSACTION DETAILS (labels + items table) ----------
     public static void loadOrderDetails(int orderId, JTable detailsTable,
             JLabel idL, JLabel dateTimeL, JLabel cashierL, JLabel customerL,
             JLabel paymentL, JLabel changeL, JLabel orderTypeL, JLabel totalL) {
@@ -133,7 +131,6 @@ public class bTransaction {
                 + "WHERE oi.order_id = ? ORDER BY oi.order_item_id";
  
         try (Connection con = DBConnection.getConnection()) {
-            // works even if payment_amount / change_amount were not added to the DB yet
             boolean hasPayment = hasColumn(con, "orders", "payment_amount")
                     && hasColumn(con, "orders", "change_amount");
  
@@ -154,7 +151,7 @@ public class bTransaction {
                         double total = rs.getDouble("total_amount");
                         double payment = rs.getDouble("payment_amount");
                         double change = rs.getDouble("change_amount");
-                        if (payment == 0) {      // old orders saved before payment tracking
+                        if (payment == 0) {
                             payment = total;
                             change = 0;
                         }
@@ -197,7 +194,6 @@ public class bTransaction {
         }
     }
  
-    // ---------- 5. clear the details panel (nothing selected / after refresh) ----------
     public static void clearOrderDetails(JTable detailsTable, JLabel... labels) {
         ((DefaultTableModel) detailsTable.getModel()).setRowCount(0);
         for (JLabel l : labels) {
@@ -205,7 +201,6 @@ public class bTransaction {
         }
     }
  
-    // ---------- 6. REPRINT RECEIPT ----------
     public static void reprintReceipt(int orderId, JTable detailsTable,
             String dateTime, String cashier, String customer,
             String payment, String change, String total) {
@@ -247,7 +242,6 @@ public class bTransaction {
         }
     }
  
-    // ---------- 7. PRINT LIST ----------
     public static void printList(JTable orderTable) {
         try {
             MessageFormat header = new MessageFormat("Transaction List");

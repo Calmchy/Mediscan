@@ -5,65 +5,38 @@ package Frontend;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import Backend.Session;
-import Call.Category;
 import Call.Product;
 import Call.Stock;
-import Backend.bSales;
 
+import Backend.Session;
+import Backend.bSales;
 import Backend.bCategory;
+import Backend.bPrint;
 import Backend.bProduct;
 import Backend.bStocks;
 import Backend.bTransaction;
 
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.awt.print.Printable;
-import static java.awt.print.Printable.NO_SUCH_PAGE;
-import static java.awt.print.Printable.PAGE_EXISTS;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.oned.Code128Writer;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
-import java.awt.image.BufferedImage;
 import java.nio.file.Path;
-import static java.util.logging.Level.ALL;
 
 /**
  *
  * @author chyril
  */
 public class Dashboard extends javax.swing.JFrame {
-    private double bHeight = 0.0;
     private int orderId;
     private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
-    private static final String BARCODE_FOLDER_SALES = System.getProperty("user.home") + "/MediScanBarcodes/Sales/";
     private boolean loadingFilters = false;
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
     
@@ -135,6 +108,7 @@ public class Dashboard extends javax.swing.JFrame {
         bTransaction.setOrders(transOrderListTable, transOrderIDTF.getText(),
                 transFromDC.getDate(), transToDC.getDate(),
                 (String) transCashierCB.getSelectedItem());
+        bTransaction.updateSummary(transOrderListTable, transactionsCountL, transTotalSalesL);
         for (int r = 0; r < transOrderListTable.getRowCount(); r++) {
             if ((int) transOrderListTable.getValueAt(r, 0) == keepId) {
                 transOrderListTable.setRowSelectionInterval(r, r);
@@ -254,19 +228,6 @@ public class Dashboard extends javax.swing.JFrame {
         });
     }
     
-    
-    
-    private BufferedImage generateBarcodeImage(String data, int width, int height) {
-        try {
-            Code128Writer writer = new Code128Writer();
-            BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.CODE_128, width, height);
-            return MatrixToImageWriter.toBufferedImage(bitMatrix);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
     private void saveBarcodeToFile(String data, String FOLDER) {
         try {
             File folder = new File(FOLDER);
@@ -284,24 +245,6 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (Exception e) {
             System.out.println("Barcode save failed: " + e.getMessage());
         }
-    }
-    
-    public PageFormat getPageFormat(PrinterJob pj) {
-        PageFormat pf = pj.defaultPage();
-        Paper paper = pf.getPaper();
-
-        double bodyHeight = bHeight;
-        double headerHeight = 5.0;
-        double footerHeight = 5.0;
-        double width = cm_to_pp(8);
-        double height = cm_to_pp(headerHeight + bodyHeight + footerHeight);
-
-        paper.setSize(width, height);
-        paper.setImageableArea(0, 10, width, height - cm_to_pp(1));
-        pf.setOrientation(PageFormat.PORTRAIT);
-        pf.setPaper(paper);
-
-        return pf;
     }
 
     /**
@@ -435,8 +378,9 @@ public class Dashboard extends javax.swing.JFrame {
         transToDC = new com.toedter.calendar.JDateChooser();
         transTotalSalesL = new javax.swing.JLabel();
         jLabel31 = new javax.swing.JLabel();
-        transTotalSalesL1 = new javax.swing.JLabel();
+        transactionsCountL = new javax.swing.JLabel();
         jLabel33 = new javax.swing.JLabel();
+        customersTab = new javax.swing.JPanel();
         accountsTab = new javax.swing.JPanel();
         accountsBG = new javax.swing.JPanel();
         jLabel25 = new javax.swing.JLabel();
@@ -1400,7 +1344,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         transTotalTF.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         transTotalTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        transTotalTF.setText("           ");
+        transTotalTF.setText("₱ 0");
 
         transReprintReceiptBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         transReprintReceiptBtn.setText("REPRINT RECEIPT");
@@ -1549,9 +1493,9 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel31.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel31.setText("TOTAL SALES:");
 
-        transTotalSalesL1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        transTotalSalesL1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        transTotalSalesL1.setText("69");
+        transactionsCountL.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        transactionsCountL.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        transactionsCountL.setText("69");
 
         jLabel33.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel33.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1584,14 +1528,14 @@ public class Dashboard extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(transRefreshBtn))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transactionBGLayout.createSequentialGroup()
-                        .addGap(747, 747, 747)
-                        .addComponent(jLabel33)
+                        .addGap(571, 571, 571)
+                        .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(transTotalSalesL1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(transactionsCountL, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel31)
+                        .addComponent(jLabel31, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(transTotalSalesL)))
+                        .addComponent(transTotalSalesL, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -1610,15 +1554,15 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(transCashierCB, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(transRefreshBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
+                .addGap(13, 13, 13)
                 .addGroup(transactionBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(transTotalSalesL)
                     .addComponent(jLabel31)
-                    .addComponent(transTotalSalesL1)
+                    .addComponent(transactionsCountL)
                     .addComponent(jLabel33))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         transFromDC.getAccessibleContext().setAccessibleName("");
@@ -1635,6 +1579,19 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         tabPannel.addTab("TRANSACTION", transactionTab);
+
+        javax.swing.GroupLayout customersTabLayout = new javax.swing.GroupLayout(customersTab);
+        customersTab.setLayout(customersTabLayout);
+        customersTabLayout.setHorizontalGroup(
+            customersTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1048, Short.MAX_VALUE)
+        );
+        customersTabLayout.setVerticalGroup(
+            customersTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 653, Short.MAX_VALUE)
+        );
+
+        tabPannel.addTab("CUSTOMERS", customersTab);
 
         jLabel25.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel25.setText("Search:");
@@ -1747,27 +1704,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         orderId = result.orderId;
         setStockTable();
-
-        ArrayList<String> rItemName = new ArrayList<>(), rQty = new ArrayList<>(), rPrice = new ArrayList<>(), rUnit = new ArrayList<>(), rSubtotal = new ArrayList<>();
-        for (bSales.CartItem it : result.items) {
-            rItemName.add(it.name);
-            rQty.add(String.valueOf(it.quantity));
-            rPrice.add(String.valueOf(it.price));
-            rUnit.add(it.unit);
-            rSubtotal.add(String.valueOf(it.subtotal()));
-        }
-
-        bHeight = rItemName.size();
-        PrinterJob pj = PrinterJob.getPrinterJob();
-        saveBarcodeToFile(String.valueOf(orderId), BARCODE_FOLDER_SALES);
-        pj.setPrintable(new BillPrintable(rItemName, rQty, rPrice, rUnit, rSubtotal,
-                result.total, result.cash, result.change, orderId), getPageFormat(pj));
-        try {
-            pj.print();
-        } catch (PrinterException ex) {
-            ex.printStackTrace();
-        }
-
+        bPrint.printSale(result);
         bSales.clearSale(salesUI);
         salesProductIDScanTF.requestFocus();
     }//GEN-LAST:event_salesCheckoutBtnActionPerformed
@@ -1936,9 +1873,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_transRefreshBtnActionPerformed
 
     private void transReprintReceiptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transReprintReceiptBtnActionPerformed
-         bTransaction.reprintReceipt(bTransaction.getSelectedOrderId(transOrderListTable), transactionDetailsTable,
-            transDateTimeL.getText(), transCashierFNL.getText(), transCustFNL.getText(),
-            transPaymentL.getText(), transChangeL.getText(), transTotalTF.getText());
+         bPrint.reprintReceipt(this, bTransaction.getSelectedOrderId(transOrderListTable));
     }//GEN-LAST:event_transReprintReceiptBtnActionPerformed
 
     private void transPrintListBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transPrintListBtnActionPerformed
@@ -1951,145 +1886,6 @@ public class Dashboard extends javax.swing.JFrame {
             salesProductIDScanTF.requestFocus();
         }
     }//GEN-LAST:event_tabPannelStateChanged
-
-    public class BillPrintable implements Printable {
-        private ArrayList<String> itemName, quantity, itemPrice, unit, subtotal;
-        private double total, cash, change;
-        private int orderId;
-
-        public BillPrintable(ArrayList<String> itemName, ArrayList<String> quantity, ArrayList<String> itemPrice,
-                ArrayList<String> unit, ArrayList<String> subtotal, double total, double cash, double change, int orderId) {
-            this.itemName = itemName;
-            this.quantity = quantity;
-            this.itemPrice = itemPrice;
-            this.unit = unit;
-            this.subtotal = subtotal;
-            this.total = total;
-            this.cash = cash;
-            this.change = change;
-            this.orderId = orderId;
-        }
-
-        @Override
-        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-            if (pageIndex > 0) {
-                return NO_SUCH_PAGE;
-            }
-
-            Graphics2D g2d = (Graphics2D) graphics;
-            g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
-
-            Font normalFont = new Font("Monospaced", Font.PLAIN, 7);
-            Font boldFont = new Font("Monospaced", Font.BOLD, 8);
-            g2d.setFont(normalFont);
-            java.awt.FontMetrics fm = g2d.getFontMetrics();
-
-            // every line on the receipt shares this ONE left edge and ONE right edge
-            int margin = 12;
-            double paperWidth = pageFormat.getImageableWidth();
-            double charW = fm.stringWidth(repeatChar('-', 20)) / 20.0;
-            int cols = (int) ((paperWidth - (margin * 2)) / charW);
-            String divider = repeatChar('-', cols);
-            String stars = repeatChar('*', cols);
-            int blockWidth = fm.stringWidth(divider);
-            int left = (int) ((paperWidth - blockWidth) / 2);
-            int right = left + blockWidth;
-            int indent = fm.stringWidth("  ");
-            int lineH = 10;
-            int y = 15;
-
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
-            // logo, centered
-            java.net.URL logoUrl = getClass().getResource("/Images/logo-128.png");
-            if (logoUrl != null) {
-                java.awt.Image logo = new ImageIcon(logoUrl).getImage();
-                int logoSize = 48;
-                g2d.drawImage(logo, left + (blockWidth - logoSize) / 2, y, logoSize, logoSize, null);
-                y += logoSize + 10;
-            }
-
-            // header, centered
-            g2d.setFont(boldFont);
-            drawCentered(g2d, "MEDISCAN POS", left, right, y); y += lineH + 1;
-            g2d.setFont(normalFont);
-            drawCentered(g2d, "Retail Pharmacy", left, right, y); y += lineH;
-            drawCentered(g2d, currentDateTime, left, right, y); y += lineH;
-            g2d.drawString(divider, left, y); y += lineH + 4;
-
-            // items: name on line 1, "qty unit x price ........ subtotal" on line 2
-            for (int i = 0; i < itemName.size(); i++) {
-                int qty = Integer.parseInt(quantity.get(i));
-                double price = Double.parseDouble(itemPrice.get(i));
-                double sub = Double.parseDouble(subtotal.get(i));
-
-                String name = itemName.get(i);
-                while (name.length() > 1 && fm.stringWidth(name) > blockWidth) {
-                    name = name.substring(0, name.length() - 1);
-                }
-                g2d.drawString(name, left, y); y += lineH;
-
-                String detail = String.format("%d %s x %.2f", qty, unit.get(i), price);
-                String subText = String.format("%.2f", sub);
-                g2d.drawString(detail, left + indent, y);
-                g2d.drawString(subText, right - fm.stringWidth(subText), y);
-                y += lineH + 2;
-            }
-
-            // totals: label on the left edge, amount on the right edge
-            g2d.drawString(divider, left, y); y += lineH;
-            g2d.setFont(boldFont);
-            drawLeftRight(g2d, "TOTAL", String.format("%.2f", total), left, right, y); y += lineH;
-            g2d.setFont(normalFont);
-            drawLeftRight(g2d, "CASH", String.format("%.2f", cash), left, right, y); y += lineH;
-            drawLeftRight(g2d, "CHANGE", String.format("%.2f", change), left, right, y); y += lineH;
-            g2d.drawString(divider, left, y); y += lineH + 2;
-
-            // thank you
-            g2d.drawString(stars, left, y); y += lineH;
-            drawCentered(g2d, "THANK YOU, COME AGAIN!", left, right, y); y += lineH;
-            g2d.drawString(stars, left, y); y += lineH + 6;
-
-            // barcode, centered and never wider than the receipt block
-            String orderIdText = String.valueOf(orderId);
-            int barcodeW = Math.min(140, blockWidth);
-            int barcodeH = 36;
-            BufferedImage barcodeImg = generateBarcodeImage(orderIdText, barcodeW * 3, barcodeH * 3);
-            if (barcodeImg != null) {
-                g2d.drawImage(barcodeImg, left + (blockWidth - barcodeW) / 2, y, barcodeW, barcodeH, null);
-                y += barcodeH + 10;
-                drawCentered(g2d, orderIdText, left, right, y);
-            }
-
-            return PAGE_EXISTS;
-        }
-
-        private String repeatChar(char c, int count) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < count; i++) {
-                sb.append(c);
-            }
-            return sb.toString();
-        }
-
-        private void drawCentered(Graphics2D g2d, String text, int left, int right, int y) {
-            int textWidth = g2d.getFontMetrics().stringWidth(text);
-            g2d.drawString(text, left + ((right - left) - textWidth) / 2, y);
-        }
-
-        private void drawLeftRight(Graphics2D g2d, String leftText, String rightText, int left, int right, int y) {
-            g2d.drawString(leftText, left, y);
-            g2d.drawString(rightText, right - g2d.getFontMetrics().stringWidth(rightText), y);
-        }
-    }
-
-    protected static double cm_to_pp(double cm) {
-        return toPPI(cm * 0.393600787);
-    }
-
-    protected static double toPPI(double inch) {
-        return inch * 72d;
-    }
 
     /**
      * @param args the command line arguments
@@ -2138,6 +1934,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel categoryTab;
     private javax.swing.JTable categoryTable;
     private javax.swing.JTextField changeSalesTF;
+    private javax.swing.JPanel customersTab;
     private javax.swing.JButton deleteCategoryBtn;
     private javax.swing.JButton deleteProductBtn;
     private javax.swing.JButton deleteStockBtn;
@@ -2248,11 +2045,11 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton transReprintReceiptBtn;
     private com.toedter.calendar.JDateChooser transToDC;
     private javax.swing.JLabel transTotalSalesL;
-    private javax.swing.JLabel transTotalSalesL1;
     private javax.swing.JLabel transTotalTF;
     private javax.swing.JPanel transactionBG;
     private javax.swing.JTable transactionDetailsTable;
     private javax.swing.JPanel transactionTab;
+    private javax.swing.JLabel transactionsCountL;
     private javax.swing.JLabel userFullNameL;
     private javax.swing.JLabel userRoleL;
     // End of variables declaration//GEN-END:variables
