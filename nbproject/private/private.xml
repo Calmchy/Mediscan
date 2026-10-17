@@ -5,10 +5,13 @@
         <group>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Dashboard2.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Login.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bStocks.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bSales.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bTransaction.java</file>
-            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bUser.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/Session.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/Stock.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bPrint.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bAuth.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Dashboard.java</file>
         </group>
     </open-files>
