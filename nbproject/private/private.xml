@@ -3,14 +3,18 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Dashboard2.java</file>
-            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Login.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/addAccount.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bStocks.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bSales.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bTransaction.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/Session.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/Stock.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bPrint.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Login.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/Category.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/resetPassword.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/NewPassword.java</file>
+            <file>file:/C:/Users/Calmchy/github/Mediscan/src/Call/Product.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Backend/bAuth.java</file>
             <file>file:/C:/Users/Calmchy/github/Mediscan/src/Frontend/Dashboard.java</file>
         </group>
