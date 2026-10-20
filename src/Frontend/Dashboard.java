@@ -15,6 +15,7 @@ import Backend.bPrint;
 import Backend.bProduct;
 import Backend.bStocks;
 import Backend.bTransaction;
+import Backend.bAccount;
 
 import java.io.File;
 import java.sql.Connection;
@@ -39,6 +40,7 @@ public class Dashboard extends javax.swing.JFrame {
     private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private boolean loadingFilters = false;
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
+    private final bAccount.AccountFields accountUI = new bAccount.AccountFields();
     
     bProduct bProd = new bProduct();
     bStocks bSto = new bStocks();
@@ -89,6 +91,16 @@ public class Dashboard extends javax.swing.JFrame {
         salesUI.totalL = totalSalesTF;
         salesUI.cashTF = cashAmountSalesTF;
         salesUI.changeTF = changeSalesTF;
+        
+        accountUI.accountTable = adminAccountTable;
+        accountUI.searchTF  = transOrderIDTF1;
+        accountUI.roleCB = transCashierCB1;
+        accountUI.totalL = adminAccountsCountL;
+        accountUI.adminL = adminAccountsCountL1;
+        accountUI.pharmacistL = adminAccountsCountL2;
+        accountUI.cashierL = adminAccountsCountL3;
+        bAccount.loadRoleFilter(accountUI);
+        bAccount.setAccounts(accountUI);
     }
     
     private void showSelectedOrder() {

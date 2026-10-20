@@ -235,9 +235,9 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="addAccountBtn" max="32767" attributes="0"/>
+                      <Component id="addAccountBtn" min="-2" pref="143" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="clearrBtn" min="-2" pref="105" max="-2" attributes="0"/>
+                      <Component id="clearrBtn" pref="129" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -263,11 +263,17 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="ADD"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addAccountBtnActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="clearrBtn">
               <Properties>
                 <Property name="text" type="java.lang.String" value="CLEAR"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearrBtnActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>

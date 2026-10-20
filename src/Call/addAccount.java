@@ -5,6 +5,8 @@
  */
 package Call;
 
+import Backend.bAccount;
+
 /**
  *
  * @author Calmchy
@@ -90,8 +92,18 @@ public class addAccount extends javax.swing.JDialog {
 
         addAccountBtn.setBackground(new java.awt.Color(28, 107, 98));
         addAccountBtn.setText("ADD");
+        addAccountBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addAccountBtnActionPerformed(evt);
+            }
+        });
 
         clearrBtn.setText("CLEAR");
+        clearrBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearrBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout footerLayout = new javax.swing.GroupLayout(footer);
         footer.setLayout(footerLayout);
@@ -99,9 +111,9 @@ public class addAccount extends javax.swing.JDialog {
             footerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(footerLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(addAccountBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(addAccountBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(clearrBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(clearrBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
                 .addContainerGap())
         );
         footerLayout.setVerticalGroup(
@@ -219,6 +231,14 @@ public class addAccount extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void addAccountBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAccountBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addAccountBtnActionPerformed
+
+    private void clearrBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearrBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_clearrBtnActionPerformed
 
     /**
      * @param args the command line arguments
