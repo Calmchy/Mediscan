@@ -5,18 +5,31 @@
  */
 package Call;
 
+import Backend.bAccount;
 /**
  *
  * @author Calmchy
  */
 public class resetPassword extends javax.swing.JDialog {
-
+    private final bAccount.ResetPasswordFields ui = new bAccount.ResetPasswordFields();
+    private final int userId;
     /**
      * Creates new form resetPassword
      */
     public resetPassword(java.awt.Frame parent, boolean modal) {
+        this(parent, modal, -1);
+    }
+    
+    public resetPassword(java.awt.Frame parent, boolean modal, int userId) {
         super(parent, modal);
+        this.userId = userId;
         initComponents();
+        ui.accountTF = accountTF;
+        ui.newPasswordTF = newTemPassTF;
+        ui.showPassCB = showPass;
+        accountTF.setEchoChar((char) 0);
+        bAccount.loadResetAccount(ui, userId);
+        showPass.addActionListener(e -> bAccount.togglePassword(newTemPassTF, showPass));
     }
 
     /**
@@ -155,11 +168,13 @@ public class resetPassword extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
-        // TODO add your handling code here:
+        if (bAccount.resetPassword(this, ui, userId)) {
+            dispose();
+        }
     }//GEN-LAST:event_resetBtnActionPerformed
 
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
-        // TODO add your handling code here:
+        dispose();
     }//GEN-LAST:event_cancelBtnActionPerformed
 
     /**

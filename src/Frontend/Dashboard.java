@@ -101,6 +101,8 @@ public class Dashboard extends javax.swing.JFrame {
         accountUI.cashierL = adminAccountsCountL3;
         bAccount.loadRoleFilter(accountUI);
         bAccount.setAccounts(accountUI);
+        addSearchListener(transOrderIDTF1, () -> bAccount.setAccounts(accountUI));
+        transCashierCB1.addActionListener(e -> bAccount.setAccounts(accountUI));
     }
     
     private void showSelectedOrder() {
@@ -284,6 +286,7 @@ public class Dashboard extends javax.swing.JFrame {
         userFullNameL = new javax.swing.JLabel();
         tabPannel = new javax.swing.JTabbedPane();
         mainDashboardTab = new javax.swing.JPanel();
+        dashboardBG = new javax.swing.JPanel();
         categoryTab = new javax.swing.JPanel();
         categoryBG = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -510,15 +513,26 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        javax.swing.GroupLayout dashboardBGLayout = new javax.swing.GroupLayout(dashboardBG);
+        dashboardBG.setLayout(dashboardBGLayout);
+        dashboardBGLayout.setHorizontalGroup(
+            dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1048, Short.MAX_VALUE)
+        );
+        dashboardBGLayout.setVerticalGroup(
+            dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 653, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout mainDashboardTabLayout = new javax.swing.GroupLayout(mainDashboardTab);
         mainDashboardTab.setLayout(mainDashboardTabLayout);
         mainDashboardTabLayout.setHorizontalGroup(
             mainDashboardTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1048, Short.MAX_VALUE)
+            .addComponent(dashboardBG, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         mainDashboardTabLayout.setVerticalGroup(
             mainDashboardTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 653, Short.MAX_VALUE)
+            .addComponent(dashboardBG, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         tabPannel.addTab("DASHBOARD", mainDashboardTab);
@@ -2228,27 +2242,40 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_tabPannelStateChanged
 
     private void adminRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRefreshBtnActionPerformed
-        // TODO add your handling code here:
+        bAccount.refresh(accountUI);
     }//GEN-LAST:event_adminRefreshBtnActionPerformed
 
     private void adminAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminAddBtnActionPerformed
-        // TODO add your handling code here:
+        new Call.addAccount(this, true).setVisible(true);
+        bAccount.setAccounts(accountUI);
     }//GEN-LAST:event_adminAddBtnActionPerformed
 
     private void adminEditBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminEditBtnActionPerformed
-        // TODO add your handling code here:
+        int id = bAccount.getSelectedUserId(adminAccountTable);
+        if (id == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select an account to edit.");
+            return;
+        }
+        new Call.addAccount(this, true, id).setVisible(true);
+        bAccount.setAccounts(accountUI);
     }//GEN-LAST:event_adminEditBtnActionPerformed
 
     private void adminDeleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminDeleteBtnActionPerformed
-        // TODO add your handling code here:
+        bAccount.deleteAccount(this, accountUI);
     }//GEN-LAST:event_adminDeleteBtnActionPerformed
 
     private void adminResetPassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminResetPassBtnActionPerformed
-        // TODO add your handling code here:
+        int id = bAccount.getSelectedUserId(adminAccountTable);
+        if (id == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select an account to reset.");
+            return;
+        }
+        new Call.resetPassword(this, true, id).setVisible(true);
+        bAccount.setAccounts(accountUI);
     }//GEN-LAST:event_adminResetPassBtnActionPerformed
 
     private void adminPrintBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminPrintBtnActionPerformed
-        // TODO add your handling code here:
+        bAccount.printAccounts(accountUI);
     }//GEN-LAST:event_adminPrintBtnActionPerformed
 
     /**
@@ -2311,6 +2338,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTable categoryTable;
     private javax.swing.JTextField changeSalesTF;
     private javax.swing.JPanel customersTab;
+    private javax.swing.JPanel dashboardBG;
     private javax.swing.JButton deleteCategoryBtn;
     private javax.swing.JButton deleteProductBtn;
     private javax.swing.JButton deleteStockBtn;

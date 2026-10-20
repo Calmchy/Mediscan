@@ -12,13 +12,39 @@ import Backend.bAccount;
  * @author Calmchy
  */
 public class addAccount extends javax.swing.JDialog {
-
+    private final bAccount.AddAccountFields ui = new bAccount.AddAccountFields();
+    private int userId = -1;
     /**
      * Creates new form addAccount
      */
     public addAccount(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        initFields();
+    }
+    
+    public addAccount(java.awt.Frame parent, boolean modal, int userId) {
+        this(parent, modal);
+        this.userId = userId;
+        bAccount.loadAccount(ui, userId);
+        Title.setText("EDIT ACCOUNT");
+        addAccountBtn.setText("SAVE");
+        jLabel6.setVisible(false);          // password is not edited here (use RESET PASSWORD)
+        temporaryPassTF.setVisible(false);
+        showPassCB.setVisible(false);
+        pack();
+    }
+    
+    private void initFields() {
+        ui.firstNameTF = firstNameTF;
+        ui.lastNameTF = lastNameTF;
+        ui.middleInitialTF = middleInitialTF;
+        ui.usernameTF = usernameTF;
+        ui.roleCB = roleCB;
+        ui.passwordTF = temporaryPassTF;
+        ui.showPassCB = showPassCB;
+        bAccount.loadRoles(roleCB);
+        showPassCB.addActionListener(e -> bAccount.togglePassword(temporaryPassTF, showPassCB));
     }
 
     /**
@@ -233,11 +259,18 @@ public class addAccount extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addAccountBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAccountBtnActionPerformed
-        // TODO add your handling code here:
+        boolean ok = (userId == -1) ? bAccount.addAccount(this, ui) : bAccount.updateAccount(this, ui, userId);
+        if (ok) {
+            dispose();
+        }
     }//GEN-LAST:event_addAccountBtnActionPerformed
 
     private void clearrBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearrBtnActionPerformed
-        // TODO add your handling code here:
+        if (userId == -1) {
+            bAccount.clearAddFields(ui);
+        } else {
+            bAccount.loadAccount(ui, userId);
+        }
     }//GEN-LAST:event_clearrBtnActionPerformed
 
     /**
