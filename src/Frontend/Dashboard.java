@@ -270,13 +270,6 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPopupMenu1 = new javax.swing.JPopupMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenu1 = new javax.swing.JMenu();
-        jMenu2 = new javax.swing.JMenu();
-        textLoader1 = new net.sf.jasperreports.engine.xml.print.TextLoader();
-        categoryLabelPosition1 = new org.jfree.chart.axis.CategoryLabelPosition();
-        transRefreshBtn1 = new javax.swing.JButton();
         background = new javax.swing.JPanel();
         header = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -430,15 +423,6 @@ public class Dashboard extends javax.swing.JFrame {
         adminPrintBtn = new javax.swing.JButton();
         jScrollPane8 = new javax.swing.JScrollPane();
         adminAccountTable = new javax.swing.JTable();
-
-        jMenuItem1.setText("jMenuItem1");
-
-        jMenu1.setText("jMenu1");
-
-        jMenu2.setText("jMenu2");
-
-        transRefreshBtn1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        transRefreshBtn1.setText("REFRESH");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1024, 768));
@@ -2331,7 +2315,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel background;
     private javax.swing.JTextField cashAmountSalesTF;
     private javax.swing.JPanel categoryBG;
-    private org.jfree.chart.axis.CategoryLabelPosition categoryLabelPosition1;
     private javax.swing.JButton categoryRefreshBtn;
     private javax.swing.JTextField categorySearchTF;
     private javax.swing.JPanel categoryTab;
@@ -2387,9 +2370,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
@@ -2400,7 +2380,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -2444,7 +2423,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel stockTab;
     private javax.swing.JTable stockTable;
     private javax.swing.JTabbedPane tabPannel;
-    private net.sf.jasperreports.engine.xml.print.TextLoader textLoader1;
     private javax.swing.JLabel totalSalesTF;
     private javax.swing.JComboBox<String> transCashierCB;
     private javax.swing.JComboBox<String> transCashierCB1;
@@ -2461,7 +2439,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel transPaymentL;
     private javax.swing.JButton transPrintListBtn;
     private javax.swing.JButton transRefreshBtn;
-    private javax.swing.JButton transRefreshBtn1;
     private javax.swing.JButton transReprintReceiptBtn;
     private com.toedter.calendar.JDateChooser transToDC;
     private javax.swing.JLabel transTotalSalesL;

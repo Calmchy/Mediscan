@@ -12,13 +12,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import javax.swing.table.DefaultTableModel;
+
 
 public class bAccount {
     public static final String ALL_ROLES = "All Roles";
     public static final String[] ROLES = {"admin", "pharmacist", "cashier"};
     public static final int MIN_PASSWORD_LENGTH = 8;
-    private static final String MASK = "********";
+    public static final String PASSWORD_SET = "Set";
+    public static final String PASSWORD_MUST_CHANGE = "Must Change";
  
     private static final int C_ID = 0, C_USERNAME = 1;
  
@@ -56,17 +62,25 @@ public class bAccount {
         }
     }
  
+    private static String fullNameSql(String alias) {
+        return "CONCAT_WS(' ', " + alias + ".first_name, "
+                + "IF(" + alias + ".middle_initial IS NULL OR TRIM(" + alias + ".middle_initial) = '', NULL, "
+                + "CONCAT(TRIM(" + alias + ".middle_initial), '.')), "
+                + alias + ".last_name)";
+    }
+ 
     public static void setAccounts(AccountFields f) {
         String keyword = f.searchTF.getText().trim();
         Object selected = f.roleCB.getSelectedItem();
         String role = (selected == null || ALL_ROLES.equals(selected.toString())) ? "" : selected.toString();
  
         StringBuilder sql = new StringBuilder(
-                "SELECT u.user_id, u.username, CONCAT(u.first_name, ' ', u.last_name) AS full_name, "
-              + "u.role, CONCAT(c.first_name, ' ', c.last_name) AS created_by_name, u.created_at "
+                "SELECT u.user_id, u.username, " + fullNameSql("u") + " AS full_name, "
+              + "u.role, " + fullNameSql("c") + " AS created_by_name, u.created_at, "
+              + "u.must_change_password "
               + "FROM users u LEFT JOIN users c ON u.created_by = c.user_id "
               + "WHERE (u.username LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? "
-              + "OR CONCAT(u.first_name, ' ', u.last_name) LIKE ?) ");
+              + "OR " + fullNameSql("u") + " LIKE ?) ");
         if (!role.isEmpty()) {
             sql.append("AND u.role = ? ");
         }
@@ -92,9 +106,9 @@ public class bAccount {
                         rs.getString("username"),
                         rs.getString("full_name"),
                         rs.getString("role"),
-                        createdBy == null ? "-" : createdBy,
+                        (createdBy == null || createdBy.trim().isEmpty()) ? "-" : createdBy,
                         rs.getTimestamp("created_at").toString(),
-                        MASK                                  
+                        rs.getBoolean("must_change_password") ? PASSWORD_MUST_CHANGE : PASSWORD_SET
                     });
                 }
             }
@@ -197,6 +211,45 @@ public class bAccount {
         roleCB.setSelectedItem("cashier");
     }
  
+    public static String normalizeMiddleInitial(String text) {
+        if (text == null) {
+            return "";
+        }
+        text = text.trim();
+        return text.isEmpty() ? "" : text.substring(0, 1).toUpperCase();
+    }
+ 
+    public static void applyMiddleInitialFilter(JTextField field) {
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
+                    throws BadLocationException {
+                replace(fb, offset, 0, text, attr);
+            }
+ 
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                    throws BadLocationException {
+                if (text == null) {
+                    super.replace(fb, offset, length, text, attrs);
+                    return;
+                }
+                String letters = text.replaceAll("[^\\p{L}]", "").toUpperCase();
+                if (letters.isEmpty() && !text.isEmpty()) {
+                    return;
+                }
+                int remaining = 1 - (fb.getDocument().getLength() - length);
+                if (remaining <= 0 && !letters.isEmpty()) {
+                    return;
+                }
+                if (letters.length() > remaining) {
+                    letters = letters.substring(0, Math.max(remaining, 0));
+                }
+                super.replace(fb, offset, length, letters, attrs);
+            }
+        });
+    }
+ 
     public static void togglePassword(JPasswordField passwordTF, JCheckBox showPassCB) {
         passwordTF.setEchoChar(showPassCB.isSelected() ? (char) 0 : '\u2022');
     }
@@ -219,7 +272,7 @@ public class bAccount {
     public static String checkAddFields(AddAccountFields f) {
         String first = f.firstNameTF.getText().trim();
         String last = f.lastNameTF.getText().trim();
-        String mi = f.middleInitialTF.getText().trim();
+        String mi = normalizeMiddleInitial(f.middleInitialTF.getText());
         String username = f.usernameTF.getText().trim();
         String password = new String(f.passwordTF.getPassword());
  
@@ -227,8 +280,8 @@ public class bAccount {
                 || f.roleCB.getSelectedItem() == null) {
             return "Please fill in all required fields.";
         }
-        if (mi.length() > 2) {
-            return "Middle initial must be 1-2 characters.";
+        if (!mi.isEmpty() && !Character.isLetter(mi.charAt(0))) {
+            return "Middle initial must be a letter.";
         }
         if (username.contains(" ")) {
             return "Username must not contain spaces.";
@@ -275,7 +328,7 @@ public class bAccount {
                 + "role, must_change_password, created_by) VALUES (?, ?, ?, ?, ?, ?, TRUE, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            String mi = f.middleInitialTF.getText().trim();
+            String mi = normalizeMiddleInitial(f.middleInitialTF.getText());
             ps.setString(1, username);
             ps.setString(2, bAuth.hash(new String(f.passwordTF.getPassword())));
             ps.setString(3, f.firstNameTF.getText().trim());
@@ -310,7 +363,7 @@ public class bAccount {
                     f.firstNameTF.setText(rs.getString("first_name"));
                     f.lastNameTF.setText(rs.getString("last_name"));
                     String mi = rs.getString("middle_initial");
-                    f.middleInitialTF.setText(mi == null ? "" : mi.trim());
+                    f.middleInitialTF.setText(normalizeMiddleInitial(mi));
                     f.usernameTF.setText(rs.getString("username"));
                     f.roleCB.setSelectedItem(rs.getString("role"));
                     f.passwordTF.setText("");
@@ -327,15 +380,15 @@ public class bAccount {
         }
         String first = f.firstNameTF.getText().trim();
         String last = f.lastNameTF.getText().trim();
-        String mi = f.middleInitialTF.getText().trim();
+        String mi = normalizeMiddleInitial(f.middleInitialTF.getText());
         String username = f.usernameTF.getText().trim();
  
         if (first.isEmpty() || last.isEmpty() || username.isEmpty() || f.roleCB.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(parent, "Please fill in all required fields.");
             return false;
         }
-        if (mi.length() > 2) {
-            JOptionPane.showMessageDialog(parent, "Middle initial must be 1-2 characters.");
+        if (!mi.isEmpty() && !Character.isLetter(mi.charAt(0))) {
+            JOptionPane.showMessageDialog(parent, "Middle initial must be a letter.");
             return false;
         }
         if (username.contains(" ") || username.length() < 4) {

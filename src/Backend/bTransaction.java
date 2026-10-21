@@ -24,7 +24,20 @@ public class bTransaction {
     private static final DecimalFormat MONEY = new DecimalFormat("#,##0.00");
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
  
+    public static boolean isCashier() {
+        return Session.role != null && Session.role.equalsIgnoreCase("cashier");
+    }
+    
     public static void loadCashierFilter(JComboBox<String> combo) {
+        if (isCashier()) {
+            combo.removeAllItems();
+            combo.addItem(Session.fullName);
+            combo.setSelectedIndex(0);
+            combo.setEnabled(false);
+            return;
+        }
+
+        combo.setEnabled(true);
         Object previous = combo.getSelectedItem();
         combo.removeAllItems();
         combo.addItem(ALL_CASHIERS);
@@ -84,6 +97,10 @@ public class bTransaction {
             sql.append("AND CONCAT(u.first_name, ' ', u.last_name) = ? ");
             params.add(cashier);
         }
+        if (isCashier()) {
+            sql.append("AND o.user_id = ? ");
+            params.add(Session.userId);
+        }
         sql.append("GROUP BY o.order_id, o.order_date, u.first_name, u.last_name, o.total_amount "
                  + "ORDER BY o.order_date DESC");
  
@@ -121,6 +138,16 @@ public class bTransaction {
         }
         return (int) orderTable.getValueAt(row, 0);
     }
+    
+    public static String formatOrderType(String dbValue) {
+        if ("pickup".equalsIgnoreCase(dbValue)) {
+            return "Pick-up";
+        }
+        if ("walk_in".equalsIgnoreCase(dbValue)) {
+            return "Walk-in";
+        }
+        return dbValue == null ? "" : dbValue;
+    }
  
     public static void loadOrderDetails(int orderId, JTable detailsTable,
             JLabel idL, JLabel dateTimeL, JLabel cashierL, JLabel customerL,
@@ -138,7 +165,7 @@ public class bTransaction {
                     + (hasPayment ? "o.payment_amount, o.change_amount, "
                                   : "0 AS payment_amount, 0 AS change_amount, ")
                     + "CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
-                    + "CONCAT(c.first_name, ' ', c.last_name) AS customer "
+                    + "NULLIF(CONCAT_WS(' ', TRIM(c.first_name), TRIM(c.last_name)), '') AS customer "
                     + "FROM orders o "
                     + "JOIN users u ON o.user_id = u.user_id "
                     + "LEFT JOIN customers c ON o.customer_id = c.customer_id "
@@ -159,10 +186,19 @@ public class bTransaction {
                         dateTimeL.setText(rs.getTimestamp("order_date").toLocalDateTime().format(DT_FMT));
                         cashierL.setText(rs.getString("cashier"));
                         String cust = rs.getString("customer");
-                        customerL.setText(cust == null ? "Walk-in" : cust);
+                        String type = rs.getString("order_type");
+                        if (cust == null || cust.trim().isEmpty()) {
+                            cust = "N/A";
+                        }
+                        customerL.setText(cust);
                         paymentL.setText(MONEY.format(payment));
                         changeL.setText(MONEY.format(change));
-                        orderTypeL.setText(rs.getString("order_type"));
+                        
+                        if (cust == null || cust.trim().isEmpty()) {
+                            cust = "walk_in".equalsIgnoreCase(type) ? "Walk-in" : "N/A";
+                        }
+                        orderTypeL.setText(formatOrderType(type));
+                        customerL.setText(cust);
                         totalL.setText("\u20b1 " + MONEY.format(total));
                     }
                 }
