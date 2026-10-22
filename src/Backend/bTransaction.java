@@ -191,14 +191,9 @@ public class bTransaction {
                             cust = "N/A";
                         }
                         customerL.setText(cust);
+                        orderTypeL.setText(formatOrderType(type));
                         paymentL.setText(MONEY.format(payment));
                         changeL.setText(MONEY.format(change));
-                        
-                        if (cust == null || cust.trim().isEmpty()) {
-                            cust = "walk_in".equalsIgnoreCase(type) ? "Walk-in" : "N/A";
-                        }
-                        orderTypeL.setText(formatOrderType(type));
-                        customerL.setText(cust);
                         totalL.setText("\u20b1 " + MONEY.format(total));
                     }
                 }
