@@ -15,6 +15,7 @@ import Backend.bPrint;
 import Backend.bProduct;
 import Backend.bStocks;
 import Backend.bTransaction;
+import Backend.bCustomer;
 import Backend.bAccount;
 
 import java.io.File;
@@ -40,6 +41,7 @@ public class Dashboard extends javax.swing.JFrame {
     private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private boolean loadingFilters = false;
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
+    private final bCustomer.CustomerFields customerUI = new bCustomer.CustomerFields();
     private final bAccount.AccountFields accountUI = new bAccount.AccountFields();
     
     bProduct bProd = new bProduct();
@@ -91,6 +93,13 @@ public class Dashboard extends javax.swing.JFrame {
         salesUI.totalL = totalSalesTF;
         salesUI.cashTF = cashAmountSalesTF;
         salesUI.changeTF = changeSalesTF;
+        
+        customerUI.customerTable = customerTable;
+        customerUI.searchTF = customerSearchTF;
+        customerUI.countL = customerCountL;
+        bCustomer.applyRolePermissions(customerDeleteBtn);
+        bCustomer.setCustomers(customerUI);
+        addSearchListener(customerSearchTF, () -> bCustomer.setCustomers(customerUI));
         
         accountUI.accountTable = adminAccountTable;
         accountUI.searchTF  = transOrderIDTF1;
@@ -2478,23 +2487,30 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_adminPrintBtnActionPerformed
 
     private void customerRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerRefreshBtnActionPerformed
-        // TODO add your handling code here:
+        bCustomer.refresh(customerUI);
     }//GEN-LAST:event_customerRefreshBtnActionPerformed
 
     private void customerAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerAddBtnActionPerformed
-        // TODO add your handling code here:
+        new Call.addCustomer(this, true).setVisible(true);
+        bCustomer.setCustomers(customerUI);
     }//GEN-LAST:event_customerAddBtnActionPerformed
 
     private void customerEditBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerEditBtnActionPerformed
-        // TODO add your handling code here:
+        int id = bCustomer.getSelectedCustomerId(customerTable);
+        if (id == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a customer to edit.");
+            return;
+        }
+        new Call.addCustomer(this, true, id).setVisible(true);
+        bCustomer.setCustomers(customerUI);
     }//GEN-LAST:event_customerEditBtnActionPerformed
 
     private void customerDeleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerDeleteBtnActionPerformed
-        // TODO add your handling code here:
+        bCustomer.deleteCustomer(this, customerUI);
     }//GEN-LAST:event_customerDeleteBtnActionPerformed
 
     private void customerPrintBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerPrintBtnActionPerformed
-        // TODO add your handling code here:
+        bCustomer.printCustomers(customerUI);
     }//GEN-LAST:event_customerPrintBtnActionPerformed
 
     private void salesCustomerIDTFKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_salesCustomerIDTFKeyReleased

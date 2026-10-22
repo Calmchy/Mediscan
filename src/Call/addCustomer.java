@@ -5,20 +5,44 @@
  */
 package Call;
 
+import Backend.bAccount;
+import Backend.bCustomer;
+
 /**
  *
  * @author Calmchy
  */
 public class addCustomer extends javax.swing.JDialog {
-
+    private final bCustomer.AddCustomerFields ui = new bCustomer.AddCustomerFields();
+    private int customerId = -1;
     /**
      * Creates new form addCustomer
      */
     public addCustomer(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        initFields();
+    }
+    
+    public addCustomer(java.awt.Frame parent, boolean modal, int customerId) {
+        this(parent, modal);
+        this.customerId = customerId;
+        bCustomer.loadCustomer(ui, customerId);
+        Title.setText("EDIT CUSTOMER");
+        addAccountBtn.setText("SAVE");
     }
 
+    private void initFields() {
+        ui.firstNameTF = firstNameTF;
+        ui.lastNameTF = lastNameTF;
+        ui.middleInitialTF = middleInitialTF;
+        ui.dateOfBirthDC = dateOfBirthDC;
+        ui.phoneTF = phoneNumberTF;
+        ui.emailTF = emailTF;
+        phoneNumberTF.setEchoChar((char) 0);
+        emailTF.setEchoChar((char) 0);
+        bAccount.applyMiddleInitialFilter(middleInitialTF);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -137,6 +161,8 @@ public class addCustomer extends javax.swing.JDialog {
                     .addContainerGap(13, Short.MAX_VALUE)))
         );
 
+        dateOfBirthDC.setDateFormatString("yyyy-MM-dd");
+
         phoneNumberTF.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -215,18 +241,25 @@ public class addCustomer extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(background, javax.swing.GroupLayout.PREFERRED_SIZE, 431, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void addAccountBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAccountBtnActionPerformed
-        
+        boolean ok = (customerId == -1) ? bCustomer.addCustomer(this, ui) : bCustomer.updateCustomer(this, ui, customerId);
+        if (ok) {
+            dispose();
+        }        
     }//GEN-LAST:event_addAccountBtnActionPerformed
 
     private void clearrBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearrBtnActionPerformed
-        
+        if (customerId == -1) {
+            bCustomer.clearAddFields(ui);
+        } else {
+            bCustomer.loadCustomer(ui, customerId);
+        }
     }//GEN-LAST:event_clearrBtnActionPerformed
 
     /**
