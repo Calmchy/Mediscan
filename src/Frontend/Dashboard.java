@@ -93,6 +93,8 @@ public class Dashboard extends javax.swing.JFrame {
         salesUI.totalL = totalSalesTF;
         salesUI.cashTF = cashAmountSalesTF;
         salesUI.changeTF = changeSalesTF;
+        salesUI.customerIdTF = salesCustomerIDTF;
+        salesUI.customerNameL = salesCustomerFNL;
         
         customerUI.customerTable = customerTable;
         customerUI.searchTF = customerSearchTF;
@@ -1307,7 +1309,7 @@ public class Dashboard extends javax.swing.JFrame {
         totalSalesTF.setText("0");
 
         salesCustomerIDTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        salesCustomerIDTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        salesCustomerIDTF.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         salesCustomerIDTF.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 salesCustomerIDTFKeyReleased(evt);
@@ -1315,15 +1317,15 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         jLabel41.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel41.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel41.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel41.setText("CUSTOMER ID:");
 
         jLabel42.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel42.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel42.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel42.setText("FULLNAME:");
 
         salesCustomerFNL.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        salesCustomerFNL.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        salesCustomerFNL.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         salesCustomerFNL.setText(" ");
 
         javax.swing.GroupLayout salesBGLayout = new javax.swing.GroupLayout(salesBG);
@@ -2514,7 +2516,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_customerPrintBtnActionPerformed
 
     private void salesCustomerIDTFKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_salesCustomerIDTFKeyReleased
-        // TODO add your handling code here:
+        bSales.lookupCustomer(salesUI);
     }//GEN-LAST:event_salesCustomerIDTFKeyReleased
 
     /**

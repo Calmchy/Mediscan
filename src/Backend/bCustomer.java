@@ -56,6 +56,17 @@ public class bCustomer {
                 + "IF(" + alias + ".middle_initial IS NULL OR " + mi + " = '', NULL, CONCAT(" + mi + ", '.')), "
                 + alias + ".last_name)";
     }
+    
+    public static String getFullName(int customerId) throws java.sql.SQLException {
+        String sql = "SELECT " + fullNameSql("c") + " AS full_name FROM customers c WHERE c.customer_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("full_name") : null;
+            }
+        }
+    }
  
     public static void setCustomers(CustomerFields f) {
         String keyword = f.searchTF.getText().trim();

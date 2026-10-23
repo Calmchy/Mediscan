@@ -206,6 +206,8 @@ public class bSales {
         public JLabel totalL;
         public JTextField cashTF;
         public JTextField changeTF;
+        public JTextField customerIdTF;
+        public JLabel customerNameL;
     }
  
     private static void msg(Component parent, String text, String title, int type) {
@@ -222,6 +224,33 @@ public class bSales {
         }
         return JOptionPane.showConfirmDialog(parent, text, "Confirm", JOptionPane.YES_NO_OPTION)
                 == JOptionPane.YES_OPTION;
+    }
+    
+    private static Integer parseCustomerId(String text) {
+        return text.matches("\\d{1,9}") ? Integer.valueOf(text) : null;
+    }
+    
+    public static void lookupCustomer(SalesFields f) {
+        String text = f.customerIdTF.getText().trim();
+        f.customerNameL.setForeground(javax.swing.UIManager.getColor("Label.foreground"));
+        if (text.isEmpty()) {
+            f.customerNameL.setText(" ");
+            return;
+        }
+        try {
+            Integer id = parseCustomerId(text);
+            String name = id == null ? null : bCustomer.getFullName(id);
+            if (name == null) {
+                f.customerNameL.setForeground(java.awt.Color.RED);
+                f.customerNameL.setText("Customer not found");
+            } else {
+                f.customerNameL.setText(name);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            f.customerNameL.setForeground(java.awt.Color.RED);
+            f.customerNameL.setText("Lookup error");
+        }
     }
  
     public static void showWarning(SalesFields f, String title, String description) {
@@ -354,7 +383,26 @@ public class bSales {
     }
  
     public static CheckoutResult checkoutSale(Component parent, SalesFields f) {
-        return checkoutSale(parent, f, null, "walk_in");
+        Integer customerId = null;
+        String text = f.customerIdTF == null ? "" : f.customerIdTF.getText().trim();
+        if (!text.isEmpty()) {
+            try {
+                customerId = parseCustomerId(text);
+                if (customerId == null || bCustomer.getFullName(customerId) == null) {
+                    msg(parent, "Customer ID \"" + text + "\" does not exist.\n"
+                            + "Clear the Customer ID if the customer has no account yet.",
+                            "Sale not completed", JOptionPane.WARNING_MESSAGE);
+                    f.customerIdTF.requestFocus();
+                    f.customerIdTF.selectAll();
+                    return null;
+                }
+            } catch (Exception e) {
+                msg(parent, "Could not verify the customer: " + e.getMessage(),
+                        "Sale not completed", JOptionPane.WARNING_MESSAGE);
+                return null;
+            }
+        }
+        return checkoutSale(parent, f, customerId, "walk_in");
     }
  
     public static CheckoutResult checkoutSale(Component parent, SalesFields f, Integer customerId, String orderType) {
@@ -390,6 +438,12 @@ public class bSales {
         f.totalL.setText("");
         f.cashTF.setText("");
         f.changeTF.setText("");
+        if (f.customerIdTF != null) {
+            f.customerIdTF.setText("");
+        }
+        if (f.customerNameL != null) {
+            f.customerNameL.setText(" ");
+        }
     }
  
     public static CheckoutResult checkout(List<CartItem> cart, double cash,
