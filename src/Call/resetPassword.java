@@ -6,6 +6,7 @@
 package Call;
 
 import Backend.bAccount;
+import Frontend.AppIcon;
 /**
  *
  * @author Calmchy
@@ -24,6 +25,8 @@ public class resetPassword extends javax.swing.JDialog {
         super(parent, modal);
         this.userId = userId;
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         ui.accountTF = accountTF;
         ui.newPasswordTF = newTemPassTF;
         ui.showPassCB = showPass;

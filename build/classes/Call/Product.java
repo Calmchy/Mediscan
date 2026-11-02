@@ -1,0 +1,654 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Call;
+
+import Backend.DBConnection;
+import Frontend.AppIcon;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.Statement;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+
+/**
+ *
+ * @author chyril
+ */
+public class Product extends javax.swing.JDialog {
+    private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
+    private int productId = -1;
+    private String title;
+    /**
+     * Creates new form NewJDialog
+     */
+    public Product(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
+        title = "ADD PRODUCT";
+        setTitle(title);
+        Title.setText(title);
+        productAddBtn.setText("ADD");
+        loadCategories();
+        setupAgeRestrictedToggle();
+        setupUnitTypeToggle();
+    }
+    
+    public Product(java.awt.Frame parent, boolean modal, int productId) {
+        super(parent, modal);
+        initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
+        this.productId = productId;
+        title = "EDIT PRODUCT";
+        setTitle(title);
+        Title.setText(title);
+        productAddBtn.setText("UPDATE");
+        loadCategories();
+        setupAgeRestrictedToggle();
+        setupUnitTypeToggle();
+        loadProductData();
+    }
+    
+    private String generateBarcode(String productId) {
+        try {
+            File folder = new File(BARCODE_FOLDER_PRODUCT);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            Code128Writer writer = new Code128Writer();
+            BitMatrix bitMatrix = writer.encode(productId, BarcodeFormat.CODE_128, 300, 100);
+
+            Path path = new File(folder, productId + ".png").toPath();
+            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+            System.out.println("Barcode saved: " + path);
+            return path.toString();
+        } catch (Exception e) {
+            System.out.println("Barcode generation failed: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    private void loadCategories() {
+        try {
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT category_name FROM categories");
+            ResultSet rs = ps.executeQuery();
+ 
+            productCategoryCB.removeAllItems();
+            while (rs.next()) {
+                productCategoryCB.addItem(rs.getString("category_name"));
+            }
+ 
+            rs.close();
+            ps.close();
+            con.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private int getCategoryIdByName(String categoryName) throws Exception {
+        Connection con = DBConnection.getConnection();
+        PreparedStatement ps = con.prepareStatement("SELECT category_id FROM categories WHERE category_name = ?");
+        ps.setString(1, categoryName);
+        ResultSet rs = ps.executeQuery();
+ 
+        int id = -1;
+        if (rs.next()) {
+            id = rs.getInt("category_id");
+        }
+ 
+        rs.close();
+        ps.close();
+        con.close();
+        return id;
+    }
+    
+    private void setupAgeRestrictedToggle() {
+        productMinAgeTF.setEnabled(productAgeRestCB.isSelected());
+        productAgeRestCB.addItemListener(e -> {
+            boolean checked = productAgeRestCB.isSelected();
+            productMinAgeTF.setEnabled(checked);
+            if (!checked) {
+                productMinAgeTF.setText("");
+            }
+        });
+    }
+    
+    private void setupUnitTypeToggle() {
+        if (productUTypeCB.getItemCount() == 0) {
+            productUTypeCB.addItem("tablet");
+            productUTypeCB.addItem("piece");
+        }
+ 
+        boolean isTablet = "tablet".equals(productUTypeCB.getSelectedItem());
+        productSellingPriceTF1.setEnabled(isTablet);
+ 
+        productUTypeCB.addItemListener(e -> {
+            boolean tablet = "tablet".equals(productUTypeCB.getSelectedItem());
+            productSellingPriceTF1.setEnabled(tablet);
+            if (!tablet) {
+                productSellingPriceTF1.setText("");
+            }
+        });
+    }
+    
+    private void loadProductData() {
+        try {
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT p.name, p.brand, c.category_name, p.cost_price, p.selling_price, "
+                    + "p.requires_prescription, p.is_age_restricted, p.minimum_age, "
+                    + "p.unit_type, p.pack_size "
+                    + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
+                    + "WHERE p.product_id = ?");
+            
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+ 
+            if (rs.next()) {
+                productNameTF.setText(rs.getString("name"));
+                productBrandTF.setText(rs.getString("brand"));
+                productCostPriseTF.setText(String.valueOf(rs.getDouble("cost_price")));
+                productSellingPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
+                productRPresCB.setSelected(rs.getBoolean("requires_prescription"));
+                productAgeRestCB.setSelected(rs.getBoolean("is_age_restricted"));
+                productUTypeCB.setSelectedItem(rs.getString("unit_type"));
+ 
+                Object packSize = rs.getObject("pack_size");
+                if (packSize != null) {
+                    productSellingPriceTF1.setText(packSize.toString());
+                    productSellingPriceTF1.setEnabled(true);
+                }
+ 
+                Object minAge = rs.getObject("minimum_age");
+                if (minAge != null) {
+                    productMinAgeTF.setText(minAge.toString());
+                    productMinAgeTF.setEnabled(true);
+                }
+ 
+                productCategoryCB.setSelectedItem(rs.getString("category_name"));
+            }
+ 
+            rs.close();
+            ps.close();
+            con.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        Title = new javax.swing.JLabel();
+        jPanel9 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        productBrandTF = new javax.swing.JTextField();
+        productNameTF = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        productCostPriseTF = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        productCategoryCB = new javax.swing.JComboBox<>();
+        jLabel16 = new javax.swing.JLabel();
+        productSellingPriceTF = new javax.swing.JTextField();
+        productMinAgeTF = new javax.swing.JTextField();
+        productMinAgeL = new javax.swing.JLabel();
+        productRPresCB = new javax.swing.JCheckBox();
+        productAgeRestCB = new javax.swing.JCheckBox();
+        productAddBtn = new javax.swing.JButton();
+        productClearBtn = new javax.swing.JButton();
+        jLabel17 = new javax.swing.JLabel();
+        productUTypeCB = new javax.swing.JComboBox<>();
+        jLabel18 = new javax.swing.JLabel();
+        productSellingPriceTF1 = new javax.swing.JTextField();
+
+        jLabel1.setText("jLabel1");
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jPanel1.setBackground(new java.awt.Color(43, 138, 130));
+
+        Title.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        Title.setForeground(new java.awt.Color(255, 255, 255));
+        Title.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Title.setText("ADD PRODUCT");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(Title)
+                    .addGap(0, 0, Short.MAX_VALUE)))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 85, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(Title)
+                    .addGap(0, 0, Short.MAX_VALUE)))
+        );
+
+        jPanel9.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel11.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel11.setText("BRAND");
+
+        jLabel12.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel12.setText("NAME");
+
+        jLabel13.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel13.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel13.setText("CATEGORY");
+
+        jLabel14.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel14.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel14.setText("COST PRICE");
+
+        jLabel16.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel16.setText("SELLING PRICE (per unit)");
+
+        productMinAgeL.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productMinAgeL.setForeground(new java.awt.Color(26, 32, 44));
+        productMinAgeL.setText("MINIMUM AGE");
+
+        productRPresCB.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productRPresCB.setText(" PRESCRIPTION");
+
+        productAgeRestCB.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productAgeRestCB.setText(" AGE RESTRICTED");
+
+        productAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productAddBtn.setText("ADD");
+        productAddBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                productAddBtnActionPerformed(evt);
+            }
+        });
+
+        productClearBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productClearBtn.setText("CLEAR");
+        productClearBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                productClearBtnActionPerformed(evt);
+            }
+        });
+
+        jLabel17.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel17.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel17.setText("UNIT TYPE");
+
+        jLabel18.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel18.setText("PACK SIZE");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addComponent(productUTypeCB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel13)
+                        .addGap(280, 280, 280))
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(productBrandTF)
+                            .addComponent(productNameTF)
+                            .addComponent(productCostPriseTF)
+                            .addComponent(productCategoryCB, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
+                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(productSellingPriceTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                                        .addComponent(jLabel16)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(productMinAgeTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                                .addComponent(productMinAgeL))
+                            .addComponent(productAgeRestCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(productRPresCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                                .addComponent(productAddBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(productClearBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel17)
+                            .addComponent(jLabel18))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                        .addComponent(productSellingPriceTF1)
+                        .addContainerGap())))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productNameTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productBrandTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productCategoryCB, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel14)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productCostPriseTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productSellingPriceTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel17)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productUTypeCB, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productSellingPriceTF1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productRPresCB, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(productAgeRestCB, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(productMinAgeL)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productMinAgeTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(productClearBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(productAddBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 3, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+    
+    private void productAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productAddBtnActionPerformed
+        String name = productNameTF.getText().trim();
+        String brand = productBrandTF.getText().trim();
+        String costText = productCostPriseTF.getText().trim();
+        String sellText = productSellingPriceTF.getText().trim();
+        boolean requiresRx = productRPresCB.isSelected();
+        boolean ageRestricted = productAgeRestCB.isSelected();
+        String minAgeText = productMinAgeTF.getText().trim();
+        String selectedCategory = (String) productCategoryCB.getSelectedItem();
+        String unitType = (String) productUTypeCB.getSelectedItem();
+        String packSizeText = productSellingPriceTF1.getText().trim();
+
+        if (name.isEmpty() || selectedCategory == null || costText.isEmpty() || sellText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
+            return;
+        }
+
+        Integer packSize = null;
+        if ("tablet".equals(unitType) && !packSizeText.isEmpty()) {
+            try {
+                packSize = Integer.parseInt(packSizeText);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Pack Size must be a whole number.");
+                return;
+            }
+        }
+
+        double costPrice, sellingPrice;
+        try {
+            costPrice = Double.parseDouble(costText);
+            sellingPrice = Double.parseDouble(sellText);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Cost Price and Selling Price must be valid numbers.");
+            return;
+        }
+
+        Integer minimumAge = null;
+        if (ageRestricted) {
+            if (minAgeText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a minimum age for age-restricted products.");
+                return;
+            }
+            try {
+                minimumAge = Integer.parseInt(minAgeText);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Minimum Age must be a whole number.");
+                return;
+            }
+        }
+
+        if (sellingPrice < costPrice) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                "Selling price is lower than cost price. Continue anyway?",
+                "Warning", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        try {
+            int categoryId = getCategoryIdByName(selectedCategory);
+            if (categoryId == -1) {
+                JOptionPane.showMessageDialog(this, "Selected category could not be found.");
+                return;
+            }
+
+            Connection con = DBConnection.getConnection();
+
+            if (productId == -1) {
+                // RETURN_GENERATED_KEYS lets us read the new product_id right after the insert
+                PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, cost_price, selling_price, "
+                        + "requires_prescription, is_age_restricted, minimum_age, unit_type, pack_size) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+                ps.setString(1, name);
+                ps.setString(2, brand.isEmpty() ? null : brand);
+                ps.setInt(3, categoryId);
+                ps.setDouble(4, costPrice);
+                ps.setDouble(5, sellingPrice);
+                ps.setBoolean(6, requiresRx);
+                ps.setBoolean(7, ageRestricted);
+                if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
+                ps.setString(9, unitType);
+                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
+                ps.executeUpdate();
+
+                int newId = -1;
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        newId = keys.getInt(1);
+                    }
+                }
+                ps.close();
+
+                String message = "Product added successfully!";
+                if (newId != -1) {
+                    String barcodePath = generateBarcode(String.valueOf(newId));
+                    message += "\n\nProduct ID: " + newId;
+                    message += (barcodePath != null)
+                            ? "\nBarcode saved to:\n" + barcodePath
+                            : "\nBarcode could not be generated.";
+                }
+                JOptionPane.showMessageDialog(this, message);
+            } else {
+                PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, cost_price=?, selling_price=?, "
+                        + "requires_prescription=?, is_age_restricted=?, minimum_age=?, unit_type=?, pack_size=? "
+                        + "WHERE product_id=?");
+
+                ps.setString(1, name);
+                ps.setString(2, brand.isEmpty() ? null : brand);
+                ps.setInt(3, categoryId);
+                ps.setDouble(4, costPrice);
+                ps.setDouble(5, sellingPrice);
+                ps.setBoolean(6, requiresRx);
+                ps.setBoolean(7, ageRestricted);
+                if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
+                ps.setString(9, unitType);
+                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
+                ps.setInt(11, productId);
+                ps.executeUpdate();
+                ps.close();
+                JOptionPane.showMessageDialog(this, "Product updated successfully!");
+            }
+
+            con.close();
+            dispose();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }//GEN-LAST:event_productAddBtnActionPerformed
+
+    private void productClearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productClearBtnActionPerformed
+        productNameTF.setText("");
+        productBrandTF.setText("");
+        if (productCategoryCB.getItemCount() > 0) productCategoryCB.setSelectedIndex(0);
+        productCostPriseTF.setText("");
+        productSellingPriceTF.setText("");
+        productRPresCB.setSelected(false);
+        productAgeRestCB.setSelected(false);
+        productMinAgeTF.setText("");
+        productMinAgeTF.setEnabled(false);
+        if (productUTypeCB.getItemCount() > 0) productUTypeCB.setSelectedIndex(0);
+        productSellingPriceTF1.setText("");
+    }//GEN-LAST:event_productClearBtnActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Product.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Product.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Product.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Product.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the dialog */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                Product dialog = new Product(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Title;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JButton productAddBtn;
+    private javax.swing.JCheckBox productAgeRestCB;
+    private javax.swing.JTextField productBrandTF;
+    private javax.swing.JComboBox<String> productCategoryCB;
+    private javax.swing.JButton productClearBtn;
+    private javax.swing.JTextField productCostPriseTF;
+    private javax.swing.JLabel productMinAgeL;
+    private javax.swing.JTextField productMinAgeTF;
+    private javax.swing.JTextField productNameTF;
+    private javax.swing.JCheckBox productRPresCB;
+    private javax.swing.JTextField productSellingPriceTF;
+    private javax.swing.JTextField productSellingPriceTF1;
+    private javax.swing.JComboBox<String> productUTypeCB;
+    // End of variables declaration//GEN-END:variables
+}

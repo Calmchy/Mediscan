@@ -6,6 +6,7 @@
 package Call;
 
 import Backend.bAccount;
+import Frontend.AppIcon;
 
 /**
  *
@@ -20,12 +21,16 @@ public class addAccount extends javax.swing.JDialog {
     public addAccount(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         initFields();
     }
     
     public addAccount(java.awt.Frame parent, boolean modal, int userId) {
         this(parent, modal);
         this.userId = userId;
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         bAccount.loadAccount(ui, userId);
         Title.setText("EDIT ACCOUNT");
         addAccountBtn.setText("SAVE");

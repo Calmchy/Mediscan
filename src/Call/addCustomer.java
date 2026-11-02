@@ -7,6 +7,7 @@ package Call;
 
 import Backend.bAccount;
 import Backend.bCustomer;
+import Frontend.AppIcon;
 
 /**
  *
@@ -21,12 +22,16 @@ public class addCustomer extends javax.swing.JDialog {
     public addCustomer(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         initFields();
     }
     
     public addCustomer(java.awt.Frame parent, boolean modal, int customerId) {
         this(parent, modal);
         this.customerId = customerId;
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         bCustomer.loadCustomer(ui, customerId);
         Title.setText("EDIT CUSTOMER");
         addAccountBtn.setText("SAVE");

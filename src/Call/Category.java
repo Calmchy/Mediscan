@@ -6,6 +6,7 @@
 package Call;
 
 import Backend.bCategory;
+import Frontend.AppIcon;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,6 +30,8 @@ public class Category extends javax.swing.JDialog {
         super(parent, modal);
         this.parent = parent;
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         title = "ADD CATEGORY";
         setTitle(title);
         Title.setText(title);
@@ -38,6 +41,8 @@ public class Category extends javax.swing.JDialog {
     public Category(java.awt.Frame parent, boolean modal, int categoryId) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         this.categoryId = categoryId;
         title = "EDIT CATEGORY";
         setTitle(title);

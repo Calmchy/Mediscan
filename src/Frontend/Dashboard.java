@@ -9,6 +9,7 @@ import Call.Product;
 import Call.Stock;
 
 import Backend.Session;
+import Backend.bDashboard;
 import Backend.bSales;
 import Backend.bCategory;
 import Backend.bPrint;
@@ -40,6 +41,7 @@ public class Dashboard extends javax.swing.JFrame {
     private int orderId;
     private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private boolean loadingFilters = false;
+    private final bDashboard.DashboardFields dashUI = new bDashboard.DashboardFields();
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
     private final bCustomer.CustomerFields customerUI = new bCustomer.CustomerFields();
     private final bAccount.AccountFields accountUI = new bAccount.AccountFields();
@@ -53,6 +55,10 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         //this.setUndecorated(true); // para waray window border
         initComponents();
+        //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
+        setupDashboardLayout();
         bTransaction.loadCashierFilter(transCashierCB);
         bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
         
@@ -60,8 +66,7 @@ public class Dashboard extends javax.swing.JFrame {
         transFromDC.addPropertyChangeListener("date", e -> reloadOrders());
         transToDC.addPropertyChangeListener("date", e -> reloadOrders());
         transCashierCB.addActionListener(e -> reloadOrders());
-        reloadOrders(); 
-        //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
+        reloadOrders();
         setTitle("Dashboard"); 
         applyRolePermissions();
         loadFilterCombos(); 
@@ -79,6 +84,26 @@ public class Dashboard extends javax.swing.JFrame {
 
         salesProductIDScanTF.setFocusable(true);
         salesProductIDScanTF.requestFocus();
+        
+        dashUI.todayBtn = dashTodayBtn;
+        dashUI.sevenDaysBtn = dash7DaysBtn;
+        dashUI.thirtyDaysBtn = dash30DaysBtn;
+        dashUI.fromDC = dashFromDC;
+        dashUI.toDC = dashToDC;
+        dashUI.totalSalesL = dashTotalSalesTF;
+        dashUI.transactionsL = dashTransactionsTF;
+        dashUI.itemsSoldL = dashItemSoldTF;
+        dashUI.lowStockL = dashLowStockCatTF;
+        dashUI.expiringL = dashExpiringLeftTF;     // the "2" in "2 / 1"
+        dashUI.expiredL = dashExpiredRightTF;      // the "1" in "2 / 1"
+        dashUI.salesPerDayP = dashSalesPerDayP;
+        dashUI.salesByCategoryP = dashSalesByCategoryP;
+        dashUI.top5ProductsP = dashTop5ProductsP;
+        dashUI.lowStockTable = dashLowStockTable;
+        dashUI.expiringTable = dashExpiringSoonTable;
+        bDashboard.init(dashUI);
+        dashFromDC.addPropertyChangeListener("date", e -> bDashboard.onDatesChanged(dashUI));
+        dashToDC.addPropertyChangeListener("date", e -> bDashboard.onDatesChanged(dashUI));
         
         salesUI.cartTable = salesTable;
         salesUI.idTF = salesProductIDScanTF;
@@ -114,6 +139,71 @@ public class Dashboard extends javax.swing.JFrame {
         bAccount.setAccounts(accountUI);
         addSearchListener(transOrderIDTF1, () -> bAccount.setAccounts(accountUI));
         transCashierCB1.addActionListener(e -> bAccount.setAccounts(accountUI));
+    }
+    
+    private void setupDashboardLayout() {
+        final java.awt.Dimension ZERO = new java.awt.Dimension(0, 0);
+        final java.awt.Dimension TINY = new java.awt.Dimension(10, 10);
+
+        // proportions per row
+        final double LEFT = 0.42, RIGHT = 0.58;
+        final double TOP5 = 0.25, LOW = 0.17, EXPIRING = 0.58;
+
+        // let weights decide size, not the chart/table content
+        for (javax.swing.JPanel p : new javax.swing.JPanel[]{jPanel26, jPanel27, jPanel28, jPanel29, jPanel30,
+                dashSalesPerDayP, dashSalesByCategoryP, dashTop5ProductsP}) {
+            p.setMinimumSize(ZERO);
+            p.setPreferredSize(TINY);
+        }
+        jPanel26.setMinimumSize(new java.awt.Dimension(0, 150));
+        jPanel27.setMinimumSize(new java.awt.Dimension(0, 150));
+        jPanel28.setMinimumSize(new java.awt.Dimension(0, 140));
+        jPanel29.setMinimumSize(new java.awt.Dimension(0, 140));
+        jPanel30.setMinimumSize(new java.awt.Dimension(0, 140));
+
+        dashboardBG.removeAll();
+        dashboardBG.setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
+        c.fill = java.awt.GridBagConstraints.BOTH;
+
+        // row 0: filter bar
+        c.gridx = 0; c.gridy = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
+        c.insets = new java.awt.Insets(0, 0, 8, 0);
+        dashboardBG.add(jPanel13, c);
+
+        // row 1: KPI cards
+        c.gridy = 1;
+        dashboardBG.add(jPanel32, c);
+
+        // row 2: sales per day | pie chart
+        c.gridy = 2; c.weighty = 0.5; c.gridwidth = 2; c.weightx = LEFT;
+        c.insets = new java.awt.Insets(0, 10, 8, 4);
+        dashboardBG.add(jPanel26, c);
+
+        c.gridx = 2; c.gridwidth = 1; c.weightx = RIGHT;
+        c.insets = new java.awt.Insets(0, 4, 8, 10);
+        dashboardBG.add(jPanel27, c);
+
+        // row 3: top 5 | low stock | expiring soon
+        c.gridy = 3; c.gridx = 0; c.weightx = TOP5;
+        c.insets = new java.awt.Insets(0, 10, 8, 4);
+        dashboardBG.add(jPanel28, c);
+
+        c.gridx = 1; c.weightx = LOW;
+        c.insets = new java.awt.Insets(0, 4, 8, 4);
+        dashboardBG.add(jPanel29, c);
+
+        c.gridx = 2; c.weightx = EXPIRING;
+        c.insets = new java.awt.Insets(0, 4, 8, 10);
+        dashboardBG.add(jPanel30, c);
+
+        // row 4: report buttons
+        c.gridy = 4; c.gridx = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
+        c.insets = new java.awt.Insets(0, 0, 0, 0);
+        dashboardBG.add(jPanel31, c);
+
+        dashboardBG.revalidate();
+        dashboardBG.repaint();
     }
     
     private void showSelectedOrder() {
@@ -510,7 +600,7 @@ public class Dashboard extends javax.swing.JFrame {
         adminAccountTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1024, 768));
+        setMinimumSize(new java.awt.Dimension(1056, 771));
 
         background.setBackground(new java.awt.Color(245, 247, 250));
         background.setPreferredSize(new java.awt.Dimension(1053, 768));
@@ -622,8 +712,12 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel44.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel44.setText("From:");
 
+        dashFromDC.setDateFormatString("yyyy-MM-dd");
+
         jLabel45.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel45.setText("To:");
+
+        dashToDC.setDateFormatString("yyyy-MM-dd");
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -672,7 +766,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel26.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(180, 195, 211)));
 
         jLabel60.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel60.setText("TOP 5 PRODUCTS");
+        jLabel60.setText("SALES PER DAY");
 
         javax.swing.GroupLayout dashSalesPerDayPLayout = new javax.swing.GroupLayout(dashSalesPerDayP);
         dashSalesPerDayP.setLayout(dashSalesPerDayPLayout);
@@ -682,7 +776,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
         dashSalesPerDayPLayout.setVerticalGroup(
             dashSalesPerDayPLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 167, Short.MAX_VALUE)
+            .addGap(0, 166, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel26Layout = new javax.swing.GroupLayout(jPanel26);
@@ -710,7 +804,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel27.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(180, 195, 211)));
 
         jLabel61.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel61.setText("TOP 5 PRODUCTS");
+        jLabel61.setText("SALES BY CATEGORY");
 
         javax.swing.GroupLayout dashSalesByCategoryPLayout = new javax.swing.GroupLayout(dashSalesByCategoryP);
         dashSalesByCategoryP.setLayout(dashSalesByCategoryPLayout);
@@ -830,7 +924,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel57)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane10, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
+                .addComponent(jScrollPane10, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -872,7 +966,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel30Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel30Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane11, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane11)
                     .addComponent(jLabel58, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1219,15 +1313,15 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(dashboardBGLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(dashboardBGLayout.createSequentialGroup()
                         .addComponent(jPanel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel29, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel26, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jPanel29, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel30, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel30, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addComponent(jPanel31, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1240,8 +1334,8 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jPanel32, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(dashboardBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel29, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -3248,19 +3342,19 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_salesCustomerIDTFKeyReleased
 
     private void dashRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashRefreshBtnActionPerformed
-        // TODO add your handling code here:
+        bDashboard.refresh(dashUI);
     }//GEN-LAST:event_dashRefreshBtnActionPerformed
 
     private void dashTodayBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashTodayBtnActionPerformed
-        // TODO add your handling code here:
+        bDashboard.setPeriod(dashUI, 1);
     }//GEN-LAST:event_dashTodayBtnActionPerformed
 
     private void dash7DaysBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dash7DaysBtnActionPerformed
-        // TODO add your handling code here:
+        bDashboard.setPeriod(dashUI, 7);
     }//GEN-LAST:event_dash7DaysBtnActionPerformed
 
     private void dash30DaysBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dash30DaysBtnActionPerformed
-        // TODO add your handling code here:
+        bDashboard.setPeriod(dashUI, 30);
     }//GEN-LAST:event_dash30DaysBtnActionPerformed
 
     private void dashSalesReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashSalesReportBtnActionPerformed
@@ -3443,8 +3537,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel18;
     private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel20;
-    private javax.swing.JPanel jPanel21;
     private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel23;
     private javax.swing.JPanel jPanel24;
