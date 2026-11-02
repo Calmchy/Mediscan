@@ -6,6 +6,7 @@
 package Call;
 
 import Backend.DBConnection;
+import Frontend.AppIcon;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -24,6 +25,8 @@ public class Stock extends javax.swing.JDialog {
     public Stock(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         setTitle("ADD STOCK");
         Title.setText("ADD STOCK");
         stockAddBtn.setText("ADD");
@@ -34,6 +37,8 @@ public class Stock extends javax.swing.JDialog {
     public Stock(java.awt.Frame parent, boolean modal, int stockId) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         this.stockId = stockId;
         setTitle("EDIT STOCK");
         Title.setText("EDIT STOCK");

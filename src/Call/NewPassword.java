@@ -7,6 +7,7 @@ package Call;
 
 import Backend.Session;
 import Backend.bAuth;
+import Frontend.AppIcon;
 import javax.swing.JOptionPane;
 
 /**
@@ -22,7 +23,9 @@ public class NewPassword extends javax.swing.JDialog {
     public NewPassword(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
         setTitle("SET NEW PASSWORD");
+        setIconImage(AppIcon.getIcon().getImage());
         defaultEcho = currentPassPF.getEchoChar();
         usernameDisplayTF.setText(Session.fullName);
         jLabel5.setText("(" + Session.role + ")");

@@ -23,6 +23,8 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         setTitle("LOGIN");
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         defaultEcho = passwordPF.getEchoChar();
         getRootPane().setDefaultButton(loginBtn);
     }

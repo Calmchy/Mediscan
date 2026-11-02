@@ -6,6 +6,7 @@
 package Call;
 
 import Backend.DBConnection;
+import Frontend.AppIcon;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,6 +36,8 @@ public class Product extends javax.swing.JDialog {
     public Product(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         title = "ADD PRODUCT";
         setTitle(title);
         Title.setText(title);
@@ -47,6 +50,8 @@ public class Product extends javax.swing.JDialog {
     public Product(java.awt.Frame parent, boolean modal, int productId) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
+        setIconImage(AppIcon.getIcon().getImage());
         this.productId = productId;
         title = "EDIT PRODUCT";
         setTitle(title);
