@@ -1564,12 +1564,11 @@
                               <Font name="Dialog" size="14" style="1"/>
                             </Property>
                             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                              <Table columnCount="10" rowCount="0">
+                              <Table columnCount="9" rowCount="0">
                                 <Column editable="false" title="ID" type="java.lang.Integer"/>
                                 <Column editable="false" title="NAME" type="java.lang.String"/>
                                 <Column editable="false" title="BRAND" type="java.lang.String"/>
                                 <Column editable="false" title="CATEGORY" type="java.lang.String"/>
-                                <Column editable="false" title="COST" type="java.lang.Double"/>
                                 <Column editable="false" title="PRICE" type="java.lang.Double"/>
                                 <Column editable="false" title="RX" type="java.lang.Boolean"/>
                                 <Column editable="false" title="MINIMUM AGE" type="java.lang.Integer"/>
@@ -1826,10 +1825,11 @@
                               <Font name="Dialog" size="14" style="1"/>
                             </Property>
                             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                              <Table columnCount="7" rowCount="0">
+                              <Table columnCount="8" rowCount="0">
                                 <Column editable="false" title="STOCK ID" type="java.lang.Integer"/>
                                 <Column editable="false" title="PRODUCT NAME" type="java.lang.String"/>
                                 <Column editable="false" title="BATCH NO" type="java.lang.String"/>
+                                <Column editable="false" title="COST PRICE" type="java.lang.Double"/>
                                 <Column editable="false" title="QUANTITY" type="java.lang.Integer"/>
                                 <Column editable="false" title="UNIT" type="java.lang.String"/>
                                 <Column editable="false" title="EXPIRY DATE" type="java.lang.String"/>

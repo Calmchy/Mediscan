@@ -1526,14 +1526,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "NAME", "BRAND", "CATEGORY", "COST", "PRICE", "RX", "MINIMUM AGE", "UNIT", "PACK SIZE"
+                "ID", "NAME", "BRAND", "CATEGORY", "PRICE", "RX", "MINIMUM AGE", "UNIT", "PACK SIZE"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1704,14 +1704,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "STOCK ID", "PRODUCT NAME", "BATCH NO", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED"
+                "STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {

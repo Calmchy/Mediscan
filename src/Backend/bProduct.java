@@ -37,7 +37,7 @@ public class bProduct {
     public void setProd(javax.swing.JTable table, String keyword, String category) {
         boolean filterCategory = category != null && !category.equals(ALL_CATEGORIES);
 
-        String sql = "SELECT p.product_id, p.name, p.brand, c.category_name, p.cost_price, "
+        String sql = "SELECT p.product_id, p.name, p.brand, c.category_name, "
                 + "p.selling_price, p.requires_prescription, p.minimum_age, p.unit_type, p.pack_size "
                 + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
                 + "WHERE (p.name LIKE ? OR p.brand LIKE ? OR c.category_name LIKE ? "
@@ -66,7 +66,6 @@ public class bProduct {
                         rs.getString("name"),
                         rs.getString("brand"),
                         rs.getString("category_name"),
-                        rs.getDouble("cost_price"),
                         rs.getDouble("selling_price"),
                         rs.getBoolean("requires_prescription"),
                         rs.getInt("minimum_age"),
