@@ -19,7 +19,7 @@ DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 OutputDir=installer
-OutputBaseFilename=MediScan_POS_Setup
+OutputBaseFilename=MediScan_POS_Setup_v{#MyAppVersion}
 SetupIconFile=C:\Users\Calmchy\github\Mediscan\src\Images\logo-128.ico
 
 Compression=lzma2

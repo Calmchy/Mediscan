@@ -3358,15 +3358,15 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_dash30DaysBtnActionPerformed
 
     private void dashSalesReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashSalesReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.SALES, dashFromDC.getDate(), dashToDC.getDate());
     }//GEN-LAST:event_dashSalesReportBtnActionPerformed
 
     private void dashStockReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashStockReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.STOCK, null, null);
     }//GEN-LAST:event_dashStockReportBtnActionPerformed
 
     private void dashExpiryReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashExpiryReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.EXPIRY, null, null);
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
     /**
