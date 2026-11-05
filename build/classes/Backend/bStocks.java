@@ -37,8 +37,8 @@ public class bStocks {
     public void setStock(javax.swing.JTable table, String keyword, String productName) {
         boolean filterProduct = productName != null && !productName.equals(ALL_PRODUCTS);
 
-        String sql = "SELECT ps.stock_id, p.name, ps.batch_no, ps.quantity, p.unit_type, "
-                + "ps.expiry_date, ps.date_received "
+        String sql = "SELECT ps.stock_id, p.name, ps.batch_no, ps.cost_price, ps.quantity, "
+                + "p.unit_type, ps.expiry_date, ps.date_received "
                 + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
                 + "WHERE (ps.batch_no LIKE ? OR p.name LIKE ?) "
                 + (filterProduct ? "AND p.name = ? " : "")
@@ -60,6 +60,7 @@ public class bStocks {
                         rs.getInt("stock_id"),
                         rs.getString("name"),
                         rs.getString("batch_no"),
+                        rs.getDouble("cost_price"), 
                         rs.getInt("quantity"),
                         rs.getString("unit_type"),
                         rs.getDate("expiry_date"),

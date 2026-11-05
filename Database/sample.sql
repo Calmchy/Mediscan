@@ -36,32 +36,32 @@ INSERT INTO `categories` (`category_id`, `category_name`) VALUES
 -- ============================================
 -- PRODUCTS
 -- ============================================
-INSERT INTO `products` (`product_id`, `name`, `brand`, `category_id`, `cost_price`, `selling_price`, `requires_prescription`, `is_age_restricted`, `minimum_age`, `unit_type`, `pack_size`) VALUES
-(1, 'Amoxicillin 500mg', 'Amoxil', 1, 5.00, 8.50, 1, 0, NULL, 'capsule', 21),
-(2, 'Biogesic 500mg', 'Biogesic', 2, 2.00, 3.50, 0, 0, NULL, 'tablet', 100),
-(3, 'Neozep Forte', 'Neozep', 3, 4.00, 6.50, 0, 1, 18, 'tablet', 20),
-(4, 'Vitamin C 500mg', 'Cecon', 4, 3.00, 5.00, 0, 0, NULL, 'tablet', 100),
-(5, 'Nicotine Gum 2mg', 'Nicorette', 5, 6.00, 10.00, 0, 1, 18, 'piece', 30),
-(6, 'Kremil-S', 'Kremil-S', 6, 3.50, 5.50, 0, 0, NULL, 'tablet', 100),
-(7, 'Cetirizine 10mg', 'Virlix', 7, 2.00, 3.50, 0, 0, NULL, 'tablet', 50),
-(8, 'Robitussin Syrup 60ml', 'Robitussin', 8, 5.00, 8.00, 0, 0, NULL, 'ml', 60),
-(9, 'Betadine Solution 60ml', 'Betadine', 9, 4.50, 7.00, 0, 0, NULL, 'ml', 60),
-(10, 'Bandage Roll 5cm', 'Medline', 10, 1.50, 3.00, 0, 0, NULL, 'piece', NULL);
+INSERT INTO `products` (`product_id`, `name`, `brand`, `category_id`, `selling_price`, `requires_prescription`, `is_age_restricted`, `minimum_age`, `unit_type`, `pack_size`) VALUES
+(1, 'Amoxicillin 500mg', 'Amoxil', 1, 8.50, 1, 0, NULL, 'capsule', 21),
+(2, 'Biogesic 500mg', 'Biogesic', 2, 3.50, 0, 0, NULL, 'tablet', 100),
+(3, 'Neozep Forte', 'Neozep', 3, 6.50, 0, 1, 18, 'tablet', 20),
+(4, 'Vitamin C 500mg', 'Cecon', 4, 5.00, 0, 0, NULL, 'tablet', 100),
+(5, 'Nicotine Gum 2mg', 'Nicorette', 5, 10.00, 0, 1, 18, 'piece', 30),
+(6, 'Kremil-S', 'Kremil-S', 6, 5.50, 0, 0, NULL, 'tablet', 100),
+(7, 'Cetirizine 10mg', 'Virlix', 7, 3.50, 0, 0, NULL, 'tablet', 50),
+(8, 'Robitussin Syrup 60ml', 'Robitussin', 8, 8.00, 0, 0, NULL, 'ml', 60),
+(9, 'Betadine Solution 60ml', 'Betadine', 9, 7.00, 0, 0, NULL, 'ml', 60),
+(10, 'Bandage Roll 5cm', 'Medline', 10, 3.00, 0, 0, NULL, 'piece', NULL);
 
 -- ============================================
 -- PRODUCT_STOCK
 -- ============================================
-INSERT INTO `product_stock` (`stock_id`, `product_id`, `batch_no`, `quantity`, `expiry_date`, `date_received`) VALUES
-(1, 1, 'B-1001', 39, '2027-05-01', '2026-06-01'),
-(2, 2, 'B-1002', 192, '2028-01-15', '2026-05-10'),
-(3, 3, 'B-1003', 75, '2026-12-01', '2026-06-15'),
-(4, 4, 'B-1004', 145, '2027-08-20', '2026-06-01'),
-(5, 5, 'B-1005', 58, '2027-03-10', '2026-06-20'),
-(6, 6, 'B-1006', 86, '2027-06-15', '2026-06-10'),
-(7, 7, 'B-1007', 64, '2027-01-25', '2026-06-12'),
-(8, 8, 'B-1008', 34, '2026-11-30', '2026-06-18'),
-(9, 9, 'B-1009', 96, '2027-09-05', '2026-06-20'),
-(10, 10, 'B-1010', 298, '2028-04-10', '2026-06-22');
+INSERT INTO `product_stock` (`stock_id`, `product_id`, `batch_no`, `quantity`, `cost_price`, `expiry_date`, `date_received`) VALUES
+(1, 1, 'B-1001', 39, 5.00, '2027-05-01', '2026-06-01'),
+(2, 2, 'B-1002', 192, 2.00, '2028-01-15', '2026-05-10'),
+(3, 3, 'B-1003', 75, 4.00, '2026-12-01', '2026-06-15'),
+(4, 4, 'B-1004', 145, 3.00, '2027-08-20', '2026-06-01'),
+(5, 5, 'B-1005', 58, 6.00, '2027-03-10', '2026-06-20'),
+(6, 6, 'B-1006', 86, 3.50, '2027-06-15', '2026-06-10'),
+(7, 7, 'B-1007', 64, 2.00, '2027-01-25', '2026-06-12'),
+(8, 8, 'B-1008', 34, 5.00, '2026-11-30', '2026-06-18'),
+(9, 9, 'B-1009', 96, 4.50, '2027-09-05', '2026-06-20'),
+(10, 10, 'B-1010', 298, 1.50, '2028-04-10', '2026-06-22');
 
 -- ============================================
 -- CUSTOMERS
@@ -137,3 +137,18 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `quantity`
 (8, 8, 3, 3, 5.00, 15.00, 0),
 (9, 9, 8, 3, 11.00, 33.00, 0),
 (10, 10, 5, 1, 12.50, 12.50, 1);
+
+-- ============================================
+-- ORDER_ITEM_BATCHES (which batch each sale came from + cost at that time)
+-- ============================================
+INSERT INTO `order_item_batches` (`id`, `order_item_id`, `stock_id`, `quantity`, `unit_cost`) VALUES
+(1, 1, 2, 2, 2.00),
+(2, 2, 4, 3, 3.00),
+(3, 3, 7, 5, 2.00),
+(4, 4, 1, 8, 5.00),
+(5, 5, 5, 2, 6.00),
+(6, 6, 6, 4, 3.50),
+(7, 7, 10, 10, 1.50),
+(8, 8, 3, 3, 4.00),
+(9, 9, 8, 3, 5.00),
+(10, 10, 5, 1, 6.00);

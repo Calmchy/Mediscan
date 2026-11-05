@@ -1,6 +1,6 @@
 
 #define MyAppName "MediScan POS"
-#define MyAppVersion "1.0.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Calmchy"
 #define MyAppURL "https://github.com/Calmchy/Mediscan"
 #define MyAppExeName "Mediscan POS.exe"
@@ -19,8 +19,8 @@ DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 OutputDir=installer
-OutputBaseFilename=MediScan_POS_Setup
-SetupIconFile=C:\Users\Calmchy\github\Mediscan\src\Images\logo-128.ico
+OutputBaseFilename=MediScan_POS_Setup_v{#MyAppVersion}
+SetupIconFile=C:\Users\Calmchy\Desktop\App\logo-128.ico
 
 Compression=lzma2
 SolidCompression=yes
@@ -42,7 +42,7 @@ Name: "desktopicon"; \
 
 [Files]
 ; Copy the complete application distribution
-Source: "C:\Users\Calmchy\github\Mediscan\dist\*"; \
+Source: "C:\Users\Calmchy\Desktop\App\*"; \
     DestDir: "{app}"; \
     Flags: ignoreversion recursesubdirs createallsubdirs
 

@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Users\Calmchy\github\Mediscan\dist\MediScan.jar</jar>
-  <outfile>C:\Users\Calmchy\github\Mediscan\dist\MediScan POS.exe</outfile>
+  <jar>C:\Users\Calmchy\Desktop\App\MediScan.jar</jar>
+  <outfile>C:\Users\Calmchy\Desktop\App\Mediscan POS.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>C:\Users\Calmchy\github\Mediscan\src\Images\logo-128.ico</icon>
+  <icon>C:\Users\Calmchy\Desktop\App\logo-128.ico</icon>
   <jre>
     <path>jre</path>
     <requiresJdk>false</requiresJdk>
@@ -22,12 +22,12 @@
     <maxVersion></maxVersion>
   </jre>
   <versionInfo>
-    <fileVersion>1.0.0.0</fileVersion>
-    <txtFileVersion>1.0.0.0</txtFileVersion>
+    <fileVersion>1.1.0.0</fileVersion>
+    <txtFileVersion>1.1.0.0</txtFileVersion>
     <fileDescription>POS System for Retail Pharmacies</fileDescription>
     <copyright>2026</copyright>
-    <productVersion>1.0.0.0</productVersion>
-    <txtProductVersion>1.0.0.0</txtProductVersion>
+    <productVersion>1.1.0.0</productVersion>
+    <txtProductVersion>1.1.0.0</txtProductVersion>
     <productName>MediScan POS</productName>
     <companyName>Calmchy</companyName>
     <internalName>Mediscan POS</internalName>

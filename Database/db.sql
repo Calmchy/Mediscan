@@ -27,13 +27,13 @@ create table categories (
 );
 
 -- products (basic product info only, no stock/quantity)
+-- selling_price = CURRENT price. cost lives per batch in product_stock.
 -- product_id doubles as the barcode value (scan it directly)
 create table products (
     product_id int auto_increment primary key,
     name varchar(150) not null,
     brand varchar(100),
     category_id int,
-    cost_price decimal(10,2) not null default 0.00,
     selling_price decimal(10,2) not null default 0.00,
     requires_prescription boolean not null default false,
     is_age_restricted boolean not null default false,
@@ -45,13 +45,17 @@ create table products (
 );
 
 -- product stock (one product can have many stock batches)
+-- cost_price = what you paid for THIS batch
 create table product_stock (
     stock_id int auto_increment primary key,
     product_id int not null,
     batch_no varchar(50),
     quantity int not null default 0,
+    cost_price decimal(10,2) not null default 0.00,
     expiry_date date,
     date_received date default (current_date),
+	status enum('active','on_hold','recalled') not null default 'active',
+	status_reason varchar(255) default null;
     foreign key (product_id) references products(product_id)
         on delete cascade on update cascade
 );
@@ -127,6 +131,36 @@ create table order_items (
         on delete restrict on update cascade
 );
 
+-- which stock batch(es) each order line was taken from (FEFO can span several)
+-- unit_cost is a snapshot, so profit per sale never changes when costs change later
+create table order_item_batches (
+    id int auto_increment primary key,
+    order_item_id int not null,
+    stock_id int default null,
+    quantity int not null,
+    unit_cost decimal(10,2) not null,
+    foreign key (order_item_id) references order_items(order_item_id)
+        on delete cascade on update cascade,
+    foreign key (stock_id) references product_stock(stock_id)
+        on delete set null on update cascade
+);
+
+-- audit trail for selling price changes (write a row whenever products.selling_price changes)
+create table product_price_history (
+    id int auto_increment primary key,
+    product_id int not null,
+    old_price decimal(10,2),
+    new_price decimal(10,2) not null,
+    changed_by int default null,
+    changed_at timestamp default current_timestamp,
+    foreign key (product_id) references products(product_id)
+        on delete cascade on update cascade,
+    foreign key (changed_by) references users(user_id)
+        on delete set null on update cascade
+);
+
 -- helpful indexes
 create index idx_prescriptions_status on prescriptions(status);
 create index idx_stock_expiry on product_stock(product_id, expiry_date);
+create index idx_batches_order_item on order_item_batches(order_item_id);
+create index idx_price_history_product on product_price_history(product_id, changed_at);
