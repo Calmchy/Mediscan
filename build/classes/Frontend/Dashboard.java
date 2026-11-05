@@ -801,7 +801,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         jPanel27.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel27.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(180, 195, 211)));
+        jPanel27.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(180, 195, 211), 1, true));
 
         jLabel61.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel61.setText("SALES BY CATEGORY");
@@ -902,6 +902,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        dashLowStockTable.setGridColor(new java.awt.Color(180, 195, 211));
         jScrollPane10.setViewportView(dashLowStockTable);
 
         jLabel57.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -954,6 +955,8 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        dashExpiringSoonTable.setFocusable(false);
+        dashExpiringSoonTable.setGridColor(new java.awt.Color(180, 195, 211));
         jScrollPane11.setViewportView(dashExpiringSoonTable);
 
         jLabel58.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -1526,14 +1529,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "NAME", "BRAND", "CATEGORY", "COST", "PRICE", "RX", "MINIMUM AGE", "UNIT", "PACK SIZE"
+                "ID", "NAME", "BRAND", "CATEGORY", "PRICE", "RX", "MINIMUM AGE", "UNIT", "PACK SIZE"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1704,14 +1707,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "STOCK ID", "PRODUCT NAME", "BATCH NO", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED"
+                "STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1722,6 +1725,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        stockTable.setFocusTraversalPolicyProvider(true);
         jScrollPane4.setViewportView(stockTable);
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
@@ -3358,15 +3362,15 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_dash30DaysBtnActionPerformed
 
     private void dashSalesReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashSalesReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.SALES, dashFromDC.getDate(), dashToDC.getDate());
     }//GEN-LAST:event_dashSalesReportBtnActionPerformed
 
     private void dashStockReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashStockReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.STOCK, null, null);
     }//GEN-LAST:event_dashStockReportBtnActionPerformed
 
     private void dashExpiryReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashExpiryReportBtnActionPerformed
-        // TODO add your handling code here:
+        Backend.bReports.generate(this, Backend.bReports.Type.EXPIRY, null, null);
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
     /**

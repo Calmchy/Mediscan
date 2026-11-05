@@ -152,7 +152,7 @@ public class Product extends javax.swing.JDialog {
     private void loadProductData() {
         try {
             Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT p.name, p.brand, c.category_name, p.cost_price, p.selling_price, "
+            PreparedStatement ps = con.prepareStatement("SELECT p.name, p.brand, c.category_name, p.selling_price, "
                     + "p.requires_prescription, p.is_age_restricted, p.minimum_age, "
                     + "p.unit_type, p.pack_size "
                     + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
@@ -164,7 +164,6 @@ public class Product extends javax.swing.JDialog {
             if (rs.next()) {
                 productNameTF.setText(rs.getString("name"));
                 productBrandTF.setText(rs.getString("brand"));
-                productCostPriseTF.setText(String.valueOf(rs.getDouble("cost_price")));
                 productSellingPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
                 productRPresCB.setSelected(rs.getBoolean("requires_prescription"));
                 productAgeRestCB.setSelected(rs.getBoolean("is_age_restricted"));
@@ -190,6 +189,27 @@ public class Product extends javax.swing.JDialog {
             con.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }
+    }
+    
+    private Double getCurrentSellingPrice(Connection con, int id) throws Exception {
+        try (PreparedStatement ps = con.prepareStatement("SELECT selling_price FROM products WHERE product_id = ?")) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble("selling_price") : null;
+            }
+        }
+    }
+
+    /** Writes one row to product_price_history (runs inside the caller's transaction). */
+    private void logPriceChange(Connection con, int id, Double oldPrice, double newPrice) throws Exception {
+        try (PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO product_price_history (product_id, old_price, new_price, changed_by) VALUES (?, ?, ?, ?)")) {
+            ps.setInt(1, id);
+            if (oldPrice != null) ps.setDouble(2, oldPrice); else ps.setNull(2, java.sql.Types.DECIMAL);
+            ps.setDouble(3, newPrice);
+            if (Backend.Session.userId > 0) ps.setInt(4, Backend.Session.userId); else ps.setNull(4, java.sql.Types.INTEGER);
+            ps.executeUpdate();
         }
     }
 
@@ -422,7 +442,6 @@ public class Product extends javax.swing.JDialog {
     private void productAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productAddBtnActionPerformed
         String name = productNameTF.getText().trim();
         String brand = productBrandTF.getText().trim();
-        String costText = productCostPriseTF.getText().trim();
         String sellText = productSellingPriceTF.getText().trim();
         boolean requiresRx = productRPresCB.isSelected();
         boolean ageRestricted = productAgeRestCB.isSelected();
@@ -431,7 +450,7 @@ public class Product extends javax.swing.JDialog {
         String unitType = (String) productUTypeCB.getSelectedItem();
         String packSizeText = productSellingPriceTF1.getText().trim();
 
-        if (name.isEmpty() || selectedCategory == null || costText.isEmpty() || sellText.isEmpty()) {
+        if (name.isEmpty() || selectedCategory == null || sellText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
             return;
         }
@@ -446,12 +465,15 @@ public class Product extends javax.swing.JDialog {
             }
         }
 
-        double costPrice, sellingPrice;
+        double sellingPrice;
         try {
-            costPrice = Double.parseDouble(costText);
             sellingPrice = Double.parseDouble(sellText);
+            if (sellingPrice < 0) {
+                JOptionPane.showMessageDialog(this, "Selling Price cannot be negative.");
+                return;
+            }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Cost Price and Selling Price must be valid numbers.");
+            JOptionPane.showMessageDialog(this, "Selling Price must be a valid number.");
             return;
         }
 
@@ -469,15 +491,6 @@ public class Product extends javax.swing.JDialog {
             }
         }
 
-        if (sellingPrice < costPrice) {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                "Selling price is lower than cost price. Continue anyway?",
-                "Warning", JOptionPane.YES_NO_OPTION);
-            if (confirm != JOptionPane.YES_OPTION) {
-                return;
-            }
-        }
-
         try {
             int categoryId = getCategoryIdByName(selectedCategory);
             if (categoryId == -1) {
@@ -488,21 +501,20 @@ public class Product extends javax.swing.JDialog {
             Connection con = DBConnection.getConnection();
 
             if (productId == -1) {
-                // RETURN_GENERATED_KEYS lets us read the new product_id right after the insert
-                PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, cost_price, selling_price, "
+                con.setAutoCommit(false);
+                PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, selling_price, "
                         + "requires_prescription, is_age_restricted, minimum_age, unit_type, pack_size) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
-                ps.setDouble(4, costPrice);
-                ps.setDouble(5, sellingPrice);
-                ps.setBoolean(6, requiresRx);
-                ps.setBoolean(7, ageRestricted);
-                if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
-                ps.setString(9, unitType);
-                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
+                ps.setDouble(4, sellingPrice);
+                ps.setBoolean(5, requiresRx);
+                ps.setBoolean(6, ageRestricted);
+                if (minimumAge != null) ps.setInt(7, minimumAge); else ps.setNull(7, java.sql.Types.INTEGER);
+                ps.setString(8, unitType);
+                if (packSize != null) ps.setInt(9, packSize); else ps.setNull(9, java.sql.Types.INTEGER);
                 ps.executeUpdate();
 
                 int newId = -1;
@@ -512,6 +524,12 @@ public class Product extends javax.swing.JDialog {
                     }
                 }
                 ps.close();
+
+                // first price entry for the new product (old_price stays NULL)
+                if (newId != -1) {
+                    logPriceChange(con, newId, null, sellingPrice);
+                }
+                con.commit();
 
                 String message = "Product added successfully!";
                 if (newId != -1) {
@@ -523,23 +541,31 @@ public class Product extends javax.swing.JDialog {
                 }
                 JOptionPane.showMessageDialog(this, message);
             } else {
-                PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, cost_price=?, selling_price=?, "
+                con.setAutoCommit(false);
+                Double oldPrice = getCurrentSellingPrice(con, productId);
+
+                PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, selling_price=?, "
                         + "requires_prescription=?, is_age_restricted=?, minimum_age=?, unit_type=?, pack_size=? "
                         + "WHERE product_id=?");
 
                 ps.setString(1, name);
                 ps.setString(2, brand.isEmpty() ? null : brand);
                 ps.setInt(3, categoryId);
-                ps.setDouble(4, costPrice);
-                ps.setDouble(5, sellingPrice);
-                ps.setBoolean(6, requiresRx);
-                ps.setBoolean(7, ageRestricted);
-                if (minimumAge != null) ps.setInt(8, minimumAge); else ps.setNull(8, java.sql.Types.INTEGER);
-                ps.setString(9, unitType);
-                if (packSize != null) ps.setInt(10, packSize); else ps.setNull(10, java.sql.Types.INTEGER);
-                ps.setInt(11, productId);
+                ps.setDouble(4, sellingPrice);
+                ps.setBoolean(5, requiresRx);
+                ps.setBoolean(6, ageRestricted);
+                if (minimumAge != null) ps.setInt(7, minimumAge); else ps.setNull(7, java.sql.Types.INTEGER);
+                ps.setString(8, unitType);
+                if (packSize != null) ps.setInt(9, packSize); else ps.setNull(9, java.sql.Types.INTEGER);
+                ps.setInt(10, productId);
                 ps.executeUpdate();
                 ps.close();
+
+                // audit trail: only write a row when the selling price actually changed
+                if (oldPrice == null || Double.compare(oldPrice, sellingPrice) != 0) {
+                    logPriceChange(con, productId, oldPrice, sellingPrice);
+                }
+                con.commit();
                 JOptionPane.showMessageDialog(this, "Product updated successfully!");
             }
 
@@ -556,7 +582,6 @@ public class Product extends javax.swing.JDialog {
         productNameTF.setText("");
         productBrandTF.setText("");
         if (productCategoryCB.getItemCount() > 0) productCategoryCB.setSelectedIndex(0);
-        productCostPriseTF.setText("");
         productSellingPriceTF.setText("");
         productRPresCB.setSelected(false);
         productAgeRestCB.setSelected(false);

@@ -136,26 +136,27 @@ public class Stock extends javax.swing.JDialog {
     
     private void loadStockData() {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("SELECT p.name, ps.batch_no, ps.quantity, ps.expiry_date "
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT p.name, ps.batch_no, ps.quantity, ps.cost_price, ps.expiry_date "
                     + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
                     + "WHERE ps.stock_id = ?");
-            
+
             ps.setInt(1, stockId);
             ResultSet rs = ps.executeQuery();
- 
+
             if (rs.next()) {
                 stockBatchNoTF.setText(rs.getString("batch_no"));
                 stockQtyTF.setText(String.valueOf(rs.getInt("quantity")));
- 
+                stockCostPriceTF.setText(String.valueOf(rs.getDouble("cost_price")));
+
                 Date expiry = rs.getDate("expiry_date");
                 if (expiry != null) {
                     stockExpiryDateFF.setDate(expiry);
                 }
- 
+
                 stockProductNameCB.setSelectedItem(rs.getString("name"));
             }
- 
+
             rs.close();
             ps.close();
             con.close();
@@ -188,6 +189,8 @@ public class Stock extends javax.swing.JDialog {
         jLabel13 = new javax.swing.JLabel();
         stockPReceivedTF = new javax.swing.JTextField();
         stockExpiryDateFF = new com.toedter.calendar.JDateChooser();
+        stockCostPriceTF = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -261,6 +264,10 @@ public class Stock extends javax.swing.JDialog {
 
         stockExpiryDateFF.setDateFormatString("yyyy-MM-dd");
 
+        jLabel15.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(26, 32, 44));
+        jLabel15.setText("COST PRICE");
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
@@ -274,17 +281,18 @@ public class Stock extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(stockClearBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(stockBatchNoTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                                .addComponent(stockQtyTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                                .addComponent(jLabel11)
-                                .addComponent(jLabel12)
-                                .addComponent(jLabel14)
-                                .addComponent(stockProductNameCB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel16)
-                                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(stockPReceivedTF, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(stockBatchNoTF, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(stockQtyTF, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel14)
+                            .addComponent(stockProductNameCB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel16)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                            .addComponent(stockPReceivedTF)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(stockCostPriceTF))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -299,6 +307,10 @@ public class Stock extends javax.swing.JDialog {
                 .addComponent(jLabel11)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(stockBatchNoTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(stockCostPriceTF, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -322,15 +334,17 @@ public class Stock extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -340,13 +354,29 @@ public class Stock extends javax.swing.JDialog {
         String selectedProduct = (String) stockProductNameCB.getSelectedItem();
         String batchNo = stockBatchNoTF.getText().trim();
         String qtyText = stockQtyTF.getText().trim();
-        String expiryText = new java.text.SimpleDateFormat("yyyy-MM-dd").format(stockExpiryDateFF.getDate());
- 
-        if (selectedProduct == null || batchNo.isEmpty() || qtyText.isEmpty() || expiryText.isEmpty()) {
+        String costText = stockCostPriceTF.getText().trim();
+        // getDate() is null when the date was cleared, so check before formatting
+        String expiryText = stockExpiryDateFF.getDate() == null ? ""
+                : new java.text.SimpleDateFormat("yyyy-MM-dd").format(stockExpiryDateFF.getDate());
+
+        if (selectedProduct == null || batchNo.isEmpty() || qtyText.isEmpty()
+                || costText.isEmpty() || expiryText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all fields.");
             return;
         }
- 
+
+        double costPrice;
+        try {
+            costPrice = Double.parseDouble(costText);
+            if (costPrice < 0) {
+                JOptionPane.showMessageDialog(this, "Cost Price cannot be negative.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Cost Price must be a valid number.");
+            return;
+        }
+
         int quantity;
         try {
             quantity = Integer.parseInt(qtyText);
@@ -358,7 +388,7 @@ public class Stock extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Quantity must be a whole number.");
             return;
         }
- 
+
         Date expiryDate;
         try {
             expiryDate = Date.valueOf(expiryText);
@@ -366,44 +396,46 @@ public class Stock extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Expiry Date must be in yyyy-MM-dd format (e.g. 2027-05-01).");
             return;
         }
- 
+
         try {
             int productId = getProductIdByName(selectedProduct);
             if (productId == -1) {
                 JOptionPane.showMessageDialog(this, "Selected product could not be found.");
                 return;
             }
- 
+
             Connection con = DBConnection.getConnection();
- 
+
             if (stockId == -1) {
-                PreparedStatement ps = con.prepareStatement("INSERT INTO product_stock (product_id, batch_no, quantity, expiry_date) "
-                        + "VALUES (?, ?, ?, ?)");
-                
+                PreparedStatement ps = con.prepareStatement("INSERT INTO product_stock (product_id, batch_no, quantity, cost_price, expiry_date) "
+                        + "VALUES (?, ?, ?, ?, ?)");
+
                 ps.setInt(1, productId);
                 ps.setString(2, batchNo);
                 ps.setInt(3, quantity);
-                ps.setDate(4, expiryDate);
+                ps.setDouble(4, costPrice);
+                ps.setDate(5, expiryDate);
                 ps.executeUpdate();
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Stock added successfully!");
             } else {
                 PreparedStatement ps = con.prepareStatement("UPDATE product_stock "
-                        + "SET product_id=?, batch_no=?, quantity=?, expiry_date=? WHERE stock_id=?");
-                
+                        + "SET product_id=?, batch_no=?, quantity=?, cost_price=?, expiry_date=? WHERE stock_id=?");
+
                 ps.setInt(1, productId);
                 ps.setString(2, batchNo);
                 ps.setInt(3, quantity);
-                ps.setDate(4, expiryDate);
-                ps.setInt(5, stockId);
+                ps.setDouble(4, costPrice);
+                ps.setDate(5, expiryDate);
+                ps.setInt(6, stockId);
                 ps.executeUpdate();
                 ps.close();
                 JOptionPane.showMessageDialog(this, "Stock updated successfully!");
             }
- 
+
             con.close();
             dispose();
- 
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
@@ -414,6 +446,7 @@ public class Stock extends javax.swing.JDialog {
         if (stockProductNameCB.getItemCount() > 0) stockProductNameCB.setSelectedIndex(0);
         stockBatchNoTF.setText("");
         stockQtyTF.setText("");
+        stockCostPriceTF.setText("");
         stockExpiryDateFF.setDate(null);
         stockPReceivedTF.setText("");
     }//GEN-LAST:event_stockClearBtnActionPerformed
@@ -467,12 +500,14 @@ public class Stock extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JButton stockAddBtn;
     private javax.swing.JTextField stockBatchNoTF;
     private javax.swing.JButton stockClearBtn;
+    private javax.swing.JTextField stockCostPriceTF;
     private com.toedter.calendar.JDateChooser stockExpiryDateFF;
     private javax.swing.JTextField stockPReceivedTF;
     private javax.swing.JComboBox<String> stockProductNameCB;

@@ -801,7 +801,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
 
         jPanel27.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel27.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(180, 195, 211)));
+        jPanel27.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(180, 195, 211), 1, true));
 
         jLabel61.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel61.setText("SALES BY CATEGORY");
@@ -902,6 +902,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        dashLowStockTable.setGridColor(new java.awt.Color(180, 195, 211));
         jScrollPane10.setViewportView(dashLowStockTable);
 
         jLabel57.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -954,6 +955,8 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        dashExpiringSoonTable.setFocusable(false);
+        dashExpiringSoonTable.setGridColor(new java.awt.Color(180, 195, 211));
         jScrollPane11.setViewportView(dashExpiringSoonTable);
 
         jLabel58.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -1722,6 +1725,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        stockTable.setFocusTraversalPolicyProvider(true);
         jScrollPane4.setViewportView(stockTable);
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));

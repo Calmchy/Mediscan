@@ -461,7 +461,7 @@
                         </Property>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
-                            <LineBorder>
+                            <LineBorder roundedCorners="true">
                               <Color PropertyName="color" blue="d3" green="c3" red="b4" type="rgb"/>
                             </LineBorder>
                           </Border>
@@ -639,6 +639,9 @@
                                     <Column editable="false" title="UNITS LEFT" type="java.lang.Integer"/>
                                   </Table>
                                 </Property>
+                                <Property name="gridColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                                  <Color blue="d3" green="c3" red="b4" type="rgb"/>
+                                </Property>
                               </Properties>
                             </Component>
                           </SubComponents>
@@ -709,6 +712,10 @@
                                     <Column editable="false" title="EXPIRY" type="java.lang.String"/>
                                     <Column editable="false" title="DAYS LEFT" type="java.lang.String"/>
                                   </Table>
+                                </Property>
+                                <Property name="focusable" type="boolean" value="false"/>
+                                <Property name="gridColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                                  <Color blue="d3" green="c3" red="b4" type="rgb"/>
                                 </Property>
                               </Properties>
                             </Component>
@@ -1836,6 +1843,7 @@
                                 <Column editable="false" title="DATE RECEIVED" type="java.lang.String"/>
                               </Table>
                             </Property>
+                            <Property name="focusTraversalPolicyProvider" type="boolean" value="true"/>
                           </Properties>
                         </Component>
                       </SubComponents>

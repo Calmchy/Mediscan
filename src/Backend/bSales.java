@@ -445,7 +445,51 @@ public class bSales {
             f.customerNameL.setText(" ");
         }
     }
+    
+    /** One slice of an order line taken from a single stock batch, with that batch's cost at sale time. */
+    private static class BatchUsed {
+        final int stockId, quantity;
+        final double unitCost;
+
+        BatchUsed(int stockId, int quantity, double unitCost) {
+            this.stockId = stockId;
+            this.quantity = quantity;
+            this.unitCost = unitCost;
+        }
+    }
  
+    /** Deducts stock first-expiry-first-out and returns which batches were used (and at what cost). */
+    private static List<BatchUsed> deductStockFEFO(Connection con, int productId, int quantity, String productName)
+            throws Exception {
+        String selectSql = "SELECT stock_id, quantity, cost_price FROM product_stock "
+                + "WHERE product_id = ? AND quantity > 0 "
+                + "AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE) "
+                + "ORDER BY expiry_date IS NULL, expiry_date ASC FOR UPDATE";
+
+        List<BatchUsed> used = new ArrayList<>();
+        int remaining = quantity;
+        try (PreparedStatement select = con.prepareStatement(selectSql)) {
+            select.setInt(1, productId);
+            try (ResultSet rs = select.executeQuery()) {
+                while (rs.next() && remaining > 0) {
+                    int stockId = rs.getInt("stock_id");
+                    int deduct = Math.min(rs.getInt("quantity"), remaining);
+                    remaining -= deduct;
+                    try (PreparedStatement update = con.prepareStatement("UPDATE product_stock SET quantity = quantity - ? WHERE stock_id = ?")) {
+                        update.setInt(1, deduct);
+                        update.setInt(2, stockId);
+                        update.executeUpdate();
+                    }
+                    used.add(new BatchUsed(stockId, deduct, rs.getDouble("cost_price")));
+                }
+            }
+        }
+        if (remaining > 0) {
+            throw new Exception("Not enough stock for \"" + productName + "\" (short by " + remaining + ").");
+        }
+        return used;
+    }
+
     public static CheckoutResult checkout(List<CartItem> cart, double cash,
             Integer customerId, String orderType) throws Exception {
  
@@ -500,9 +544,14 @@ public class bSales {
  
             String itemSql = "INSERT INTO order_items (order_id, product_id, quantity, unit_price, "
                     + "subtotal, id_verified) VALUES (?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement ps = con.prepareStatement(itemSql)) {
+            String batchSql = "INSERT INTO order_item_batches (order_item_id, stock_id, quantity, unit_cost) "
+                    + "VALUES (?, ?, ?, ?)";
+            try (PreparedStatement ps = con.prepareStatement(itemSql, Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement batchPs = con.prepareStatement(batchSql)) {
                 for (CartItem item : cart) {
-                    deductStockFEFO(con, item.productId, item.quantity, item.name);
+                    // FEFO may take one line from several batches; each carries its own cost
+                    List<BatchUsed> used = deductStockFEFO(con, item.productId, item.quantity, item.name);
+
                     ps.setInt(1, orderId);
                     ps.setInt(2, item.productId);
                     ps.setInt(3, item.quantity);
@@ -510,6 +559,24 @@ public class bSales {
                     ps.setDouble(5, item.subtotal());
                     ps.setBoolean(6, false);
                     ps.executeUpdate();
+
+                    int orderItemId;
+                    try (ResultSet keys = ps.getGeneratedKeys()) {
+                        if (!keys.next()) {
+                            throw new Exception("Could not save the order item for \"" + item.name + "\".");
+                        }
+                        orderItemId = keys.getInt(1);
+                    }
+
+                    // snapshot of cost per batch so profit never changes if costs change later
+                    for (BatchUsed b : used) {
+                        batchPs.setInt(1, orderItemId);
+                        batchPs.setInt(2, b.stockId);
+                        batchPs.setInt(3, b.quantity);
+                        batchPs.setDouble(4, b.unitCost);
+                        batchPs.addBatch();
+                    }
+                    batchPs.executeBatch();
                 }
             }
  
@@ -531,34 +598,6 @@ public class bSales {
                 } catch (Exception ignore) {
                 }
             }
-        }
-    }
- 
-    private static void deductStockFEFO(Connection con, int productId, int quantity, String productName)
-            throws Exception {
-        String selectSql = "SELECT stock_id, quantity FROM product_stock "
-                + "WHERE product_id = ? AND quantity > 0 "
-                + "AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE) "
-                + "ORDER BY expiry_date IS NULL, expiry_date ASC FOR UPDATE";
- 
-        int remaining = quantity;
-        try (PreparedStatement select = con.prepareStatement(selectSql)) {
-            select.setInt(1, productId);
-            try (ResultSet rs = select.executeQuery()) {
-                while (rs.next() && remaining > 0) {
-                    int stockId = rs.getInt("stock_id");
-                    int deduct = Math.min(rs.getInt("quantity"), remaining);
-                    remaining -= deduct;
-                    try (PreparedStatement update = con.prepareStatement("UPDATE product_stock SET quantity = quantity - ? WHERE stock_id = ?")) {
-                        update.setInt(1, deduct);
-                        update.setInt(2, stockId);
-                        update.executeUpdate();
-                    }
-                }
-            }
-        }
-        if (remaining > 0) {
-            throw new Exception("Not enough stock for \"" + productName + "\" (short by " + remaining + ").");
         }
     }
  
