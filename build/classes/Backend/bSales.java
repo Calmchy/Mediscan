@@ -20,6 +20,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.AbstractButton;
 
 
 
@@ -209,6 +210,7 @@ public class bSales {
         public JTextField changeTF;
         public JTextField customerIdTF;
         public JLabel customerNameL;
+        public AbstractButton pickupBtn;
     }
  
     private static void msg(Component parent, String text, String title, int type) {
@@ -404,7 +406,8 @@ public class bSales {
                 return null;
             }
         }
-        return checkoutSale(parent, f, customerId, "walk_in");
+        boolean pickup = f.pickupBtn != null && f.pickupBtn.isSelected();
+        return checkoutSale(parent, f, customerId, pickup ? "pickup" : "walk_in");
     }
  
     public static CheckoutResult checkoutSale(Component parent, SalesFields f, Integer customerId, String orderType) {

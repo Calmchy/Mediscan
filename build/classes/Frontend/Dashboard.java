@@ -101,6 +101,7 @@ public class Dashboard extends javax.swing.JFrame {
         salesUI.cashTF = cashAmountSalesTF;
         salesUI.changeTF = changeSalesTF;
         salesUI.customerIdTF = salesCustomerIDTF;
+        salesUI.pickupBtn = salesPickUpCB;
         salesUI.customerNameL = salesCustomerFNL;
         
         customerUI.customerTable = customerTable;
@@ -446,6 +447,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel41 = new javax.swing.JLabel();
         jLabel42 = new javax.swing.JLabel();
         salesCustomerFNL = new javax.swing.JLabel();
+        salesPickUpCB = new javax.swing.JCheckBox();
         transactionTab = new javax.swing.JPanel();
         transactionBG = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -2142,6 +2144,9 @@ public class Dashboard extends javax.swing.JFrame {
         salesCustomerFNL.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         salesCustomerFNL.setText(" ");
 
+        salesPickUpCB.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        salesPickUpCB.setText("PICKUP");
+
         javax.swing.GroupLayout salesBGLayout = new javax.swing.GroupLayout(salesBG);
         salesBG.setLayout(salesBGLayout);
         salesBGLayout.setHorizontalGroup(
@@ -2167,12 +2172,15 @@ public class Dashboard extends javax.swing.JFrame {
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                             .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                 .addGroup(salesBGLayout.createSequentialGroup()
-                                    .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(changeSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                                        .addComponent(salesPickUpCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(salesBGLayout.createSequentialGroup()
                                 .addComponent(jLabel41)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2210,7 +2218,9 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                    .addComponent(salesPickUpCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -3538,6 +3548,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton salesCheckoutBtn;
     private javax.swing.JLabel salesCustomerFNL;
     private javax.swing.JTextField salesCustomerIDTF;
+    private javax.swing.JCheckBox salesPickUpCB;
     private javax.swing.JTextField salesPriceTF;
     private javax.swing.JTextField salesPriceTF1;
     private javax.swing.JTextField salesProductIDScanTF;
