@@ -55,7 +55,7 @@ create table product_stock (
     expiry_date date,
     date_received date default (current_date),
 	status enum('active','on_hold','recalled') not null default 'active',
-	status_reason varchar(255) default null;
+	status_reason varchar(255) default null,
     foreign key (product_id) references products(product_id)
         on delete cascade on update cascade
 );
