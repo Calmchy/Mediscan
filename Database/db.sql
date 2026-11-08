@@ -73,33 +73,6 @@ create table customers (
     created_at timestamp default current_timestamp
 );
 
--- prescriptions (doctor info kept simple as plain fields)
-create table prescriptions (
-    prescription_id int auto_increment primary key,
-    customer_id int not null,
-    product_id int not null,
-    doctor_name varchar(100),
-    dosage varchar(100),
-    quantity_prescribed int not null,
-    date_issued date not null,
-    status enum('pending', 'ready', 'picked_up') not null default 'pending',
-    foreign key (customer_id) references customers(customer_id)
-        on delete cascade on update cascade,
-    foreign key (product_id) references products(product_id)
-        on delete restrict on update cascade
-);
-
--- refill reminders
-create table refill_reminders (
-    reminder_id int auto_increment primary key,
-    prescription_id int not null,
-    reminder_date date not null,
-    method enum('sms', 'email') not null,
-    sent_status enum('pending', 'sent') not null default 'pending',
-    foreign key (prescription_id) references prescriptions(prescription_id)
-        on delete cascade on update cascade
-);
-
 -- orders (the receipt)
 create table orders (
     order_id int auto_increment primary key,
@@ -160,7 +133,6 @@ create table product_price_history (
 );
 
 -- helpful indexes
-create index idx_prescriptions_status on prescriptions(status);
 create index idx_stock_expiry on product_stock(product_id, expiry_date);
 create index idx_batches_order_item on order_item_batches(order_item_id);
 create index idx_price_history_product on product_price_history(product_id, changed_at);
