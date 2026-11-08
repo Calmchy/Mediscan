@@ -76,8 +76,8 @@ public class Dashboard extends javax.swing.JFrame {
         dashUI.transactionsL = dashTransactionsTF;
         dashUI.itemsSoldL = dashItemSoldTF;
         dashUI.lowStockL = dashLowStockCatTF;
-        dashUI.expiringL = dashExpiringLeftTF;     // the "2" in "2 / 1"
-        dashUI.expiredL = dashExpiredRightTF;      // the "1" in "2 / 1"
+        dashUI.expiringL = dashExpiringLeftTF;
+        dashUI.expiredL = dashExpiredRightTF;
         dashUI.salesPerDayP = dashSalesPerDayP;
         dashUI.salesByCategoryP = dashSalesByCategoryP;
         dashUI.top5ProductsP = dashTop5ProductsP;
@@ -163,11 +163,9 @@ public class Dashboard extends javax.swing.JFrame {
         final java.awt.Dimension ZERO = new java.awt.Dimension(0, 0);
         final java.awt.Dimension TINY = new java.awt.Dimension(10, 10);
 
-        // proportions per row
         final double LEFT = 0.42, RIGHT = 0.58;
         final double TOP5 = 0.25, LOW = 0.17, EXPIRING = 0.58;
 
-        // let weights decide size, not the chart/table content
         for (javax.swing.JPanel p : new javax.swing.JPanel[]{jPanel26, jPanel27, jPanel28, jPanel29, jPanel30,
                 dashSalesPerDayP, dashSalesByCategoryP, dashTop5ProductsP}) {
             p.setMinimumSize(ZERO);
@@ -184,16 +182,13 @@ public class Dashboard extends javax.swing.JFrame {
         java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
         c.fill = java.awt.GridBagConstraints.BOTH;
 
-        // row 0: filter bar
         c.gridx = 0; c.gridy = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
         c.insets = new java.awt.Insets(0, 0, 8, 0);
         dashboardBG.add(jPanel13, c);
 
-        // row 1: KPI cards
         c.gridy = 1;
         dashboardBG.add(jPanel32, c);
 
-        // row 2: sales per day | pie chart
         c.gridy = 2; c.weighty = 0.5; c.gridwidth = 2; c.weightx = LEFT;
         c.insets = new java.awt.Insets(0, 10, 8, 4);
         dashboardBG.add(jPanel26, c);
@@ -202,7 +197,6 @@ public class Dashboard extends javax.swing.JFrame {
         c.insets = new java.awt.Insets(0, 4, 8, 10);
         dashboardBG.add(jPanel27, c);
 
-        // row 3: top 5 | low stock | expiring soon
         c.gridy = 3; c.gridx = 0; c.weightx = TOP5;
         c.insets = new java.awt.Insets(0, 10, 8, 4);
         dashboardBG.add(jPanel28, c);
@@ -215,7 +209,6 @@ public class Dashboard extends javax.swing.JFrame {
         c.insets = new java.awt.Insets(0, 4, 8, 10);
         dashboardBG.add(jPanel30, c);
 
-        // row 4: report buttons
         c.gridy = 4; c.gridx = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
         c.insets = new java.awt.Insets(0, 0, 0, 0);
         dashboardBG.add(jPanel31, c);
@@ -550,6 +543,8 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/logo-64.png"))); // NOI18N
         jLabel3.setText(" ");
 
+        logoutDashboardBtn.setBackground(new java.awt.Color(232, 236, 241));
+        logoutDashboardBtn.setForeground(new java.awt.Color(26, 31, 46));
         logoutDashboardBtn.setText("Logout");
         logoutDashboardBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -609,7 +604,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel13.setBackground(new java.awt.Color(255, 255, 255));
 
+        dashRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         dashRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         dashRefreshBtn.setText("REFRESH");
         dashRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -920,7 +917,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel31.setBackground(new java.awt.Color(255, 255, 255));
 
+        dashSalesReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashSalesReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashSalesReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashSalesReportBtn.setText("SALES REPORT");
         dashSalesReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -929,9 +928,11 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         jLabel56.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel56.setText("REPORTS (PDF):");
+        jLabel56.setText("REPORTS:");
 
+        dashStockReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashStockReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashStockReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashStockReportBtn.setText("STOCK REPORT");
         dashStockReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -939,7 +940,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        dashExpiryReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashExpiryReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashExpiryReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashExpiryReportBtn.setText("EXPIRY REPORT");
         dashExpiryReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1325,7 +1328,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
 
+        printCategoryBtn.setBackground(new java.awt.Color(79, 172, 255));
         printCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printCategoryBtn.setForeground(new java.awt.Color(26, 31, 46));
         printCategoryBtn.setText("PRINT");
         printCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1333,7 +1338,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteCategoryBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteCategoryBtn.setText("DELETE");
         deleteCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1341,7 +1348,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editCategoryBtn.setBackground(new java.awt.Color(30, 58, 95));
         editCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         editCategoryBtn.setText("EDIT");
         editCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1349,7 +1358,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addCategoryBtn.setBackground(new java.awt.Color(43, 138, 130));
         addCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         addCategoryBtn.setText("ADD");
         addCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1387,7 +1398,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel11.setBackground(new java.awt.Color(255, 255, 255));
 
+        categoryRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         categoryRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        categoryRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         categoryRefreshBtn.setText("REFRESH");
         categoryRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1486,7 +1499,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel8.setBackground(new java.awt.Color(255, 255, 255));
 
+        genBarProductBtn.setBackground(new java.awt.Color(79, 172, 255));
         genBarProductBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        genBarProductBtn.setForeground(new java.awt.Color(26, 31, 46));
         genBarProductBtn.setText("GENERATE BARCODE");
         genBarProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1494,7 +1509,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        printProductBtn.setBackground(new java.awt.Color(79, 172, 255));
         printProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printProductBtn.setForeground(new java.awt.Color(26, 31, 46));
         printProductBtn.setText("PRINT");
         printProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1502,7 +1519,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteProductBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteProductBtn.setText("DELETE");
         deleteProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1510,7 +1529,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editProductBtn.setBackground(new java.awt.Color(30, 58, 95));
         editProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         editProductBtn.setText("EDIT");
         editProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1518,7 +1539,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addProductBtn.setBackground(new java.awt.Color(43, 138, 130));
         addProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         addProductBtn.setText("ADD");
         addProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1558,7 +1581,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel9.setBackground(new java.awt.Color(255, 255, 255));
 
+        productsRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         productsRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        productsRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         productsRefreshBtn.setText("REFRESH");
         productsRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1665,7 +1690,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
 
+        printStockBtn.setBackground(new java.awt.Color(79, 172, 255));
         printStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printStockBtn.setForeground(new java.awt.Color(26, 31, 46));
         printStockBtn.setText("PRINT");
         printStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1673,7 +1700,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteStockBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteStockBtn.setText("DELETE");
         deleteStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1681,7 +1710,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editStockBtn.setBackground(new java.awt.Color(30, 58, 95));
         editStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         editStockBtn.setText("EDIT");
         editStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1689,7 +1720,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addStockBtn.setBackground(new java.awt.Color(43, 138, 130));
         addStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         addStockBtn.setText("ADD");
         addStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1697,7 +1730,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        holdReleaseStockBtn.setBackground(new java.awt.Color(221, 161, 40));
         holdReleaseStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        holdReleaseStockBtn.setForeground(new java.awt.Color(26, 31, 46));
         holdReleaseStockBtn.setText("HOLD / RELEASE");
         holdReleaseStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1739,9 +1774,11 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel4.setText("Filter by Product:");
 
-        jLabel2.setText("Search Batch No:");
+        jLabel2.setText("Search:");
 
+        stockRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         stockRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        stockRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         stockRefreshBtn.setText("REFRESH");
         stockRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1759,15 +1796,15 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addGap(6, 6, 6)
-                .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addGap(3, 3, 3)
-                .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel47)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(stockRefreshBtn)
                 .addContainerGap())
@@ -1861,6 +1898,8 @@ public class Dashboard extends javax.swing.JFrame {
             salesTable.getColumnModel().getColumn(6).setMaxWidth(100);
         }
 
+        salesCheckoutBtn.setBackground(new java.awt.Color(43, 138, 130));
+        salesCheckoutBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesCheckoutBtn.setText("CHECKOUT");
         salesCheckoutBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1872,7 +1911,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel8.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel8.setText("PRODUCT ID (SCAN)");
+        jLabel8.setText("PRODUCT ID");
 
         jLabel9.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1902,6 +1941,8 @@ public class Dashboard extends javax.swing.JFrame {
         salesQuantityTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         salesQuantityTF.setText("2");
 
+        salesAddBtn.setBackground(new java.awt.Color(43, 138, 130));
+        salesAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesAddBtn.setText("ADD");
         salesAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1909,6 +1950,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        salesCancelBtn.setBackground(new java.awt.Color(232, 236, 241));
+        salesCancelBtn.setForeground(new java.awt.Color(26, 31, 46));
         salesCancelBtn.setText("CANCEL");
         salesCancelBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2052,6 +2095,8 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel15.setText("CASH AMOUNT:");
 
+        salesRemoveItemBtn.setBackground(new java.awt.Color(192, 57, 43));
+        salesRemoveItemBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesRemoveItemBtn.setText("REMOVE ITEM");
         salesRemoveItemBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2059,6 +2104,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        salesRemoveAllBtn.setBackground(new java.awt.Color(192, 57, 43));
+        salesRemoveAllBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesRemoveAllBtn.setText("REMOVE ALL");
         salesRemoveAllBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2296,7 +2343,9 @@ public class Dashboard extends javax.swing.JFrame {
         transTotalTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         transTotalTF.setText("₱ 0");
 
+        transReprintReceiptBtn.setBackground(new java.awt.Color(79, 172, 255));
         transReprintReceiptBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transReprintReceiptBtn.setForeground(new java.awt.Color(26, 31, 46));
         transReprintReceiptBtn.setText("REPRINT RECEIPT");
         transReprintReceiptBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2304,7 +2353,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        transPrintListBtn.setBackground(new java.awt.Color(79, 172, 255));
         transPrintListBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transPrintListBtn.setForeground(new java.awt.Color(26, 31, 46));
         transPrintListBtn.setText("PRINT LIST");
         transPrintListBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2449,7 +2500,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel12.setBackground(new java.awt.Color(255, 255, 255));
 
+        transRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         transRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         transRefreshBtn.setText("REFRESH");
         transRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2584,7 +2637,9 @@ public class Dashboard extends javax.swing.JFrame {
         customerCountL.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         customerCountL.setText("0");
 
+        customerRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         customerRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        customerRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerRefreshBtn.setText("REFRESH");
         customerRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2651,7 +2706,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));
 
+        customerAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         customerAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerAddBtn.setText("ADD");
         customerAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2659,7 +2716,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerEditBtn.setBackground(new java.awt.Color(30, 58, 95));
         customerEditBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerEditBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerEditBtn.setText("EDIT");
         customerEditBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2667,7 +2726,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerDeleteBtn.setBackground(new java.awt.Color(192, 57, 43));
         customerDeleteBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerDeleteBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerDeleteBtn.setText("DELETE");
         customerDeleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2675,7 +2736,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerPrintBtn.setBackground(new java.awt.Color(79, 172, 255));
         customerPrintBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerPrintBtn.setForeground(new java.awt.Color(26, 31, 46));
         customerPrintBtn.setText("PRINT");
         customerPrintBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2746,7 +2809,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         headBG.setBackground(new java.awt.Color(255, 255, 255));
 
+        adminRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         adminRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        adminRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminRefreshBtn.setText("REFRESH");
         adminRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2843,7 +2908,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         footer.setBackground(new java.awt.Color(255, 255, 255));
 
+        adminAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         adminAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminAddBtn.setText("ADD");
         adminAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2851,7 +2918,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminEditBtn.setBackground(new java.awt.Color(30, 58, 95));
         adminEditBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminEditBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminEditBtn.setText("EDIT");
         adminEditBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2859,7 +2928,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminDeleteBtn.setBackground(new java.awt.Color(192, 57, 43));
         adminDeleteBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminDeleteBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminDeleteBtn.setText("DELETE");
         adminDeleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

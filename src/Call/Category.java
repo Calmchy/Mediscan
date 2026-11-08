@@ -7,13 +7,6 @@ package Call;
 
 import Backend.bCategory;
 import Frontend.AppIcon;
- 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javax.swing.JOptionPane;
-
 
 /**
  *
@@ -116,7 +109,9 @@ public class Category extends javax.swing.JDialog {
         jLabel11.setForeground(new java.awt.Color(26, 32, 44));
         jLabel11.setText("CATEGORY NAME");
 
+        addCategoryBtn.setBackground(new java.awt.Color(43, 138, 130));
         addCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        addCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         addCategoryBtn.setText("ADD");
         addCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -124,7 +119,9 @@ public class Category extends javax.swing.JDialog {
             }
         });
 
+        clearCategoryBtn.setBackground(new java.awt.Color(232, 236, 241));
         clearCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        clearCategoryBtn.setForeground(new java.awt.Color(26, 31, 46));
         clearCategoryBtn.setText("CLEAR");
         clearCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

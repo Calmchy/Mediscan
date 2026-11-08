@@ -170,7 +170,7 @@ public class NewPassword extends javax.swing.JDialog {
             }
         });
 
-        saveBtn.setBackground(new java.awt.Color(28, 107, 98));
+        saveBtn.setBackground(new java.awt.Color(43, 138, 130));
         saveBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         saveBtn.setForeground(new java.awt.Color(255, 255, 255));
         saveBtn.setText("SAVE");
@@ -181,7 +181,9 @@ public class NewPassword extends javax.swing.JDialog {
             }
         });
 
+        cancelBtn.setBackground(new java.awt.Color(232, 236, 241));
         cancelBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        cancelBtn.setForeground(new java.awt.Color(26, 31, 46));
         cancelBtn.setText("CANCEL");
         cancelBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

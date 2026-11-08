@@ -480,13 +480,7 @@ public class bAccount {
         }
         return false;
     }
- 
-    public static void clearResetFields(ResetPasswordFields f) {
-        f.newPasswordTF.setText("");
-        f.showPassCB.setSelected(false);
-        togglePassword(f.newPasswordTF, f.showPassCB);
-    }
- 
+    
     public static boolean requireAdmin(java.awt.Component parent) {
         if (!"admin".equals(Session.role)) {
             JOptionPane.showMessageDialog(parent, "Only an admin can manage accounts.");

@@ -16,23 +16,17 @@ import javax.swing.table.DefaultTableModel;
 public class bStocks {
     public static final String ALL_PRODUCTS = "All Products";
     public static final String ALL_STATUSES = "All Statuses";
-    public static final int STATUS_COL = 8;      // index of the STATUS column in the stock table
+    public static final int STATUS_COL = 8;
     private static final java.awt.Color BLOCKED_RED = new java.awt.Color(179, 38, 30);
  
-    // ------------------------------------------------------------------
-    // Widgets (the Dashboard fills these once, the backend does the rest)
-    // ------------------------------------------------------------------
- 
-    /** Widgets of the STOCK tab. */
     public static class StockFields {
         public JTable stockTable;
         public JTextField searchTF;
-        public JComboBox<String> productCB;      // stockFilterProductCB
-        public JComboBox<String> statusCB;       // stockFilterStatusCB
-        private boolean loading;                 // true while the combos are being refilled
+        public JComboBox<String> productCB;
+        public JComboBox<String> statusCB;
+        private boolean loading;
     }
  
-    /** Widgets of the ADD / EDIT STOCK dialog. */
     public static class StockFormFields {
         public JComboBox<String> productCB;
         public JTextField batchNoTF;
@@ -42,11 +36,6 @@ public class bStocks {
         public com.toedter.calendar.JDateChooser expiryDC;
     }
  
-    // ------------------------------------------------------------------
-    // STOCK tab: table, filters
-    // ------------------------------------------------------------------
- 
-    /** Call once: gives the table its columns and shows held / recalled batches in red text. */
     public static void setupTable(StockFields f) {
         DefaultTableModel model = new DefaultTableModel(
                 new Object[][]{},
@@ -71,16 +60,14 @@ public class bStocks {
         javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
             private final java.text.DecimalFormat money = new java.text.DecimalFormat("0.##");
             @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
+            public Component getTableCellRendererComponent(JTable t, Object value, 
                     boolean selected, boolean focus, int row, int col) {
                 Object shown = (value instanceof Double) ? money.format(value) : value;
                 Component c = super.getTableCellRendererComponent(t, shown, selected, focus, row, col);
-                setHorizontalAlignment(value instanceof Number ? javax.swing.SwingConstants.RIGHT
-                                                               : javax.swing.SwingConstants.LEFT);
+                setHorizontalAlignment(value instanceof Number ? javax.swing.SwingConstants.RIGHT : javax.swing.SwingConstants.LEFT);
                 Object status = t.getModel().getValueAt(t.convertRowIndexToModel(row), STATUS_COL);
                 boolean blocked = status != null && !"ACTIVE".equals(status.toString());
                 if (!selected) {
-                    // always set it: this renderer is reused for every cell and remembers the last color
                     c.setForeground(blocked ? BLOCKED_RED : t.getForeground());
                 }
                 return c;
@@ -91,7 +78,6 @@ public class bStocks {
         f.stockTable.setDefaultRenderer(Double.class, renderer);
     }
  
-    /** Fills the Product and Status combos (keeps the current choice). Does not reload the table. */
     public static void loadFilters(StockFields f) {
         f.loading = true;
         try {
@@ -102,7 +88,6 @@ public class bStocks {
         }
     }
  
-    /** Call from the combos' action listeners. Ignored while the combos are being refilled. */
     public static void onFilterChanged(StockFields f) {
         if (!f.loading) {
             setStock(f);
@@ -139,12 +124,10 @@ public class bStocks {
         }
     }
  
-    /** 'on_hold' -> "ON HOLD", 'active' -> "ACTIVE", 'recalled' -> "RECALLED". */
     private static String statusLabel(String status) {
         return status == null ? "ACTIVE" : status.toUpperCase().replace('_', ' ');
     }
  
-    /** "On Hold" -> "on_hold" (the value stored in product_stock.status); null means no filter. */
     private static String statusValue(String filter) {
         if (filter == null || filter.equals(ALL_STATUSES)) {
             return null;
@@ -152,7 +135,6 @@ public class bStocks {
         return filter.trim().toLowerCase().replace(' ', '_');
     }
  
-    /** Loads the table using the search box and the two filters. */
     public static void setStock(StockFields f) {
         String keyword = f.searchTF.getText();
         String productName = (String) f.productCB.getSelectedItem();
@@ -201,11 +183,6 @@ public class bStocks {
         }
     }
  
-    // ------------------------------------------------------------------
-    // STOCK tab: buttons
-    // ------------------------------------------------------------------
- 
-    /** Selected stock_id, or -1 (after telling the user to select a row). action = "edit", "delete", ... */
     public static int getSelectedStockId(Component parent, StockFields f, String action) {
         int row = f.stockTable.getSelectedRow();
         if (row == -1) {
@@ -248,10 +225,6 @@ public class bStocks {
         }
     }
  
-    /**
-     * HOLD / RELEASE button. One popup asks what to do with the selected batch:
-     * ACTIVE -> hold or recall, ON HOLD -> release or recall. RECALLED batches stay recalled.
-     */
     public static void holdRelease(Component parent, StockFields f) {
         String role = Session.role == null ? "" : Session.role.toLowerCase();
         if (!role.equals("admin") && !role.equals("pharmacist")) {
@@ -279,7 +252,6 @@ public class bStocks {
             boolean isActive = "ACTIVE".equals(status);
             String why = isActive ? null : getStatusReason(stockId);
  
-            // one button, one popup: what do you want to do with this batch?
             String[] options = isActive
                     ? new String[]{"Hold (temporary)", "Recall (permanent)", "Cancel"}
                     : new String[]{"Release", "Recall (permanent)", "Cancel"};
@@ -290,7 +262,7 @@ public class bStocks {
                     "HOLD / RELEASE BATCH", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                     null, options, options[0]);
             if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
-                return; // cancelled
+                return;
             }
  
             String from = isActive ? "active" : "on_hold";
@@ -298,15 +270,14 @@ public class bStocks {
             String reason = null;
  
             if (choice == 0 && !isActive) {
-                to = "active"; // release: no reason needed
+                to = "active";
             } else {
                 to = (choice == 0) ? "on_hold" : "recalled";
                 String what = (choice == 0) ? "holding" : "recalling";
-                reason = JOptionPane.showInputDialog(parent,
-                        "Reason for " + what + " " + product + " (batch " + batch + "):",
+                reason = JOptionPane.showInputDialog(parent, "Reason for " + what + " " + product + " (batch " + batch + "):", 
                         choice == 0 ? "HOLD BATCH" : "RECALL BATCH", JOptionPane.QUESTION_MESSAGE);
                 if (reason == null) {
-                    return; // cancelled
+                    return;
                 }
                 reason = reason.trim();
                 if (reason.isEmpty()) {
@@ -339,7 +310,6 @@ public class bStocks {
         setStock(f);
     }
  
-    /** Why a batch was put on hold (null if none). */
     public static String getStatusReason(int stockId) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("SELECT status_reason FROM product_stock WHERE stock_id = ?")) {
@@ -353,11 +323,6 @@ public class bStocks {
         }
     }
  
-    /**
-     * Moves a batch from one status to another ('active', 'on_hold', 'recalled').
-     * The WHERE includes the status we expect, so if someone else already changed it nothing is updated.
-     * @return rows updated (1 = done, 0 = batch changed or was removed in the meantime)
-     */
     public static int setStatus(int stockId, String fromStatus, String toStatus, String reason) throws java.sql.SQLException {
         String sql = "UPDATE product_stock SET status = ?, status_reason = ? WHERE stock_id = ? AND status = ?";
         try (Connection con = DBConnection.getConnection();
@@ -370,11 +335,6 @@ public class bStocks {
         }
     }
  
-    // ------------------------------------------------------------------
-    // ADD / EDIT STOCK dialog
-    // ------------------------------------------------------------------
- 
-    /** Call once from the dialog constructor: fills the product combo and the "packs received" auto-calculation. */
     public static void setupForm(StockFormFields f) {
         loadProducts(f.productCB);
         f.packsReceivedTF.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -387,13 +347,13 @@ public class bStocks {
                 }
                 Integer packSize = getPackSizeByProductName(selectedProduct);
                 if (packSize == null) {
-                    return; // no pack_size for this product (e.g. unit_type = piece), nothing to calculate
+                    return;
                 }
                 try {
                     int packs = Integer.parseInt(packsText);
                     f.quantityTF.setText(String.valueOf(packs * packSize));
                 } catch (NumberFormatException e) {
-                    // still typing, ignore
+                    
                 }
             }
         });
@@ -440,7 +400,6 @@ public class bStocks {
         }
     }
  
-    /** EDIT mode: puts the batch's saved values into the form. */
     public static void loadStock(StockFormFields f, int stockId) {
         String sql = "SELECT p.name, ps.batch_no, ps.quantity, ps.cost_price, ps.expiry_date "
                 + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
@@ -475,7 +434,6 @@ public class bStocks {
         f.packsReceivedTF.setText("");
     }
  
-    /** ADD (stockId == -1) or UPDATE. Shows its own messages. @return true when saved, so the dialog can close. */
     public static boolean saveStock(Component parent, StockFormFields f, int stockId) {
         String selectedProduct = (String) f.productCB.getSelectedItem();
         String batchNo = f.batchNoTF.getText().trim();

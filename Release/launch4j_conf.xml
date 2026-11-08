@@ -22,12 +22,12 @@
     <maxVersion></maxVersion>
   </jre>
   <versionInfo>
-    <fileVersion>1.2.0.0</fileVersion>
-    <txtFileVersion>1.2.0.0</txtFileVersion>
+    <fileVersion>1.2.1.0</fileVersion>
+    <txtFileVersion>1.2.1.0</txtFileVersion>
     <fileDescription>POS System for Retail Pharmacies</fileDescription>
     <copyright>2026</copyright>
-    <productVersion>1.2.0.0</productVersion>
-    <txtProductVersion>1.2.0.0</txtProductVersion>
+    <productVersion>1.2.1.0</productVersion>
+    <txtProductVersion>1.2.1.0</txtProductVersion>
     <productName>MediScan POS</productName>
     <companyName>Calmchy</companyName>
     <internalName>Mediscan POS</internalName>

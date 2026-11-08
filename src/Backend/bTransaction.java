@@ -67,13 +67,12 @@ public class bTransaction {
     }
  
     public static void setOrders(JTable table, String orderId, Date from, Date to, String cashier) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT o.order_id, o.order_date, CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
-              + "COALESCE(SUM(oi.quantity), 0) AS items, o.total_amount "
-              + "FROM orders o "
-              + "JOIN users u ON o.user_id = u.user_id "
-              + "LEFT JOIN order_items oi ON oi.order_id = o.order_id "
-              + "WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder("SELECT o.order_id, o.order_date, CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
+                + "COALESCE(SUM(oi.quantity), 0) AS items, o.total_amount "
+                + "FROM orders o "
+                + "JOIN users u ON o.user_id = u.user_id "
+                + "LEFT JOIN order_items oi ON oi.order_id = o.order_id "
+                + "WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
  
         if (orderId != null && !orderId.trim().isEmpty()) {
@@ -252,8 +251,7 @@ public class bTransaction {
         DefaultTableModel m = (DefaultTableModel) detailsTable.getModel();
         for (int i = 0; i < m.getRowCount(); i++) {
             sb.append(m.getValueAt(i, 0)).append("\n");
-            sb.append(String.format("  %d x %s = %s\n",
-                    (int) m.getValueAt(i, 1),
+            sb.append(String.format("  %d x %s = %s\n", (int) m.getValueAt(i, 1), 
                     MONEY.format((double) m.getValueAt(i, 3)),
                     MONEY.format((double) m.getValueAt(i, 4))));
         }

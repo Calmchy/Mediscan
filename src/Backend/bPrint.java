@@ -36,7 +36,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 public class bPrint {
-    private static final String BARCODE_FOLDER_SALES = System.getProperty("user.home") + "/MediScanBarcodes/Sales/";
+    private static final String BARCODE_FOLDER_SALES = System.getProperty("user.home") + "/MediScan/Sales/";
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     
     public static class Line {

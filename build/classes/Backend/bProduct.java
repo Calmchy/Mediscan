@@ -24,21 +24,15 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 
 public class bProduct {
         public static final String ALL_CATEGORIES = "All Categories";
-    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
+    private static final String BARCODE_FOLDER = System.getProperty("user.home") + "/MediScan/Product/";
  
-    // ------------------------------------------------------------------
-    // Widgets (the Dashboard / dialog fills these once, the backend does the rest)
-    // ------------------------------------------------------------------
- 
-    /** Widgets of the PRODUCTS tab. */
     public static class ProductFields {
         public JTable productsTable;
         public JTextField searchTF;
-        public JComboBox<String> categoryCB;     // productCategoryCB (the filter)
-        private boolean loading;                 // true while the combo is being refilled
+        public JComboBox<String> categoryCB;
+        private boolean loading;
     }
  
-    /** Widgets of the ADD / EDIT PRODUCT dialog. */
     public static class ProductFormFields {
         public JTextField nameTF;
         public JTextField brandTF;
@@ -50,12 +44,7 @@ public class bProduct {
         public JComboBox<String> unitTypeCB;
         public JTextField packSizeTF;
     }
- 
-    // ------------------------------------------------------------------
-    // PRODUCTS tab: table, filter
-    // ------------------------------------------------------------------
- 
-    /** Fills the category filter (keeps the current choice). Does not reload the table. */
+    
     public static void loadCategoryFilter(ProductFields f) {
         f.loading = true;
         try {
@@ -72,21 +61,19 @@ public class bProduct {
                 System.out.println(e.getMessage());
             }
             if (previous != null) {
-                f.categoryCB.setSelectedItem(previous); // does nothing if it no longer exists -> stays on "All"
+                f.categoryCB.setSelectedItem(previous);
             }
         } finally {
             f.loading = false;
         }
     }
  
-    /** Call from the combo's action listener. Ignored while the combo is being refilled. */
     public static void onFilterChanged(ProductFields f) {
         if (!f.loading) {
             setProducts(f);
         }
     }
  
-    /** Loads the table using the search box and the category filter. */
     public static void setProducts(ProductFields f) {
         String keyword = f.searchTF.getText();
         String category = (String) f.categoryCB.getSelectedItem();
@@ -134,11 +121,6 @@ public class bProduct {
         }
     }
  
-    // ------------------------------------------------------------------
-    // PRODUCTS tab: buttons
-    // ------------------------------------------------------------------
- 
-    /** Selected product_id, or -1 (after telling the user to select a row). action = "edit", "delete", ... */
     public static int getSelectedProductId(Component parent, ProductFields f, String action) {
         int row = f.productsTable.getSelectedRow();
         if (row == -1) {
@@ -182,12 +164,7 @@ public class bProduct {
             System.out.println(e.getMessage());
         }
     }
- 
-    // ------------------------------------------------------------------
-    // Barcodes
-    // ------------------------------------------------------------------
- 
-    /** Saves the barcode image of a product id. @return the file path, or null if it failed. */
+    
     public static String generateBarcode(String productId) {
         try {
             File folder = new File(BARCODE_FOLDER);
@@ -208,7 +185,6 @@ public class bProduct {
         }
     }
  
-    /** "Generate barcodes" button: creates the barcode of every product that does not have one yet. */
     public static void generateMissingBarcodes(Component parent) {
         int created = 0, skipped = 0;
  
@@ -236,11 +212,6 @@ public class bProduct {
         }
     }
  
-    // ------------------------------------------------------------------
-    // ADD / EDIT PRODUCT dialog
-    // ------------------------------------------------------------------
- 
-    /** Call once from the dialog constructor: fills the category combo and wires the age / unit-type toggles. */
     public static void setupForm(ProductFormFields f) {
         loadCategories(f.categoryCB);
         setupAgeRestrictedToggle(f);
@@ -288,7 +259,6 @@ public class bProduct {
         });
     }
  
-    /** EDIT mode: puts the product's saved values into the form. */
     public static void loadProduct(ProductFormFields f, int productId) {
         String sql = "SELECT p.name, p.brand, c.category_name, p.selling_price, "
                 + "p.requires_prescription, p.is_age_restricted, p.minimum_age, "
@@ -340,7 +310,6 @@ public class bProduct {
         f.packSizeTF.setText("");
     }
  
-    /** ADD (productId == -1) or UPDATE. Shows its own messages. @return true when saved, so the dialog can close. */
     public static boolean saveProduct(Component parent, ProductFormFields f, int productId) {
         String name = f.nameTF.getText().trim();
         String brand = f.brandTF.getText().trim();
@@ -405,7 +374,6 @@ public class bProduct {
                 if (productId == -1) {
                     int newId = insertProduct(con, name, brand, categoryId, sellingPrice,
                             requiresRx, ageRestricted, minimumAge, unitType, packSize);
-                    // first price entry for the new product (old_price stays NULL)
                     if (newId != -1) {
                         logPriceChange(con, newId, null, sellingPrice);
                     }
@@ -424,7 +392,6 @@ public class bProduct {
                     Double oldPrice = getCurrentSellingPrice(con, productId);
                     updateProduct(con, productId, name, brand, categoryId, sellingPrice,
                             requiresRx, ageRestricted, minimumAge, unitType, packSize);
-                    // audit trail: only write a row when the selling price actually changed
                     if (oldPrice == null || Double.compare(oldPrice, sellingPrice) != 0) {
                         logPriceChange(con, productId, oldPrice, sellingPrice);
                     }
@@ -503,7 +470,6 @@ public class bProduct {
         }
     }
  
-    /** Writes one row to product_price_history (runs inside the caller's transaction). */
     private static void logPriceChange(Connection con, int id, Double oldPrice, double newPrice) throws Exception {
         try (PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO product_price_history (product_id, old_price, new_price, changed_by) VALUES (?, ?, ?, ?)")) {

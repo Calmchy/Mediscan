@@ -14,18 +14,15 @@ import javax.swing.table.DefaultTableModel;
 
 public class bCategory {
  
-    /** Widgets of the CATEGORY tab. */
     public static class CategoryFields {
         public JTable categoryTable;
         public JTextField searchTF;
     }
  
-    /** Widgets of the ADD / EDIT CATEGORY dialog. */
     public static class CategoryFormFields {
         public JTextField nameTF;
     }
  
-    /** Loads the table using the search box. */
     public static void setCategory(CategoryFields f) {
         String keyword = f.searchTF.getText();
         String sql = "SELECT category_id, category_name FROM categories "
@@ -48,7 +45,6 @@ public class bCategory {
         }
     }
  
-    /** Selected category_id, or -1 (after telling the user to select a row). action = "edit", "delete", ... */
     public static int getSelectedCategoryId(Component parent, CategoryFields f, String action) {
         int row = f.categoryTable.getSelectedRow();
         if (row == -1) {
@@ -93,7 +89,6 @@ public class bCategory {
         }
     }
  
-    /** EDIT mode: puts the category's saved name into the form. */
     public static void loadCategory(CategoryFormFields f, int categoryId) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("SELECT category_name FROM categories WHERE category_id = ?")) {
@@ -112,7 +107,6 @@ public class bCategory {
         f.nameTF.setText("");
     }
  
-    /** ADD (categoryId == -1) or UPDATE. Shows its own messages. @return true when saved, so the dialog can close. */
     public static boolean saveCategory(Component parent, CategoryFormFields f, int categoryId) {
         String name = f.nameTF.getText().trim();
  

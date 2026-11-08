@@ -152,7 +152,9 @@ public class Product extends javax.swing.JDialog {
         productAgeRestCB.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         productAgeRestCB.setText(" AGE RESTRICTED");
 
+        productAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         productAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         productAddBtn.setText("ADD");
         productAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -160,7 +162,9 @@ public class Product extends javax.swing.JDialog {
             }
         });
 
+        productClearBtn.setBackground(new java.awt.Color(232, 236, 241));
         productClearBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        productClearBtn.setForeground(new java.awt.Color(26, 31, 46));
         productClearBtn.setText("CLEAR");
         productClearBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

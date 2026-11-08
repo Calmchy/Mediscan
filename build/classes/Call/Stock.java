@@ -131,7 +131,9 @@ public class Stock extends javax.swing.JDialog {
         jLabel16.setForeground(new java.awt.Color(26, 32, 44));
         jLabel16.setText("EXPIRY DATE");
 
+        stockAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         stockAddBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        stockAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         stockAddBtn.setText("ADD");
         stockAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -139,7 +141,9 @@ public class Stock extends javax.swing.JDialog {
             }
         });
 
+        stockClearBtn.setBackground(new java.awt.Color(232, 236, 241));
         stockClearBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        stockClearBtn.setForeground(new java.awt.Color(26, 31, 46));
         stockClearBtn.setText("CLEAR");
         stockClearBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
