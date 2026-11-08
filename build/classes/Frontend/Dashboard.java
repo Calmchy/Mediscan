@@ -474,6 +474,7 @@ public class Dashboard extends javax.swing.JFrame {
         deleteStockBtn = new javax.swing.JButton();
         editStockBtn = new javax.swing.JButton();
         addStockBtn = new javax.swing.JButton();
+        holdReleaseStockBtn = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         stockFilterProductCB = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
@@ -573,7 +574,6 @@ public class Dashboard extends javax.swing.JFrame {
         customerEditBtn = new javax.swing.JButton();
         customerDeleteBtn = new javax.swing.JButton();
         customerPrintBtn = new javax.swing.JButton();
-        prescriptionTab = new javax.swing.JPanel();
         accountsTab = new javax.swing.JPanel();
         accountsBG = new javax.swing.JPanel();
         headBG = new javax.swing.JPanel();
@@ -1762,6 +1762,14 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        holdReleaseStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        holdReleaseStockBtn.setText("HOLD / RELEASE");
+        holdReleaseStockBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                holdReleaseStockBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -1774,18 +1782,21 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(deleteStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(holdReleaseStockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(printStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(265, Short.MAX_VALUE))
+                .addGap(24, 24, 24))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(printStockBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(deleteStockBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(editStockBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(addStockBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addStockBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                    .addComponent(deleteStockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(holdReleaseStockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(printStockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -2790,19 +2801,6 @@ public class Dashboard extends javax.swing.JFrame {
 
         tabPannel.addTab("CUSTOMERS", customersTab);
 
-        javax.swing.GroupLayout prescriptionTabLayout = new javax.swing.GroupLayout(prescriptionTab);
-        prescriptionTab.setLayout(prescriptionTabLayout);
-        prescriptionTabLayout.setHorizontalGroup(
-            prescriptionTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1051, Short.MAX_VALUE)
-        );
-        prescriptionTabLayout.setVerticalGroup(
-            prescriptionTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 644, Short.MAX_VALUE)
-        );
-
-        tabPannel.addTab("PRESCRIPTIONS", prescriptionTab);
-
         headBG.setBackground(new java.awt.Color(255, 255, 255));
 
         adminRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -3373,6 +3371,10 @@ public class Dashboard extends javax.swing.JFrame {
         Backend.bReports.generate(this, Backend.bReports.Type.EXPIRY, null, null);
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
+    private void holdReleaseStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_holdReleaseStockBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_holdReleaseStockBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -3473,6 +3475,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton genBarProductBtn;
     private javax.swing.JPanel headBG;
     private javax.swing.JPanel header;
+    private javax.swing.JButton holdReleaseStockBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -3572,7 +3575,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JButton logoutDashboardBtn;
     private javax.swing.JPanel mainDashboardTab;
-    private javax.swing.JPanel prescriptionTab;
     private javax.swing.JButton printCategoryBtn;
     private javax.swing.JButton printProductBtn;
     private javax.swing.JButton printStockBtn;
