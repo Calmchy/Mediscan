@@ -130,7 +130,9 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
+        exitBtn.setBackground(new java.awt.Color(232, 236, 241));
         exitBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        exitBtn.setForeground(new java.awt.Color(26, 31, 46));
         exitBtn.setText("EXIT");
         exitBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -219,12 +221,11 @@ public class Login extends javax.swing.JFrame {
             return;
         }
 
-        // first login with a temporary password: must set a new one before entering
         if (Session.mustChangePassword) {
             NewPassword np = new NewPassword(this, true);
             np.setVisible(true);
 
-            if (Session.mustChangePassword) { // dialog closed or cancelled without saving
+            if (Session.mustChangePassword) {
                 Session.clear();
                 passwordPF.setText("");
                 return;

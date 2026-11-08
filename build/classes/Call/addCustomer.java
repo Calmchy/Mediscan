@@ -22,6 +22,7 @@ public class addCustomer extends javax.swing.JDialog {
     public addCustomer(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        Title.setText("ADD CUSTOMER");
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         initFields();
@@ -105,7 +106,8 @@ public class addCustomer extends javax.swing.JDialog {
 
         footer.setBackground(new java.awt.Color(255, 255, 255));
 
-        addAccountBtn.setBackground(new java.awt.Color(28, 107, 98));
+        addAccountBtn.setBackground(new java.awt.Color(43, 138, 130));
+        addAccountBtn.setForeground(new java.awt.Color(255, 255, 255));
         addAccountBtn.setText("ADD");
         addAccountBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -113,6 +115,8 @@ public class addCustomer extends javax.swing.JDialog {
             }
         });
 
+        clearrBtn.setBackground(new java.awt.Color(232, 236, 241));
+        clearrBtn.setForeground(new java.awt.Color(26, 31, 46));
         clearrBtn.setText("CLEAR");
         clearrBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

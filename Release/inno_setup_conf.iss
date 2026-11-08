@@ -1,6 +1,6 @@
 
 #define MyAppName "MediScan POS"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppPublisher "Calmchy"
 #define MyAppURL "https://github.com/Calmchy/Mediscan"
 #define MyAppExeName "Mediscan POS.exe"

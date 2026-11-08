@@ -5,164 +5,53 @@
  */
 package Call;
 
-import Backend.DBConnection;
+import Backend.bStocks;
 import Frontend.AppIcon;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javax.swing.JOptionPane;
+
 /**
  *
  * @author chyril
  */
 public class Stock extends javax.swing.JDialog {
     private int stockId = -1;
+    private final bStocks.StockFormFields ui = new bStocks.StockFormFields();
+    
     /**
      * Creates new form addStock
      */
     public Stock(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         setTitle("ADD STOCK");
         Title.setText("ADD STOCK");
         stockAddBtn.setText("ADD");
-        loadProducts();
-        setupPacksAutoCalc();
+        bStocks.setupForm(ui);
     }
     
     public Stock(java.awt.Frame parent, boolean modal, int stockId) {
         super(parent, modal);
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         this.stockId = stockId;
         setTitle("EDIT STOCK");
         Title.setText("EDIT STOCK");
         stockAddBtn.setText("UPDATE");
-        loadProducts();
-        setupPacksAutoCalc();
-        loadStockData();
+        bStocks.setupForm(ui);
+        bStocks.loadStock(ui, stockId);
     }
     
-    private Integer getPackSizeByProductName(String productName) {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(
-                "SELECT pack_size FROM products WHERE name = ?");
-            ps.setString(1, productName);
-            ResultSet rs = ps.executeQuery();
- 
-            Integer packSize = null;
-            if (rs.next()) {
-                Object val = rs.getObject("pack_size");
-                if (val != null) packSize = rs.getInt("pack_size");
-            }
- 
-            rs.close();
-            ps.close();
-            con.close();
-            return packSize;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-    
-    private void setupPacksAutoCalc() {
-        stockPReceivedTF.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                String selectedProduct = (String) stockProductNameCB.getSelectedItem();
-                String packsText = stockPReceivedTF.getText().trim();
- 
-                if (selectedProduct == null || packsText.isEmpty()) {
-                    return;
-                }
- 
-                Integer packSize = getPackSizeByProductName(selectedProduct);
-                if (packSize == null) {
-                    return; // no pack_size for this product (e.g. unit_type = piece) — nothing to calculate
-                }
- 
-                try {
-                    int packs = Integer.parseInt(packsText);
-                    stockQtyTF.setText(String.valueOf(packs * packSize));
-                } catch (NumberFormatException e) {
-                    // still typing — ignore
-                }
-            }
-        });
-    }
-    
-    private void loadProducts() {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT name FROM products");
-            ResultSet rs = ps.executeQuery();
- 
-            stockProductNameCB.removeAllItems();
-            while (rs.next()) {
-                stockProductNameCB.addItem(rs.getString("name"));
-            }
- 
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    private int getProductIdByName(String productName) throws Exception {
-        Connection con = DBConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement("SELECT product_id FROM products WHERE name = ?");
-        ps.setString(1, productName);
-        ResultSet rs = ps.executeQuery();
- 
-        int id = -1;
-        if (rs.next()) {
-            id = rs.getInt("product_id");
-        }
- 
-        rs.close();
-        ps.close();
-        con.close();
-        return id;
-    }
-    
-    private void loadStockData() {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT p.name, ps.batch_no, ps.quantity, ps.cost_price, ps.expiry_date "
-                    + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
-                    + "WHERE ps.stock_id = ?");
-
-            ps.setInt(1, stockId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                stockBatchNoTF.setText(rs.getString("batch_no"));
-                stockQtyTF.setText(String.valueOf(rs.getInt("quantity")));
-                stockCostPriceTF.setText(String.valueOf(rs.getDouble("cost_price")));
-
-                Date expiry = rs.getDate("expiry_date");
-                if (expiry != null) {
-                    stockExpiryDateFF.setDate(expiry);
-                }
-
-                stockProductNameCB.setSelectedItem(rs.getString("name"));
-            }
-
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+    private void initFields() {
+        ui.productCB = stockProductNameCB;
+        ui.batchNoTF = stockBatchNoTF;
+        ui.costPriceTF = stockCostPriceTF;
+        ui.packsReceivedTF = stockPReceivedTF;
+        ui.quantityTF = stockQtyTF;
+        ui.expiryDC = stockExpiryDateFF;
     }
 
     /**
@@ -242,7 +131,9 @@ public class Stock extends javax.swing.JDialog {
         jLabel16.setForeground(new java.awt.Color(26, 32, 44));
         jLabel16.setText("EXPIRY DATE");
 
+        stockAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         stockAddBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        stockAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         stockAddBtn.setText("ADD");
         stockAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -250,7 +141,9 @@ public class Stock extends javax.swing.JDialog {
             }
         });
 
+        stockClearBtn.setBackground(new java.awt.Color(232, 236, 241));
         stockClearBtn.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        stockClearBtn.setForeground(new java.awt.Color(26, 31, 46));
         stockClearBtn.setText("CLEAR");
         stockClearBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -351,104 +244,13 @@ public class Stock extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void stockAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockAddBtnActionPerformed
-        String selectedProduct = (String) stockProductNameCB.getSelectedItem();
-        String batchNo = stockBatchNoTF.getText().trim();
-        String qtyText = stockQtyTF.getText().trim();
-        String costText = stockCostPriceTF.getText().trim();
-        // getDate() is null when the date was cleared, so check before formatting
-        String expiryText = stockExpiryDateFF.getDate() == null ? ""
-                : new java.text.SimpleDateFormat("yyyy-MM-dd").format(stockExpiryDateFF.getDate());
-
-        if (selectedProduct == null || batchNo.isEmpty() || qtyText.isEmpty()
-                || costText.isEmpty() || expiryText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields.");
-            return;
-        }
-
-        double costPrice;
-        try {
-            costPrice = Double.parseDouble(costText);
-            if (costPrice < 0) {
-                JOptionPane.showMessageDialog(this, "Cost Price cannot be negative.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Cost Price must be a valid number.");
-            return;
-        }
-
-        int quantity;
-        try {
-            quantity = Integer.parseInt(qtyText);
-            if (quantity <= 0) {
-                JOptionPane.showMessageDialog(this, "Quantity must be greater than zero.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Quantity must be a whole number.");
-            return;
-        }
-
-        Date expiryDate;
-        try {
-            expiryDate = Date.valueOf(expiryText);
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, "Expiry Date must be in yyyy-MM-dd format (e.g. 2027-05-01).");
-            return;
-        }
-
-        try {
-            int productId = getProductIdByName(selectedProduct);
-            if (productId == -1) {
-                JOptionPane.showMessageDialog(this, "Selected product could not be found.");
-                return;
-            }
-
-            Connection con = DBConnection.getConnection();
-
-            if (stockId == -1) {
-                PreparedStatement ps = con.prepareStatement("INSERT INTO product_stock (product_id, batch_no, quantity, cost_price, expiry_date) "
-                        + "VALUES (?, ?, ?, ?, ?)");
-
-                ps.setInt(1, productId);
-                ps.setString(2, batchNo);
-                ps.setInt(3, quantity);
-                ps.setDouble(4, costPrice);
-                ps.setDate(5, expiryDate);
-                ps.executeUpdate();
-                ps.close();
-                JOptionPane.showMessageDialog(this, "Stock added successfully!");
-            } else {
-                PreparedStatement ps = con.prepareStatement("UPDATE product_stock "
-                        + "SET product_id=?, batch_no=?, quantity=?, cost_price=?, expiry_date=? WHERE stock_id=?");
-
-                ps.setInt(1, productId);
-                ps.setString(2, batchNo);
-                ps.setInt(3, quantity);
-                ps.setDouble(4, costPrice);
-                ps.setDate(5, expiryDate);
-                ps.setInt(6, stockId);
-                ps.executeUpdate();
-                ps.close();
-                JOptionPane.showMessageDialog(this, "Stock updated successfully!");
-            }
-
-            con.close();
+        if (bStocks.saveStock(this, ui, stockId)) {
             dispose();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }//GEN-LAST:event_stockAddBtnActionPerformed
 
     private void stockClearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockClearBtnActionPerformed
-        if (stockProductNameCB.getItemCount() > 0) stockProductNameCB.setSelectedIndex(0);
-        stockBatchNoTF.setText("");
-        stockQtyTF.setText("");
-        stockCostPriceTF.setText("");
-        stockExpiryDateFF.setDate(null);
-        stockPReceivedTF.setText("");
+        bStocks.clearForm(ui);
     }//GEN-LAST:event_stockClearBtnActionPerformed
         
     /**

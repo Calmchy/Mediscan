@@ -20,6 +20,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.AbstractButton;
 
 
 
@@ -209,6 +210,7 @@ public class bSales {
         public JTextField changeTF;
         public JTextField customerIdTF;
         public JLabel customerNameL;
+        public AbstractButton pickupBtn;
     }
  
     private static void msg(Component parent, String text, String title, int type) {
@@ -272,6 +274,7 @@ public class bSales {
     public static void scanProduct(Component parent, SalesFields f) {
         String idText = f.idTF.getText().trim();
         if (idText.isEmpty()) {
+            showWarning(f, "", "");
             return;
         }
         int productId;
@@ -403,7 +406,8 @@ public class bSales {
                 return null;
             }
         }
-        return checkoutSale(parent, f, customerId, "walk_in");
+        boolean pickup = f.pickupBtn != null && f.pickupBtn.isSelected();
+        return checkoutSale(parent, f, customerId, pickup ? "pickup" : "walk_in");
     }
  
     public static CheckoutResult checkoutSale(Component parent, SalesFields f, Integer customerId, String orderType) {
@@ -447,7 +451,6 @@ public class bSales {
         }
     }
     
-    /** One slice of an order line taken from a single stock batch, with that batch's cost at sale time. */
     private static class BatchUsed {
         final int stockId, quantity;
         final double unitCost;
@@ -459,7 +462,6 @@ public class bSales {
         }
     }
  
-    /** Deducts stock first-expiry-first-out and returns which batches were used (and at what cost). */
     private static List<BatchUsed> deductStockFEFO(Connection con, int productId, int quantity, String productName)
             throws Exception {
         String selectSql = "SELECT stock_id, quantity, cost_price FROM product_stock "
@@ -550,7 +552,6 @@ public class bSales {
             try (PreparedStatement ps = con.prepareStatement(itemSql, Statement.RETURN_GENERATED_KEYS);
                  PreparedStatement batchPs = con.prepareStatement(batchSql)) {
                 for (CartItem item : cart) {
-                    // FEFO may take one line from several batches; each carries its own cost
                     List<BatchUsed> used = deductStockFEFO(con, item.productId, item.quantity, item.name);
 
                     ps.setInt(1, orderId);
@@ -569,7 +570,6 @@ public class bSales {
                         orderItemId = keys.getInt(1);
                     }
 
-                    // snapshot of cost per batch so profit never changes if costs change later
                     for (BatchUsed b : used) {
                         batchPs.setInt(1, orderItemId);
                         batchPs.setInt(2, b.stockId);

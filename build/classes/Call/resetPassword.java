@@ -98,7 +98,8 @@ public class resetPassword extends javax.swing.JDialog {
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel7.setText("ACCOUNT");
 
-        resetBtn.setBackground(new java.awt.Color(28, 107, 98));
+        resetBtn.setBackground(new java.awt.Color(43, 138, 130));
+        resetBtn.setForeground(new java.awt.Color(255, 255, 255));
         resetBtn.setText("RESET");
         resetBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -106,6 +107,8 @@ public class resetPassword extends javax.swing.JDialog {
             }
         });
 
+        cancelBtn.setBackground(new java.awt.Color(232, 236, 241));
+        cancelBtn.setForeground(new java.awt.Color(26, 31, 46));
         cancelBtn.setText("CANCEL");
         cancelBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

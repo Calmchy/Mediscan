@@ -36,23 +36,17 @@ import java.util.List;
 public class bReports {
     public enum Type { SALES, STOCK, EXPIRY }
  
-    // match these with the dashboard cards
     private static final int LOW_STOCK_LEVEL = 10;
     private static final int EXPIRY_WARNING_DAYS = 60;
  
-    private static final Color HEADER_BG = new Color(0x2B, 0x8A, 0x7E);   // same teal as the app
+    private static final Color HEADER_BG = new Color(0x2B, 0x8A, 0x7E);
     private static final Color ZEBRA_BG  = new Color(0xF2, 0xF4, 0xF7);
-    private static final Font TITLE_FONT  = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-    private static final Font SUB_FONT    = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.GRAY);
-    private static final Font HEAD_FONT   = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
-    private static final Font BODY_FONT   = FontFactory.getFont(FontFactory.HELVETICA, 9);
-    private static final Font BOLD_FONT   = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+    private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+    private static final Font SUB_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.GRAY);
+    private static final Font HEAD_FONT = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
+    private static final Font BODY_FONT = FontFactory.getFont(FontFactory.HELVETICA, 9);
+    private static final Font BOLD_FONT = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
     
-    // ------------------------------------------------------------------
-    // ENTRY POINT (call this from the button handlers)
-    // ------------------------------------------------------------------
- 
-    /** Asks where to save, builds the PDF, then offers to open it. */
     public static void generate(java.awt.Component parent, Type type, Date from, Date to) {
         if (type == Type.SALES && (from == null || to == null)) {
             javax.swing.JOptionPane.showMessageDialog(parent, "Please pick a From and To date first.");
@@ -95,9 +89,6 @@ public class bReports {
         }
     }
  
-    // ------------------------------------------------------------------
-    // 1) SALES REPORT  (orders between two dates)
-    // ------------------------------------------------------------------
     public static void salesReport(File out, Date from, Date to) throws SQLException, IOException, DocumentException {
         String sql =
             "SELECT o.order_id, o.order_date, "
@@ -150,9 +141,6 @@ public class bReports {
                 rows, summary);
     }
  
-    // ------------------------------------------------------------------
-    // 2) STOCK REPORT  (current stock per product, all batches summed)
-    // ------------------------------------------------------------------
     public static void stockReport(File out) throws SQLException, IOException, DocumentException {
         String sql = "SELECT p.product_id, p.name, COALESCE(p.brand, '') AS brand, "
                 + "COALESCE(cat.category_name, 'Uncategorized') AS category, "
@@ -202,9 +190,6 @@ public class bReports {
                 rows, summary);
     }
  
-    // ------------------------------------------------------------------
-    // 3) EXPIRY REPORT  (batches expired or expiring within N days)
-    // ------------------------------------------------------------------
     public static void expiryReport(File out) throws SQLException, IOException, DocumentException {
         String sql =
             "SELECT p.name, COALESCE(ps.batch_no, '-') AS batch_no, ps.quantity, ps.expiry_date, "
@@ -243,7 +228,7 @@ public class bReports {
                        + EXPIRY_WARNING_DAYS + " days: " + soon;
  
         buildPdf(out, "Expiry Report",
-                "As of " + new SimpleDateFormat("yyyy-MM-dd").format(new Date())
+                "As of " + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) 
                         + "   (batches expired or expiring within " + EXPIRY_WARNING_DAYS + " days)",
                 new String[]{"Product", "Batch", "Qty", "Expiry", "Days left", "Status"},
                 new float[]{3.2f, 1.6f, 1f, 1.8f, 1.2f, 1.6f},
@@ -252,12 +237,8 @@ public class bReports {
                 rows, summary);
     }
  
-    // ------------------------------------------------------------------
-    // SHARED PDF BUILDER
-    // ------------------------------------------------------------------
-    private static void buildPdf(File out, String title, String subtitle,
-                                 String[] headers, float[] widths, int[] aligns,
-                                 List<String[]> rows, String summary)
+    private static void buildPdf(File out, String title, String subtitle, String[] headers,
+            float[] widths, int[] aligns, List<String[]> rows, String summary) 
             throws IOException, DocumentException {
  
         Document doc = new Document(PageSize.A4, 36, 36, 36, 36);
@@ -276,7 +257,7 @@ public class bReports {
             PdfPTable table = new PdfPTable(headers.length);
             table.setWidthPercentage(100);
             table.setWidths(widths);
-            table.setHeaderRows(1);            // header repeats on every page
+            table.setHeaderRows(1);
  
             for (String h : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(h, HEAD_FONT));
@@ -314,6 +295,6 @@ public class bReports {
     }
  
     private static String money(double v) {
-        return String.format("PHP %,.2f", v);   // plain text: default PDF fonts can't draw the peso sign
+        return String.format("PHP %,.2f", v);
     }
 }

@@ -61,12 +61,11 @@ import org.jfree.data.general.DefaultPieDataset;
  * @author Calmchy
  */
 public class bDashboard {
-    public static final int LOW_STOCK_LIMIT = 20;      // LOW STOCK: units left <= 20
-    public static final int CRITICAL_STOCK = 10;       // units left <= 10 is shown in red, the rest in amber
-    public static final int EXPIRING_DAYS = 60;        // EXPIRING SOON: expiry within 60 days
-    public static final int SOON_RED_DAYS = 30;        // days left <= 30 is shown in red, 31-60 in amber
+    public static final int LOW_STOCK_LIMIT = 20;
+    public static final int CRITICAL_STOCK = 10;
+    public static final int EXPIRING_DAYS = 60;
+    public static final int SOON_RED_DAYS = 30;
  
-    // colors taken from the UI design
     public static final Color TEAL = new Color(43, 138, 130);
     public static final Color NAVY = new Color(30, 58, 95);
     public static final Color BLUE = new Color(79, 172, 255);
@@ -87,11 +86,8 @@ public class bDashboard {
     private static final DecimalFormat WHOLE = new DecimalFormat("#,##0");
     private static final String PESO = "\u20B1 ";
  
-    private static boolean adjusting = false;   // true while we set the date choosers from code
+    private static boolean adjusting = false;
  
-    // ------------------------------------------------------------------
-    // Fields holder (GUI -> backend)
-    // ------------------------------------------------------------------
  
     public static class DashboardFields {
         public JButton todayBtn;
@@ -100,14 +96,14 @@ public class bDashboard {
         public com.toedter.calendar.JDateChooser fromDC;
         public com.toedter.calendar.JDateChooser toDC;
  
-        public JLabel totalSalesL;      // dashTotalSalesTF
-        public JLabel transactionsL;    // dashTransactionsTF
-        public JLabel itemsSoldL;       // dashItemSoldTF
-        public JLabel lowStockL;        // dashLowStockCatTF
-        public JLabel expiringL;        // dashExpiringLeftTF  (the "2" in "2 / 1")
-        public JLabel expiredL;         // dashExpiredRightTF  (the "1" in "2 / 1")
+        public JLabel totalSalesL;
+        public JLabel transactionsL;
+        public JLabel itemsSoldL;
+        public JLabel lowStockL;
+        public JLabel expiringL;
+        public JLabel expiredL;
  
-        public JPanel salesPerDayP;     // empty panels where the charts are placed
+        public JPanel salesPerDayP;
         public JPanel salesByCategoryP;
         public JPanel top5ProductsP;
  
@@ -115,13 +111,8 @@ public class bDashboard {
         public JTable expiringTable;
     }
  
-    // ------------------------------------------------------------------
-    // Period buttons + dates
-    // ------------------------------------------------------------------
- 
-    /** Call once from the Dashboard constructor: styles the tables, selects 7 DAYS and loads everything. */
     public static void init(DashboardFields f) {
-        if (bTransaction.isCashier()) {          // cashier doesn't see this tab, don't load anything
+        if (bTransaction.isCashier()) {
             return;
         }
         styleTable(f.lowStockTable, 1);
@@ -129,7 +120,6 @@ public class bDashboard {
         setPeriod(f, 7);
     }
  
-    /** TODAY = 1, 7 DAYS = 7, 30 DAYS = 30. Sets the From/To dates, highlights the button and reloads. */
     public static void setPeriod(DashboardFields f, int days) {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(days - 1L);
@@ -144,7 +134,6 @@ public class bDashboard {
         refresh(f, false);
     }
  
-    /** Call from the From/To date choosers ("date" property change). Picking dates = CUSTOM period. */
     public static void onDatesChanged(DashboardFields f) {
         if (adjusting) {
             return;
@@ -155,7 +144,6 @@ public class bDashboard {
         refresh(f, true);
     }
  
-    /** REFRESH button. */
     public static void refresh(DashboardFields f) {
         refresh(f, false);
     }
@@ -188,11 +176,6 @@ public class bDashboard {
         b.setFont(b.getFont().deriveFont(active ? Font.BOLD : Font.PLAIN));
     }
  
-    // ------------------------------------------------------------------
-    // The 5 cards
-    // ------------------------------------------------------------------
- 
-    /** TOTAL SALES, TRANSACTIONS, ITEMS SOLD (period) + LOW STOCK, EXPIRING / EXPIRED (right now). */
     public static void loadCards(DashboardFields f, LocalDate from, LocalDate to) {
         Timestamp start = Timestamp.valueOf(from.atStartOfDay());
         Timestamp end = Timestamp.valueOf(to.plusDays(1).atStartOfDay());
@@ -251,11 +234,6 @@ public class bDashboard {
         }
     }
  
-    // ------------------------------------------------------------------
-    // Charts (data from the database)
-    // ------------------------------------------------------------------
- 
-    /** Loads the 3 charts for the period. */
     public static void loadCharts(DashboardFields f, LocalDate from, LocalDate to) {
         Timestamp start = Timestamp.valueOf(from.atStartOfDay());
         Timestamp end = Timestamp.valueOf(to.plusDays(1).atStartOfDay());
@@ -285,7 +263,6 @@ public class bDashboard {
         }
     }
  
-    /** day buckets for 1-31 days, week buckets for 32-90 days, month buckets above that. */
     private static String bucketLabel(LocalDate d, long totalDays) {
         if (totalDays <= 31) {
             return d.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH));
@@ -297,7 +274,6 @@ public class bDashboard {
         return YearMonth.from(d).format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH));
     }
  
-    /** Bucket label -> total sales. Buckets without sales are included with 0 so the chart has no gaps. */
     private static Map<String, Double> loadSalesPerDay(Connection con, LocalDate from, LocalDate to,
             Timestamp start, Timestamp end) throws Exception {
         long totalDays = ChronoUnit.DAYS.between(from, to) + 1;
@@ -320,7 +296,6 @@ public class bDashboard {
         return buckets;
     }
  
-    /** Category -> sales amount, biggest first. Keeps the top 4 and puts the rest into "Others". */
     private static Map<String, Double> loadSalesByCategory(Connection con, Timestamp start, Timestamp end)
             throws Exception {
         String sql = "SELECT COALESCE(c.category_name, 'Uncategorized') AS cat, SUM(oi.subtotal) AS total "
@@ -349,8 +324,7 @@ public class bDashboard {
         }
         return result;
     }
- 
-    /** Product name -> units sold, best seller first (max 5). */
+    
     private static Map<String, Integer> loadTopProducts(Connection con, Timestamp start, Timestamp end)
             throws Exception {
         String sql = "SELECT p.name, SUM(oi.quantity) AS units FROM order_items oi "
@@ -370,11 +344,6 @@ public class bDashboard {
         return result;
     }
  
-    // ------------------------------------------------------------------
-    // Chart builders (no database, so they can be tested with fake data)
-    // ------------------------------------------------------------------
- 
-    /** SALES PER DAY: vertical teal bars with the value on top. */
     public static ChartPanel createSalesPerDayChart(Map<String, Double> data) {
         DefaultCategoryDataset ds = new DefaultCategoryDataset();
         data.forEach((label, value) -> ds.addValue(value, "Sales", label));
@@ -397,9 +366,9 @@ public class bDashboard {
  
         NumberAxis range = (NumberAxis) plot.getRangeAxis();
         double max = data.values().stream().mapToDouble(Double::doubleValue).max().orElse(0);
-        double step = niceStep(max / 4);                          // about 4 steps: 0, 250, 500, 750, 1,000
+        double step = niceStep(max / 4);
         range.setTickUnit(new org.jfree.chart.axis.NumberTickUnit(step));
-        range.setRange(0, step * Math.ceil(max * 1.1 / step));    // a little room above the tallest bar for its label
+        range.setRange(0, step * Math.ceil(max * 1.1 / step));
         range.setNumberFormatOverride(WHOLE);
         range.setAxisLineVisible(false);
         range.setTickMarksVisible(false);
@@ -408,7 +377,6 @@ public class bDashboard {
         return toPanel(chart);
     }
  
-    /** Rounds a step up to 1, 2, 2.5 or 5 x 10^n so the axis shows clean numbers. */
     private static double niceStep(double raw) {
         if (raw <= 1) {
             return 1;
@@ -419,7 +387,6 @@ public class bDashboard {
         return nice * pow;
     }
  
-    /** TOP 5 PRODUCTS: horizontal navy bars with the units at the end. First item = best seller = top bar. */
     public static ChartPanel createTop5Chart(Map<String, Integer> data) {
         DefaultCategoryDataset ds = new DefaultCategoryDataset();
         data.forEach((name, units) -> ds.addValue(units, "Units", name));
@@ -440,7 +407,6 @@ public class bDashboard {
         return toPanel(chart);
     }
  
-    /** SALES BY CATEGORY: pie on the left, legend (color, name, percent) on the right. */
     public static JPanel createSalesByCategoryPanel(Map<String, Double> data) {
         double total = data.values().stream().mapToDouble(Double::doubleValue).sum();
  
@@ -455,7 +421,7 @@ public class bDashboard {
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlineVisible(false);
         plot.setShadowPaint(null);
-        plot.setLabelGenerator(null);               // percentages are shown in the legend instead
+        plot.setLabelGenerator(null);
         plot.setCircular(true);
         plot.setInteriorGap(0.04);
         plot.setSectionOutlinesVisible(true);
@@ -469,7 +435,6 @@ public class bDashboard {
         int i = 0;
         for (Map.Entry<String, Double> e : data.entrySet()) {
             Color color = PIE_COLORS[Math.min(i, PIE_COLORS.length - 1)];
-            // "Others" always gets the last color
             if ("Others".equals(e.getKey())) {
                 color = PIE_COLORS[PIE_COLORS.length - 1];
             }
@@ -501,7 +466,7 @@ public class bDashboard {
         square.setOpaque(true);
         square.setBackground(color);
         square.setPreferredSize(new java.awt.Dimension(12, 12));
-        JPanel squareHolder = new JPanel(new java.awt.GridBagLayout());   // keeps the square 12x12 and centered
+        JPanel squareHolder = new JPanel(new java.awt.GridBagLayout());
         squareHolder.setOpaque(false);
         squareHolder.add(square);
  
@@ -517,8 +482,6 @@ public class bDashboard {
         row.add(pctL, BorderLayout.EAST);
         return row;
     }
- 
-    // ---- chart styling helpers
  
     private static CategoryPlot styleCategoryPlot(JFreeChart chart) {
         chart.setBackgroundPaint(Color.WHITE);
@@ -542,7 +505,7 @@ public class bDashboard {
  
     private static BarRenderer styleBars(CategoryPlot plot, Color color) {
         BarRenderer renderer = (BarRenderer) plot.getRenderer();
-        renderer.setBarPainter(new StandardBarPainter());   // flat bars, no gradient
+        renderer.setBarPainter(new StandardBarPainter());
         renderer.setShadowVisible(false);
         renderer.setSeriesPaint(0, color);
         renderer.setDrawBarOutline(false);
@@ -556,11 +519,11 @@ public class bDashboard {
     private static ChartPanel toPanel(JFreeChart chart) {
         ChartPanel cp = new ChartPanel(chart);
         cp.setBackground(Color.WHITE);
-        cp.setPopupMenu(null);              // no right-click menu
+        cp.setPopupMenu(null);
         cp.setDomainZoomable(false);
         cp.setRangeZoomable(false);
         cp.setMouseWheelEnabled(false);
-        cp.setMinimumDrawWidth(0);          // let the chart scale with the panel instead of stretching
+        cp.setMinimumDrawWidth(0);
         cp.setMinimumDrawHeight(0);
         cp.setMaximumDrawWidth(4000);
         cp.setMaximumDrawHeight(4000);
@@ -581,11 +544,6 @@ public class bDashboard {
         install(host, l);
     }
  
-    // ------------------------------------------------------------------
-    // Tables: LOW STOCK and EXPIRING SOON
-    // ------------------------------------------------------------------
- 
-    /** LOW STOCK: products with 20 units or less (expired batches are not counted), lowest first. */
     public static void setLowStock(DashboardFields f) {
         String sql = "SELECT p.name, COALESCE(SUM(CASE WHEN ps.status = 'active' "
                 + "AND (ps.expiry_date IS NULL OR ps.expiry_date >= CURRENT_DATE) "
@@ -608,7 +566,6 @@ public class bDashboard {
         }
     }
  
-    /** EXPIRING SOON: batches with stock that expire within 60 days or are already expired, nearest first. */
     public static void setExpiringSoon(DashboardFields f) {
         String sql = "SELECT p.name, ps.batch_no, ps.expiry_date, DATEDIFF(ps.expiry_date, CURRENT_DATE) AS days_left "
                 + "FROM product_stock ps JOIN products p ON ps.product_id = p.product_id "
@@ -637,7 +594,6 @@ public class bDashboard {
         }
     }
  
-    /** Header look from the design + colored, centered last column (UNITS LEFT / DAYS LEFT). */
     private static void styleTable(JTable table, int statusColumn) {
         table.setRowHeight(26);
         table.setShowVerticalLines(false);
@@ -673,21 +629,16 @@ public class bDashboard {
         table.getColumnModel().getColumn(statusColumn).setCellRenderer(status);
     }
  
-    /** Low stock: <= 10 red, 11-20 amber. Expiring: EXPIRED / <= 30 days red, 31-60 amber. */
     private static Color statusColor(JTable table, int statusColumn, Object value) {
         String text = value == null ? "" : value.toString();
-        if (statusColumn == 1) {                                  // UNITS LEFT
+        if (statusColumn == 1) {
             return Integer.parseInt(text) <= CRITICAL_STOCK ? RED : AMBER_TEXT;
         }
-        if ("EXPIRED".equals(text)) {                             // DAYS LEFT
+        if ("EXPIRED".equals(text)) {
             return RED;
         }
         return Integer.parseInt(text) <= SOON_RED_DAYS ? RED : AMBER_TEXT;
     }
- 
-    // ------------------------------------------------------------------
-    // helpers
-    // ------------------------------------------------------------------
  
     private static Date toDate(LocalDate d) {
         return Date.from(d.atStartOfDay(ZoneId.systemDefault()).toInstant());

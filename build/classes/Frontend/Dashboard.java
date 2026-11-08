@@ -19,37 +19,21 @@ import Backend.bTransaction;
 import Backend.bCustomer;
 import Backend.bAccount;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.MessageFormat;
-import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.oned.Code128Writer;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import java.nio.file.Path;
-
 /**
  *
  * @author chyril
  */
 public class Dashboard extends javax.swing.JFrame {
     private int orderId;
-    private static final int STOCK_STATUS_COL = 8;
-    private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
-    private boolean loadingFilters = false;
+    
+    private final bCategory.CategoryFields categoryUI = new bCategory.CategoryFields();
+    private final bProduct.ProductFields productUI = new bProduct.ProductFields();
+    private final bStocks.StockFields stockUI = new bStocks.StockFields();
     private final bDashboard.DashboardFields dashUI = new bDashboard.DashboardFields();
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
     private final bCustomer.CustomerFields customerUI = new bCustomer.CustomerFields();
     private final bAccount.AccountFields accountUI = new bAccount.AccountFields();
     
-    bProduct bProd = new bProduct();
-    bStocks bSto = new bStocks();
-    //bTransaction bTrans = new bTransaction();
     /**
      * Creates new form Cashier
      */
@@ -57,26 +41,22 @@ public class Dashboard extends javax.swing.JFrame {
         //this.setUndecorated(true); // para waray window border
         initComponents();
         //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
-        setupStockTable();
+        initCatalogTabs();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         setupDashboardLayout();
+        
         bTransaction.loadCashierFilter(transCashierCB);
         bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
         
-        addSearchListener(transOrderIDTF, () -> reloadOrders());     // your existing helper
+        addSearchListener(transOrderIDTF, () -> reloadOrders());
         transFromDC.addPropertyChangeListener("date", e -> reloadOrders());
         transToDC.addPropertyChangeListener("date", e -> reloadOrders());
         transCashierCB.addActionListener(e -> reloadOrders());
         reloadOrders();
         setTitle("Dashboard"); 
         applyRolePermissions();
-        loadFilterCombos(); 
-        setupSearchListeners(); 
-        setCategoryTable();
-        setProductTable();
-        setStockTable();
-        
+        initCatalogTabs();
         
         transOrderListTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -96,8 +76,8 @@ public class Dashboard extends javax.swing.JFrame {
         dashUI.transactionsL = dashTransactionsTF;
         dashUI.itemsSoldL = dashItemSoldTF;
         dashUI.lowStockL = dashLowStockCatTF;
-        dashUI.expiringL = dashExpiringLeftTF;     // the "2" in "2 / 1"
-        dashUI.expiredL = dashExpiredRightTF;      // the "1" in "2 / 1"
+        dashUI.expiringL = dashExpiringLeftTF;
+        dashUI.expiredL = dashExpiredRightTF;
         dashUI.salesPerDayP = dashSalesPerDayP;
         dashUI.salesByCategoryP = dashSalesByCategoryP;
         dashUI.top5ProductsP = dashTop5ProductsP;
@@ -121,6 +101,7 @@ public class Dashboard extends javax.swing.JFrame {
         salesUI.cashTF = cashAmountSalesTF;
         salesUI.changeTF = changeSalesTF;
         salesUI.customerIdTF = salesCustomerIDTF;
+        salesUI.pickupBtn = salesPickUpCB;
         salesUI.customerNameL = salesCustomerFNL;
         
         customerUI.customerTable = customerTable;
@@ -143,15 +124,49 @@ public class Dashboard extends javax.swing.JFrame {
         transCashierCB1.addActionListener(e -> bAccount.setAccounts(accountUI));
     }
     
+    private void initCatalogTabs() {
+        categoryUI.categoryTable = categoryTable;
+        categoryUI.searchTF = categorySearchTF;
+
+        productUI.productsTable = productsTable;
+        productUI.searchTF = productSearchTF;
+        productUI.categoryCB = productCategoryCB;
+
+        stockUI.stockTable = stockTable;
+        stockUI.searchTF = stockSearchTF;
+        stockUI.productCB = stockFilterProductCB;
+        stockUI.statusCB = stockFilterStatusCB;
+
+        bStocks.setupTable(stockUI);
+        bProduct.loadCategoryFilter(productUI);
+        bStocks.loadFilters(stockUI);
+
+        addSearchListener(categorySearchTF, () -> bCategory.setCategory(categoryUI));
+        addSearchListener(productSearchTF, () -> bProduct.setProducts(productUI));
+        addSearchListener(stockSearchTF, () -> bStocks.setStock(stockUI));
+        productCategoryCB.addActionListener(e -> bProduct.onFilterChanged(productUI));
+        stockFilterProductCB.addActionListener(e -> bStocks.onFilterChanged(stockUI));
+        stockFilterStatusCB.addActionListener(e -> bStocks.onFilterChanged(stockUI));
+
+        tabPannel.addChangeListener(e -> {
+            bProduct.loadCategoryFilter(productUI);
+            bStocks.loadFilters(stockUI);
+            bProduct.setProducts(productUI);
+            bStocks.setStock(stockUI);
+        });
+
+        bCategory.setCategory(categoryUI);
+        bProduct.setProducts(productUI);
+        bStocks.setStock(stockUI);
+    }
+    
     private void setupDashboardLayout() {
         final java.awt.Dimension ZERO = new java.awt.Dimension(0, 0);
         final java.awt.Dimension TINY = new java.awt.Dimension(10, 10);
 
-        // proportions per row
         final double LEFT = 0.42, RIGHT = 0.58;
         final double TOP5 = 0.25, LOW = 0.17, EXPIRING = 0.58;
 
-        // let weights decide size, not the chart/table content
         for (javax.swing.JPanel p : new javax.swing.JPanel[]{jPanel26, jPanel27, jPanel28, jPanel29, jPanel30,
                 dashSalesPerDayP, dashSalesByCategoryP, dashTop5ProductsP}) {
             p.setMinimumSize(ZERO);
@@ -168,16 +183,13 @@ public class Dashboard extends javax.swing.JFrame {
         java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
         c.fill = java.awt.GridBagConstraints.BOTH;
 
-        // row 0: filter bar
         c.gridx = 0; c.gridy = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
         c.insets = new java.awt.Insets(0, 0, 8, 0);
         dashboardBG.add(jPanel13, c);
 
-        // row 1: KPI cards
         c.gridy = 1;
         dashboardBG.add(jPanel32, c);
 
-        // row 2: sales per day | pie chart
         c.gridy = 2; c.weighty = 0.5; c.gridwidth = 2; c.weightx = LEFT;
         c.insets = new java.awt.Insets(0, 10, 8, 4);
         dashboardBG.add(jPanel26, c);
@@ -186,7 +198,6 @@ public class Dashboard extends javax.swing.JFrame {
         c.insets = new java.awt.Insets(0, 4, 8, 10);
         dashboardBG.add(jPanel27, c);
 
-        // row 3: top 5 | low stock | expiring soon
         c.gridy = 3; c.gridx = 0; c.weightx = TOP5;
         c.insets = new java.awt.Insets(0, 10, 8, 4);
         dashboardBG.add(jPanel28, c);
@@ -199,7 +210,6 @@ public class Dashboard extends javax.swing.JFrame {
         c.insets = new java.awt.Insets(0, 4, 8, 10);
         dashboardBG.add(jPanel30, c);
 
-        // row 4: report buttons
         c.gridy = 4; c.gridx = 0; c.gridwidth = 3; c.weightx = 1; c.weighty = 0;
         c.insets = new java.awt.Insets(0, 0, 0, 0);
         dashboardBG.add(jPanel31, c);
@@ -231,35 +241,6 @@ public class Dashboard extends javax.swing.JFrame {
                 transOrderListTable.setRowSelectionInterval(r, r);
                 break;
             }
-        }
-    }
-    
-    private void generateMissingBarcodes() {
-        int created = 0, skipped = 0;
-
-        try (Connection con = Backend.DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT product_id FROM products ORDER BY product_id");
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                String id = String.valueOf(rs.getInt("product_id"));
-                File file = new File(BARCODE_FOLDER_PRODUCT, id + ".png");
-
-                if (file.exists()) {
-                    skipped++;
-                    continue;
-                }
-                saveBarcodeToFile(id, BARCODE_FOLDER_PRODUCT);
-                created++;
-            }
-
-            JOptionPane.showMessageDialog(this,
-                    "Barcodes created: " + created + "\nAlready existed: " + skipped
-                    + "\n\nFolder: " + BARCODE_FOLDER_PRODUCT);
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error generating barcodes: " + e.getMessage());
         }
     }
     
@@ -299,90 +280,6 @@ public class Dashboard extends javax.swing.JFrame {
             tabPannel.setSelectedIndex(firstEnabled);
         }
     }
-    
-    public void setCategoryTable() {
-        bCategory.setCategory(categoryTable, categorySearchTF.getText());
-    }
-    
-    public void setProductTable() {
-        bProd.setProd(productsTable, productSearchTF.getText(), (String) productCategoryCB.getSelectedItem());
-    }
-    
-    public void setStockTable() {
-        bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem(), (String) stockFilterStatusCB.getSelectedItem());
-    }
-    
-    /** Gives the stock table its STATUS column and shows held / recalled batches in red text. */
-    private void setupStockTable() {
-        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{"STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY",
-                    "UNIT", "EXPIRY DATE", "DATE RECEIVED", "STATUS"}) {
-            @Override public Class<?> getColumnClass(int c) {
-                switch (c) {
-                    case 0: case 4: return Integer.class;
-                    case 3: return Double.class;
-                    default: return Object.class;
-                }
-            }
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        stockTable.setModel(model);
-
-        int[] widths = {70, 220, 110, 90, 90, 90, 110, 120, 100};
-        for (int i = 0; i < widths.length; i++) {
-            stockTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
-        }
-
-        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
-            private final java.text.DecimalFormat money = new java.text.DecimalFormat("0.##");
-            @Override
-            public java.awt.Component getTableCellRendererComponent(JTable t, Object value,
-                    boolean selected, boolean focus, int row, int col) {
-                Object shown = (value instanceof Double) ? money.format(value) : value;
-                java.awt.Component c = super.getTableCellRendererComponent(t, shown, selected, focus, row, col);
-                setHorizontalAlignment(value instanceof Number ? javax.swing.SwingConstants.RIGHT
-                                                               : javax.swing.SwingConstants.LEFT);
-                Object status = t.getModel().getValueAt(t.convertRowIndexToModel(row), STOCK_STATUS_COL);
-                boolean blocked = status != null && !"ACTIVE".equals(status.toString());
-                if (!selected) {
-                    // always set it: this renderer is reused for every cell and remembers the last color
-                    c.setForeground(blocked ? new java.awt.Color(179, 38, 30) : t.getForeground());
-                }
-                return c;
-            }
-        };
-        stockTable.setDefaultRenderer(Object.class, renderer);
-        stockTable.setDefaultRenderer(Integer.class, renderer);
-        stockTable.setDefaultRenderer(Double.class, renderer);
-    }
-    
-    private void loadFilterCombos() {
-        loadingFilters = true;
-        try {
-            bProd.loadCategoryFilter(productCategoryCB);
-            bSto.loadProductFilter(stockFilterProductCB);
-            bSto.loadStatusFilter(stockFilterStatusCB); 
-        } finally {
-            loadingFilters = false;
-        }
-    }
-    
-    private void setupSearchListeners() {
-        addSearchListener(categorySearchTF, () -> setCategoryTable());
-        addSearchListener(productSearchTF, () -> setProductTable());
-        addSearchListener(stockSearchTF, () -> setStockTable());
-
-        productCategoryCB.addActionListener(e -> { if (!loadingFilters) setProductTable(); });
-        stockFilterProductCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
-        stockFilterStatusCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
-
-        tabPannel.addChangeListener(e -> {
-            loadFilterCombos();
-            setProductTable();
-            setStockTable();
-        });
-    }
 
     private void addSearchListener(javax.swing.JTextField field, Runnable reload) {
         field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -390,25 +287,6 @@ public class Dashboard extends javax.swing.JFrame {
             @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
             @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
         });
-    }
-    
-    private void saveBarcodeToFile(String data, String FOLDER) {
-        try {
-            File folder = new File(FOLDER);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            Code128Writer writer = new Code128Writer();
-            BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.CODE_128, 300, 100);
-
-            Path path = new File(folder, data + ".png").toPath();
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-
-            System.out.println("Barcode saved: " + path.toString());
-        } catch (Exception e) {
-            System.out.println("Barcode save failed: " + e.getMessage());
-        }
     }
 
     /**
@@ -569,6 +447,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel41 = new javax.swing.JLabel();
         jLabel42 = new javax.swing.JLabel();
         salesCustomerFNL = new javax.swing.JLabel();
+        salesPickUpCB = new javax.swing.JCheckBox();
         transactionTab = new javax.swing.JPanel();
         transactionBG = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -666,6 +545,8 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/logo-64.png"))); // NOI18N
         jLabel3.setText(" ");
 
+        logoutDashboardBtn.setBackground(new java.awt.Color(232, 236, 241));
+        logoutDashboardBtn.setForeground(new java.awt.Color(26, 31, 46));
         logoutDashboardBtn.setText("Logout");
         logoutDashboardBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -725,7 +606,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel13.setBackground(new java.awt.Color(255, 255, 255));
 
+        dashRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         dashRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         dashRefreshBtn.setText("REFRESH");
         dashRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1036,7 +919,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel31.setBackground(new java.awt.Color(255, 255, 255));
 
+        dashSalesReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashSalesReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashSalesReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashSalesReportBtn.setText("SALES REPORT");
         dashSalesReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1045,9 +930,11 @@ public class Dashboard extends javax.swing.JFrame {
         });
 
         jLabel56.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel56.setText("REPORTS (PDF):");
+        jLabel56.setText("REPORTS:");
 
+        dashStockReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashStockReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashStockReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashStockReportBtn.setText("STOCK REPORT");
         dashStockReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1055,7 +942,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        dashExpiryReportBtn.setBackground(new java.awt.Color(79, 172, 255));
         dashExpiryReportBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dashExpiryReportBtn.setForeground(new java.awt.Color(26, 31, 46));
         dashExpiryReportBtn.setText("EXPIRY REPORT");
         dashExpiryReportBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1441,7 +1330,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
 
+        printCategoryBtn.setBackground(new java.awt.Color(79, 172, 255));
         printCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printCategoryBtn.setForeground(new java.awt.Color(26, 31, 46));
         printCategoryBtn.setText("PRINT");
         printCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1449,7 +1340,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteCategoryBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteCategoryBtn.setText("DELETE");
         deleteCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1457,7 +1350,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editCategoryBtn.setBackground(new java.awt.Color(30, 58, 95));
         editCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         editCategoryBtn.setText("EDIT");
         editCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1465,7 +1360,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addCategoryBtn.setBackground(new java.awt.Color(43, 138, 130));
         addCategoryBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addCategoryBtn.setForeground(new java.awt.Color(255, 255, 255));
         addCategoryBtn.setText("ADD");
         addCategoryBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1503,7 +1400,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel11.setBackground(new java.awt.Color(255, 255, 255));
 
+        categoryRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         categoryRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        categoryRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         categoryRefreshBtn.setText("REFRESH");
         categoryRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1602,7 +1501,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel8.setBackground(new java.awt.Color(255, 255, 255));
 
+        genBarProductBtn.setBackground(new java.awt.Color(79, 172, 255));
         genBarProductBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        genBarProductBtn.setForeground(new java.awt.Color(26, 31, 46));
         genBarProductBtn.setText("GENERATE BARCODE");
         genBarProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1610,7 +1511,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        printProductBtn.setBackground(new java.awt.Color(79, 172, 255));
         printProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printProductBtn.setForeground(new java.awt.Color(26, 31, 46));
         printProductBtn.setText("PRINT");
         printProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1618,7 +1521,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteProductBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteProductBtn.setText("DELETE");
         deleteProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1626,7 +1531,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editProductBtn.setBackground(new java.awt.Color(30, 58, 95));
         editProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         editProductBtn.setText("EDIT");
         editProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1634,7 +1541,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addProductBtn.setBackground(new java.awt.Color(43, 138, 130));
         addProductBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addProductBtn.setForeground(new java.awt.Color(255, 255, 255));
         addProductBtn.setText("ADD");
         addProductBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1674,7 +1583,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel9.setBackground(new java.awt.Color(255, 255, 255));
 
+        productsRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         productsRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        productsRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         productsRefreshBtn.setText("REFRESH");
         productsRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1781,7 +1692,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
 
+        printStockBtn.setBackground(new java.awt.Color(79, 172, 255));
         printStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        printStockBtn.setForeground(new java.awt.Color(26, 31, 46));
         printStockBtn.setText("PRINT");
         printStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1789,7 +1702,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        deleteStockBtn.setBackground(new java.awt.Color(192, 57, 43));
         deleteStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        deleteStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         deleteStockBtn.setText("DELETE");
         deleteStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1797,7 +1712,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        editStockBtn.setBackground(new java.awt.Color(30, 58, 95));
         editStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        editStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         editStockBtn.setText("EDIT");
         editStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1805,7 +1722,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        addStockBtn.setBackground(new java.awt.Color(43, 138, 130));
         addStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        addStockBtn.setForeground(new java.awt.Color(255, 255, 255));
         addStockBtn.setText("ADD");
         addStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1813,7 +1732,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        holdReleaseStockBtn.setBackground(new java.awt.Color(221, 161, 40));
         holdReleaseStockBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        holdReleaseStockBtn.setForeground(new java.awt.Color(26, 31, 46));
         holdReleaseStockBtn.setText("HOLD / RELEASE");
         holdReleaseStockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1855,9 +1776,11 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel4.setText("Filter by Product:");
 
-        jLabel2.setText("Search Batch No:");
+        jLabel2.setText("Search:");
 
+        stockRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         stockRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        stockRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         stockRefreshBtn.setText("REFRESH");
         stockRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1875,15 +1798,15 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addGap(6, 6, 6)
-                .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addGap(3, 3, 3)
-                .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel47)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(stockRefreshBtn)
                 .addContainerGap())
@@ -1977,6 +1900,8 @@ public class Dashboard extends javax.swing.JFrame {
             salesTable.getColumnModel().getColumn(6).setMaxWidth(100);
         }
 
+        salesCheckoutBtn.setBackground(new java.awt.Color(43, 138, 130));
+        salesCheckoutBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesCheckoutBtn.setText("CHECKOUT");
         salesCheckoutBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1988,7 +1913,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel8.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel8.setText("PRODUCT ID (SCAN)");
+        jLabel8.setText("PRODUCT ID");
 
         jLabel9.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -2018,6 +1943,8 @@ public class Dashboard extends javax.swing.JFrame {
         salesQuantityTF.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         salesQuantityTF.setText("2");
 
+        salesAddBtn.setBackground(new java.awt.Color(43, 138, 130));
+        salesAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesAddBtn.setText("ADD");
         salesAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2025,6 +1952,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        salesCancelBtn.setBackground(new java.awt.Color(232, 236, 241));
+        salesCancelBtn.setForeground(new java.awt.Color(26, 31, 46));
         salesCancelBtn.setText("CANCEL");
         salesCancelBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2168,6 +2097,8 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel15.setText("CASH AMOUNT:");
 
+        salesRemoveItemBtn.setBackground(new java.awt.Color(192, 57, 43));
+        salesRemoveItemBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesRemoveItemBtn.setText("REMOVE ITEM");
         salesRemoveItemBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2175,6 +2106,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        salesRemoveAllBtn.setBackground(new java.awt.Color(192, 57, 43));
+        salesRemoveAllBtn.setForeground(new java.awt.Color(255, 255, 255));
         salesRemoveAllBtn.setText("REMOVE ALL");
         salesRemoveAllBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2211,6 +2144,9 @@ public class Dashboard extends javax.swing.JFrame {
         salesCustomerFNL.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         salesCustomerFNL.setText(" ");
 
+        salesPickUpCB.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        salesPickUpCB.setText("PICKUP");
+
         javax.swing.GroupLayout salesBGLayout = new javax.swing.GroupLayout(salesBG);
         salesBG.setLayout(salesBGLayout);
         salesBGLayout.setHorizontalGroup(
@@ -2236,12 +2172,15 @@ public class Dashboard extends javax.swing.JFrame {
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                             .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                 .addGroup(salesBGLayout.createSequentialGroup()
-                                    .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(cashAmountSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(changeSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                                        .addComponent(salesPickUpCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(totalSalesTF, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(salesBGLayout.createSequentialGroup()
                                 .addComponent(jLabel41)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2279,7 +2218,9 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(changeSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(totalSalesTF, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(salesBGLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(salesCheckoutBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                    .addComponent(salesPickUpCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -2412,7 +2353,9 @@ public class Dashboard extends javax.swing.JFrame {
         transTotalTF.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         transTotalTF.setText("₱ 0");
 
+        transReprintReceiptBtn.setBackground(new java.awt.Color(79, 172, 255));
         transReprintReceiptBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transReprintReceiptBtn.setForeground(new java.awt.Color(26, 31, 46));
         transReprintReceiptBtn.setText("REPRINT RECEIPT");
         transReprintReceiptBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2420,7 +2363,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        transPrintListBtn.setBackground(new java.awt.Color(79, 172, 255));
         transPrintListBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transPrintListBtn.setForeground(new java.awt.Color(26, 31, 46));
         transPrintListBtn.setText("PRINT LIST");
         transPrintListBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2565,7 +2510,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel12.setBackground(new java.awt.Color(255, 255, 255));
 
+        transRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         transRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         transRefreshBtn.setText("REFRESH");
         transRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2700,7 +2647,9 @@ public class Dashboard extends javax.swing.JFrame {
         customerCountL.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         customerCountL.setText("0");
 
+        customerRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         customerRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        customerRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerRefreshBtn.setText("REFRESH");
         customerRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2767,7 +2716,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));
 
+        customerAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         customerAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerAddBtn.setText("ADD");
         customerAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2775,7 +2726,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerEditBtn.setBackground(new java.awt.Color(30, 58, 95));
         customerEditBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerEditBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerEditBtn.setText("EDIT");
         customerEditBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2783,7 +2736,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerDeleteBtn.setBackground(new java.awt.Color(192, 57, 43));
         customerDeleteBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerDeleteBtn.setForeground(new java.awt.Color(255, 255, 255));
         customerDeleteBtn.setText("DELETE");
         customerDeleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2791,7 +2746,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        customerPrintBtn.setBackground(new java.awt.Color(79, 172, 255));
         customerPrintBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        customerPrintBtn.setForeground(new java.awt.Color(26, 31, 46));
         customerPrintBtn.setText("PRINT");
         customerPrintBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2862,7 +2819,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         headBG.setBackground(new java.awt.Color(255, 255, 255));
 
+        adminRefreshBtn.setBackground(new java.awt.Color(43, 138, 130));
         adminRefreshBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        adminRefreshBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminRefreshBtn.setText("REFRESH");
         adminRefreshBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2959,7 +2918,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         footer.setBackground(new java.awt.Color(255, 255, 255));
 
+        adminAddBtn.setBackground(new java.awt.Color(43, 138, 130));
         adminAddBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminAddBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminAddBtn.setText("ADD");
         adminAddBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2967,7 +2928,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminEditBtn.setBackground(new java.awt.Color(30, 58, 95));
         adminEditBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminEditBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminEditBtn.setText("EDIT");
         adminEditBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2975,7 +2938,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminDeleteBtn.setBackground(new java.awt.Color(192, 57, 43));
         adminDeleteBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminDeleteBtn.setForeground(new java.awt.Color(255, 255, 255));
         adminDeleteBtn.setText("DELETE");
         adminDeleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3150,156 +3115,88 @@ public class Dashboard extends javax.swing.JFrame {
         if (result == null) return;
 
         orderId = result.orderId;
-        setStockTable();
+        bStocks.setStock(stockUI);
         bPrint.printSale(result);
         bSales.clearSale(salesUI);
         salesProductIDScanTF.requestFocus();
     }//GEN-LAST:event_salesCheckoutBtnActionPerformed
 
     private void stockRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockRefreshBtnActionPerformed
-        setStockTable();
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_stockRefreshBtnActionPerformed
 
     private void printStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printStockBtnActionPerformed
-        try {
-            setStockTable();
-            MessageFormat header = new MessageFormat("Stock List");
-            MessageFormat footer = new MessageFormat("-{0}-");
-            stockTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bStocks.printStock(stockUI);
     }//GEN-LAST:event_printStockBtnActionPerformed
 
     private void deleteStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteStockBtnActionPerformed
-        int i = stockTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a stock entry to delete.");
-            return;
-        }
- 
-        int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS STOCK ENTRY?", "CONFIRMATION", 0);
-        if (x != 0) {
-            return;
-        }
- 
-        try {
-            int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("DELETE FROM product_stock WHERE stock_id = ?");
-            ps.setInt(1, stockId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
- 
-            JOptionPane.showMessageDialog(null, "Delete successful");
-            setStockTable();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Delete failed: " + e.getMessage());
-        }
+        bStocks.deleteStock(this, stockUI);
     }//GEN-LAST:event_deleteStockBtnActionPerformed
 
     private void editStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editStockBtnActionPerformed
-        int i = stockTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a stock entry to edit.");
+        int id = bStocks.getSelectedStockId(this, stockUI, "edit");
+        if (id == -1) {
             return;
         }
-        int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
- 
-        Stock stk = new Stock(this, true, stockId);
-        stk.setVisible(true);
-        setStockTable();
+        new Stock(this, true, id).setVisible(true);
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_editStockBtnActionPerformed
 
     private void addStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStockBtnActionPerformed
-        Stock stk = new Stock(this, true);
-        stk.setVisible(true);
-        setStockTable();
+        new Stock(this, true).setVisible(true);
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_addStockBtnActionPerformed
 
     private void productsRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsRefreshBtnActionPerformed
-        setCategoryTable();
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_productsRefreshBtnActionPerformed
 
     private void printProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printProductBtnActionPerformed
-        try {
-            setProductTable();
-            MessageFormat header = new MessageFormat("Product List");
-            MessageFormat footer = new MessageFormat("-{0}-");
-            productsTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bProduct.printProducts(productUI);
     }//GEN-LAST:event_printProductBtnActionPerformed
 
     private void deleteProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteProductBtnActionPerformed
-        int i = productsTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a product to delete.");
-            return;
-        }
- 
-        int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS PRODUCT?", "CONFIRMATION", 0);
-        if (x != 0) {
-            return;
-        }
- 
-        try {
-            int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("DELETE FROM products WHERE product_id = ?");
-            ps.setInt(1, productId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
- 
-            JOptionPane.showMessageDialog(null, "Delete successful");
-            setProductTable();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Cannot delete: this product has related stock or order records.");
-        }
+        bProduct.deleteProduct(this, productUI);
     }//GEN-LAST:event_deleteProductBtnActionPerformed
 
     private void editProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProductBtnActionPerformed
-        int i = productsTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a product to edit.");
+        int id = bProduct.getSelectedProductId(this, productUI, "edit");
+        if (id == -1) {
             return;
         }
-        int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
- 
-        Product prod = new Product(this, true, productId);
-        prod.setVisible(true);
-        setProductTable();
+        new Product(this, true, id).setVisible(true);
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_editProductBtnActionPerformed
 
     private void addProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addProductBtnActionPerformed
-        Product prod = new Product(this, true);
-        prod.setVisible(true);
-        setProductTable();
+        new Product(this, true).setVisible(true);
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_addProductBtnActionPerformed
 
     private void categoryRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoryRefreshBtnActionPerformed
-        setCategoryTable();
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_categoryRefreshBtnActionPerformed
 
     private void printCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printCategoryBtnActionPerformed
-        bCategory.printCategory(categoryTable);
+        bCategory.printCategory(categoryUI);
     }//GEN-LAST:event_printCategoryBtnActionPerformed
 
     private void deleteCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteCategoryBtnActionPerformed
-       bCategory.deleteCategory(categoryTable);
+       bCategory.deleteCategory(this, categoryUI);
     }//GEN-LAST:event_deleteCategoryBtnActionPerformed
 
     private void editCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editCategoryBtnActionPerformed
-        bCategory.editCategory(this, categoryTable);
+        int id = bCategory.getSelectedCategoryId(this, categoryUI, "edit");
+        if (id == -1) {
+            return;
+        }
+        new Call.Category(this, true, id).setVisible(true);
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_editCategoryBtnActionPerformed
 
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
-        bCategory.addCategory(this, categoryTable);
+        new Call.Category(this, true).setVisible(true);
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 
     private void logoutDashboardBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutDashboardBtnActionPerformed
@@ -3309,7 +3206,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutDashboardBtnActionPerformed
 
     private void genBarProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genBarProductBtnActionPerformed
-        generateMissingBarcodes();
+        bProduct.generateMissingBarcodes(this);
     }//GEN-LAST:event_genBarProductBtnActionPerformed
 
     private void transRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transRefreshBtnActionPerformed
@@ -3431,90 +3328,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
     private void holdReleaseStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_holdReleaseStockBtnActionPerformed
-        String role = Session.role == null ? "" : Session.role.toLowerCase();
-        if (!role.equals("admin") && !role.equals("pharmacist")) {
-            JOptionPane.showMessageDialog(this, "Only an admin or pharmacist can hold or release a batch.");
-            return;
-        }
-
-        int row = stockTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a stock batch first.");
-            return;
-        }
-
-        int stockId = Integer.parseInt(stockTable.getValueAt(row, 0).toString());
-        String product = stockTable.getValueAt(row, 1).toString();
-        String batch = String.valueOf(stockTable.getValueAt(row, 2));
-        String status = stockTable.getValueAt(row, STOCK_STATUS_COL).toString();
-
-        try {
-            if ("RECALLED".equals(status)) {
-                JOptionPane.showMessageDialog(this, "This batch was recalled and cannot be released.");
-                return;
-            }
-
-            boolean isActive = "ACTIVE".equals(status);
-            String why = isActive ? null : bSto.getStatusReason(stockId);
-
-            // one button, one popup: what do you want to do with this batch?
-            String[] options = isActive
-                    ? new String[]{"Hold (temporary)", "Recall (permanent)", "Cancel"}
-                    : new String[]{"Release", "Recall (permanent)", "Cancel"};
-            int choice = JOptionPane.showOptionDialog(this,
-                    product + " (batch " + batch + ") is " + status + "."
-                    + (why == null ? "" : "\nHeld because: " + why)
-                    + "\n\nWhat do you want to do?",
-                    "HOLD / RELEASE BATCH", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, options, options[0]);
-            if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
-                return; // cancelled
-            }
-
-            String from = isActive ? "active" : "on_hold";
-            String to;
-            String reason = null;
-
-            if (choice == 0 && !isActive) {
-                to = "active"; // release: no reason needed
-            } else {
-                to = (choice == 0) ? "on_hold" : "recalled";
-                String what = (choice == 0) ? "holding" : "recalling";
-                reason = JOptionPane.showInputDialog(this,
-                        "Reason for " + what + " " + product + " (batch " + batch + "):",
-                        choice == 0 ? "HOLD BATCH" : "RECALL BATCH", JOptionPane.QUESTION_MESSAGE);
-                if (reason == null) {
-                    return; // cancelled
-                }
-                reason = reason.trim();
-                if (reason.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Please enter a reason.");
-                    return;
-                }
-                if (reason.length() > 255) {
-                    JOptionPane.showMessageDialog(this, "Reason is too long (255 characters max).");
-                    return;
-                }
-                if (choice == 1) {
-                    int sure = JOptionPane.showConfirmDialog(this,
-                            "A recalled batch can NEVER be sold or released again.\nRecall batch " + batch + "?",
-                            "CONFIRM RECALL", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if (sure != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                }
-            }
-
-            if (bSto.setStatus(stockId, from, to, reason) == 0) {
-                JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Batch " + batch + " is now " + to.toUpperCase().replace('_', ' ') + ".");
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not change the batch status: " + e.getMessage());
-        }
-        setStockTable();
+        bStocks.holdRelease(this, stockUI);
     }//GEN-LAST:event_holdReleaseStockBtnActionPerformed
 
     /**
@@ -3734,6 +3548,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton salesCheckoutBtn;
     private javax.swing.JLabel salesCustomerFNL;
     private javax.swing.JTextField salesCustomerIDTF;
+    private javax.swing.JCheckBox salesPickUpCB;
     private javax.swing.JTextField salesPriceTF;
     private javax.swing.JTextField salesPriceTF1;
     private javax.swing.JTextField salesProductIDScanTF;
