@@ -5,51 +5,38 @@
  */
 package Call;
 
-import Backend.DBConnection;
+import Backend.bProduct;
 import Frontend.AppIcon;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javax.swing.JOptionPane;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.sql.Statement;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.oned.Code128Writer;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
 
 /**
  *
  * @author chyril
  */
 public class Product extends javax.swing.JDialog {
-    private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private int productId = -1;
     private String title;
+    private final bProduct.ProductFormFields ui = new bProduct.ProductFormFields();
+
     /**
      * Creates new form NewJDialog
      */
     public Product(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+            super(parent, modal);
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         title = "ADD PRODUCT";
         setTitle(title);
         Title.setText(title);
         productAddBtn.setText("ADD");
-        loadCategories();
-        setupAgeRestrictedToggle();
-        setupUnitTypeToggle();
+        bProduct.setupForm(ui);
     }
     
     public Product(java.awt.Frame parent, boolean modal, int productId) {
         super(parent, modal);
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         this.productId = productId;
@@ -57,160 +44,20 @@ public class Product extends javax.swing.JDialog {
         setTitle(title);
         Title.setText(title);
         productAddBtn.setText("UPDATE");
-        loadCategories();
-        setupAgeRestrictedToggle();
-        setupUnitTypeToggle();
-        loadProductData();
+        bProduct.setupForm(ui);
+        bProduct.loadProduct(ui, productId);
     }
     
-    private String generateBarcode(String productId) {
-        try {
-            File folder = new File(BARCODE_FOLDER_PRODUCT);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            Code128Writer writer = new Code128Writer();
-            BitMatrix bitMatrix = writer.encode(productId, BarcodeFormat.CODE_128, 300, 100);
-
-            Path path = new File(folder, productId + ".png").toPath();
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-
-            System.out.println("Barcode saved: " + path);
-            return path.toString();
-        } catch (Exception e) {
-            System.out.println("Barcode generation failed: " + e.getMessage());
-            return null;
-        }
-    }
-    
-    private void loadCategories() {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT category_name FROM categories");
-            ResultSet rs = ps.executeQuery();
- 
-            productCategoryCB.removeAllItems();
-            while (rs.next()) {
-                productCategoryCB.addItem(rs.getString("category_name"));
-            }
- 
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    private int getCategoryIdByName(String categoryName) throws Exception {
-        Connection con = DBConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement("SELECT category_id FROM categories WHERE category_name = ?");
-        ps.setString(1, categoryName);
-        ResultSet rs = ps.executeQuery();
- 
-        int id = -1;
-        if (rs.next()) {
-            id = rs.getInt("category_id");
-        }
- 
-        rs.close();
-        ps.close();
-        con.close();
-        return id;
-    }
-    
-    private void setupAgeRestrictedToggle() {
-        productMinAgeTF.setEnabled(productAgeRestCB.isSelected());
-        productAgeRestCB.addItemListener(e -> {
-            boolean checked = productAgeRestCB.isSelected();
-            productMinAgeTF.setEnabled(checked);
-            if (!checked) {
-                productMinAgeTF.setText("");
-            }
-        });
-    }
-    
-    private void setupUnitTypeToggle() {
-        if (productUTypeCB.getItemCount() == 0) {
-            productUTypeCB.addItem("tablet");
-            productUTypeCB.addItem("piece");
-        }
- 
-        boolean isTablet = "tablet".equals(productUTypeCB.getSelectedItem());
-        productSellingPriceTF1.setEnabled(isTablet);
- 
-        productUTypeCB.addItemListener(e -> {
-            boolean tablet = "tablet".equals(productUTypeCB.getSelectedItem());
-            productSellingPriceTF1.setEnabled(tablet);
-            if (!tablet) {
-                productSellingPriceTF1.setText("");
-            }
-        });
-    }
-    
-    private void loadProductData() {
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT p.name, p.brand, c.category_name, p.selling_price, "
-                    + "p.requires_prescription, p.is_age_restricted, p.minimum_age, "
-                    + "p.unit_type, p.pack_size "
-                    + "FROM products p LEFT JOIN categories c ON p.category_id = c.category_id "
-                    + "WHERE p.product_id = ?");
-            
-            ps.setInt(1, productId);
-            ResultSet rs = ps.executeQuery();
- 
-            if (rs.next()) {
-                productNameTF.setText(rs.getString("name"));
-                productBrandTF.setText(rs.getString("brand"));
-                productSellingPriceTF.setText(String.valueOf(rs.getDouble("selling_price")));
-                productRPresCB.setSelected(rs.getBoolean("requires_prescription"));
-                productAgeRestCB.setSelected(rs.getBoolean("is_age_restricted"));
-                productUTypeCB.setSelectedItem(rs.getString("unit_type"));
- 
-                Object packSize = rs.getObject("pack_size");
-                if (packSize != null) {
-                    productSellingPriceTF1.setText(packSize.toString());
-                    productSellingPriceTF1.setEnabled(true);
-                }
- 
-                Object minAge = rs.getObject("minimum_age");
-                if (minAge != null) {
-                    productMinAgeTF.setText(minAge.toString());
-                    productMinAgeTF.setEnabled(true);
-                }
- 
-                productCategoryCB.setSelectedItem(rs.getString("category_name"));
-            }
- 
-            rs.close();
-            ps.close();
-            con.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    private Double getCurrentSellingPrice(Connection con, int id) throws Exception {
-        try (PreparedStatement ps = con.prepareStatement("SELECT selling_price FROM products WHERE product_id = ?")) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getDouble("selling_price") : null;
-            }
-        }
-    }
-
-    /** Writes one row to product_price_history (runs inside the caller's transaction). */
-    private void logPriceChange(Connection con, int id, Double oldPrice, double newPrice) throws Exception {
-        try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO product_price_history (product_id, old_price, new_price, changed_by) VALUES (?, ?, ?, ?)")) {
-            ps.setInt(1, id);
-            if (oldPrice != null) ps.setDouble(2, oldPrice); else ps.setNull(2, java.sql.Types.DECIMAL);
-            ps.setDouble(3, newPrice);
-            if (Backend.Session.userId > 0) ps.setInt(4, Backend.Session.userId); else ps.setNull(4, java.sql.Types.INTEGER);
-            ps.executeUpdate();
-        }
+    private void initFields() {
+        ui.nameTF = productNameTF;
+        ui.brandTF = productBrandTF;
+        ui.categoryCB = productCategoryCB;
+        ui.sellingPriceTF = productSellingPriceTF;
+        ui.requiresRxCB = productRPresCB;
+        ui.ageRestrictedCB = productAgeRestCB;
+        ui.minAgeTF = productMinAgeTF;
+        ui.unitTypeCB = productUTypeCB;
+        ui.packSizeTF = productSellingPriceTF1;
     }
 
     /**
@@ -440,155 +287,13 @@ public class Product extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
     
     private void productAddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productAddBtnActionPerformed
-        String name = productNameTF.getText().trim();
-        String brand = productBrandTF.getText().trim();
-        String sellText = productSellingPriceTF.getText().trim();
-        boolean requiresRx = productRPresCB.isSelected();
-        boolean ageRestricted = productAgeRestCB.isSelected();
-        String minAgeText = productMinAgeTF.getText().trim();
-        String selectedCategory = (String) productCategoryCB.getSelectedItem();
-        String unitType = (String) productUTypeCB.getSelectedItem();
-        String packSizeText = productSellingPriceTF1.getText().trim();
-
-        if (name.isEmpty() || selectedCategory == null || sellText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
-            return;
-        }
-
-        Integer packSize = null;
-        if ("tablet".equals(unitType) && !packSizeText.isEmpty()) {
-            try {
-                packSize = Integer.parseInt(packSizeText);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Pack Size must be a whole number.");
-                return;
-            }
-        }
-
-        double sellingPrice;
-        try {
-            sellingPrice = Double.parseDouble(sellText);
-            if (sellingPrice < 0) {
-                JOptionPane.showMessageDialog(this, "Selling Price cannot be negative.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Selling Price must be a valid number.");
-            return;
-        }
-
-        Integer minimumAge = null;
-        if (ageRestricted) {
-            if (minAgeText.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a minimum age for age-restricted products.");
-                return;
-            }
-            try {
-                minimumAge = Integer.parseInt(minAgeText);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Minimum Age must be a whole number.");
-                return;
-            }
-        }
-
-        try {
-            int categoryId = getCategoryIdByName(selectedCategory);
-            if (categoryId == -1) {
-                JOptionPane.showMessageDialog(this, "Selected category could not be found.");
-                return;
-            }
-
-            Connection con = DBConnection.getConnection();
-
-            if (productId == -1) {
-                con.setAutoCommit(false);
-                PreparedStatement ps = con.prepareStatement("INSERT INTO products (name, brand, category_id, selling_price, "
-                        + "requires_prescription, is_age_restricted, minimum_age, unit_type, pack_size) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-
-                ps.setString(1, name);
-                ps.setString(2, brand.isEmpty() ? null : brand);
-                ps.setInt(3, categoryId);
-                ps.setDouble(4, sellingPrice);
-                ps.setBoolean(5, requiresRx);
-                ps.setBoolean(6, ageRestricted);
-                if (minimumAge != null) ps.setInt(7, minimumAge); else ps.setNull(7, java.sql.Types.INTEGER);
-                ps.setString(8, unitType);
-                if (packSize != null) ps.setInt(9, packSize); else ps.setNull(9, java.sql.Types.INTEGER);
-                ps.executeUpdate();
-
-                int newId = -1;
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        newId = keys.getInt(1);
-                    }
-                }
-                ps.close();
-
-                // first price entry for the new product (old_price stays NULL)
-                if (newId != -1) {
-                    logPriceChange(con, newId, null, sellingPrice);
-                }
-                con.commit();
-
-                String message = "Product added successfully!";
-                if (newId != -1) {
-                    String barcodePath = generateBarcode(String.valueOf(newId));
-                    message += "\n\nProduct ID: " + newId;
-                    message += (barcodePath != null)
-                            ? "\nBarcode saved to:\n" + barcodePath
-                            : "\nBarcode could not be generated.";
-                }
-                JOptionPane.showMessageDialog(this, message);
-            } else {
-                con.setAutoCommit(false);
-                Double oldPrice = getCurrentSellingPrice(con, productId);
-
-                PreparedStatement ps = con.prepareStatement("UPDATE products SET name=?, brand=?, category_id=?, selling_price=?, "
-                        + "requires_prescription=?, is_age_restricted=?, minimum_age=?, unit_type=?, pack_size=? "
-                        + "WHERE product_id=?");
-
-                ps.setString(1, name);
-                ps.setString(2, brand.isEmpty() ? null : brand);
-                ps.setInt(3, categoryId);
-                ps.setDouble(4, sellingPrice);
-                ps.setBoolean(5, requiresRx);
-                ps.setBoolean(6, ageRestricted);
-                if (minimumAge != null) ps.setInt(7, minimumAge); else ps.setNull(7, java.sql.Types.INTEGER);
-                ps.setString(8, unitType);
-                if (packSize != null) ps.setInt(9, packSize); else ps.setNull(9, java.sql.Types.INTEGER);
-                ps.setInt(10, productId);
-                ps.executeUpdate();
-                ps.close();
-
-                // audit trail: only write a row when the selling price actually changed
-                if (oldPrice == null || Double.compare(oldPrice, sellingPrice) != 0) {
-                    logPriceChange(con, productId, oldPrice, sellingPrice);
-                }
-                con.commit();
-                JOptionPane.showMessageDialog(this, "Product updated successfully!");
-            }
-
-            con.close();
+        if (bProduct.saveProduct(this, ui, productId)) {
             dispose();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }//GEN-LAST:event_productAddBtnActionPerformed
 
     private void productClearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productClearBtnActionPerformed
-        productNameTF.setText("");
-        productBrandTF.setText("");
-        if (productCategoryCB.getItemCount() > 0) productCategoryCB.setSelectedIndex(0);
-        productSellingPriceTF.setText("");
-        productRPresCB.setSelected(false);
-        productAgeRestCB.setSelected(false);
-        productMinAgeTF.setText("");
-        productMinAgeTF.setEnabled(false);
-        if (productUTypeCB.getItemCount() > 0) productUTypeCB.setSelectedIndex(0);
-        productSellingPriceTF1.setText("");
+        bProduct.clearForm(ui);
     }//GEN-LAST:event_productClearBtnActionPerformed
 
     /**

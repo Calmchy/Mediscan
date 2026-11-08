@@ -19,37 +19,21 @@ import Backend.bTransaction;
 import Backend.bCustomer;
 import Backend.bAccount;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.MessageFormat;
-import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.oned.Code128Writer;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import java.nio.file.Path;
-
 /**
  *
  * @author chyril
  */
 public class Dashboard extends javax.swing.JFrame {
     private int orderId;
-    private static final int STOCK_STATUS_COL = 8;
-    private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
-    private boolean loadingFilters = false;
+    
+    private final bCategory.CategoryFields categoryUI = new bCategory.CategoryFields();
+    private final bProduct.ProductFields productUI = new bProduct.ProductFields();
+    private final bStocks.StockFields stockUI = new bStocks.StockFields();
     private final bDashboard.DashboardFields dashUI = new bDashboard.DashboardFields();
     private final bSales.SalesFields salesUI = new bSales.SalesFields();
     private final bCustomer.CustomerFields customerUI = new bCustomer.CustomerFields();
     private final bAccount.AccountFields accountUI = new bAccount.AccountFields();
     
-    bProduct bProd = new bProduct();
-    bStocks bSto = new bStocks();
-    //bTransaction bTrans = new bTransaction();
     /**
      * Creates new form Cashier
      */
@@ -57,26 +41,22 @@ public class Dashboard extends javax.swing.JFrame {
         //this.setUndecorated(true); // para waray window border
         initComponents();
         //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
-        setupStockTable();
+        initCatalogTabs();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         setupDashboardLayout();
+        
         bTransaction.loadCashierFilter(transCashierCB);
         bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
         
-        addSearchListener(transOrderIDTF, () -> reloadOrders());     // your existing helper
+        addSearchListener(transOrderIDTF, () -> reloadOrders());
         transFromDC.addPropertyChangeListener("date", e -> reloadOrders());
         transToDC.addPropertyChangeListener("date", e -> reloadOrders());
         transCashierCB.addActionListener(e -> reloadOrders());
         reloadOrders();
         setTitle("Dashboard"); 
         applyRolePermissions();
-        loadFilterCombos(); 
-        setupSearchListeners(); 
-        setCategoryTable();
-        setProductTable();
-        setStockTable();
-        
+        initCatalogTabs();
         
         transOrderListTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -141,6 +121,42 @@ public class Dashboard extends javax.swing.JFrame {
         bAccount.setAccounts(accountUI);
         addSearchListener(transOrderIDTF1, () -> bAccount.setAccounts(accountUI));
         transCashierCB1.addActionListener(e -> bAccount.setAccounts(accountUI));
+    }
+    
+    private void initCatalogTabs() {
+        categoryUI.categoryTable = categoryTable;
+        categoryUI.searchTF = categorySearchTF;
+
+        productUI.productsTable = productsTable;
+        productUI.searchTF = productSearchTF;
+        productUI.categoryCB = productCategoryCB;
+
+        stockUI.stockTable = stockTable;
+        stockUI.searchTF = stockSearchTF;
+        stockUI.productCB = stockFilterProductCB;
+        stockUI.statusCB = stockFilterStatusCB;
+
+        bStocks.setupTable(stockUI);
+        bProduct.loadCategoryFilter(productUI);
+        bStocks.loadFilters(stockUI);
+
+        addSearchListener(categorySearchTF, () -> bCategory.setCategory(categoryUI));
+        addSearchListener(productSearchTF, () -> bProduct.setProducts(productUI));
+        addSearchListener(stockSearchTF, () -> bStocks.setStock(stockUI));
+        productCategoryCB.addActionListener(e -> bProduct.onFilterChanged(productUI));
+        stockFilterProductCB.addActionListener(e -> bStocks.onFilterChanged(stockUI));
+        stockFilterStatusCB.addActionListener(e -> bStocks.onFilterChanged(stockUI));
+
+        tabPannel.addChangeListener(e -> {
+            bProduct.loadCategoryFilter(productUI);
+            bStocks.loadFilters(stockUI);
+            bProduct.setProducts(productUI);
+            bStocks.setStock(stockUI);
+        });
+
+        bCategory.setCategory(categoryUI);
+        bProduct.setProducts(productUI);
+        bStocks.setStock(stockUI);
     }
     
     private void setupDashboardLayout() {
@@ -234,35 +250,6 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
-    private void generateMissingBarcodes() {
-        int created = 0, skipped = 0;
-
-        try (Connection con = Backend.DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT product_id FROM products ORDER BY product_id");
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                String id = String.valueOf(rs.getInt("product_id"));
-                File file = new File(BARCODE_FOLDER_PRODUCT, id + ".png");
-
-                if (file.exists()) {
-                    skipped++;
-                    continue;
-                }
-                saveBarcodeToFile(id, BARCODE_FOLDER_PRODUCT);
-                created++;
-            }
-
-            JOptionPane.showMessageDialog(this,
-                    "Barcodes created: " + created + "\nAlready existed: " + skipped
-                    + "\n\nFolder: " + BARCODE_FOLDER_PRODUCT);
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error generating barcodes: " + e.getMessage());
-        }
-    }
-    
     private void applyRolePermissions() {
         String role = Session.role == null ? "" : Session.role.toLowerCase();
         userFullNameL.setText(Session.fullName);
@@ -299,90 +286,6 @@ public class Dashboard extends javax.swing.JFrame {
             tabPannel.setSelectedIndex(firstEnabled);
         }
     }
-    
-    public void setCategoryTable() {
-        bCategory.setCategory(categoryTable, categorySearchTF.getText());
-    }
-    
-    public void setProductTable() {
-        bProd.setProd(productsTable, productSearchTF.getText(), (String) productCategoryCB.getSelectedItem());
-    }
-    
-    public void setStockTable() {
-        bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem(), (String) stockFilterStatusCB.getSelectedItem());
-    }
-    
-    /** Gives the stock table its STATUS column and shows held / recalled batches in red text. */
-    private void setupStockTable() {
-        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{"STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY",
-                    "UNIT", "EXPIRY DATE", "DATE RECEIVED", "STATUS"}) {
-            @Override public Class<?> getColumnClass(int c) {
-                switch (c) {
-                    case 0: case 4: return Integer.class;
-                    case 3: return Double.class;
-                    default: return Object.class;
-                }
-            }
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        stockTable.setModel(model);
-
-        int[] widths = {70, 220, 110, 90, 90, 90, 110, 120, 100};
-        for (int i = 0; i < widths.length; i++) {
-            stockTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
-        }
-
-        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
-            private final java.text.DecimalFormat money = new java.text.DecimalFormat("0.##");
-            @Override
-            public java.awt.Component getTableCellRendererComponent(JTable t, Object value,
-                    boolean selected, boolean focus, int row, int col) {
-                Object shown = (value instanceof Double) ? money.format(value) : value;
-                java.awt.Component c = super.getTableCellRendererComponent(t, shown, selected, focus, row, col);
-                setHorizontalAlignment(value instanceof Number ? javax.swing.SwingConstants.RIGHT
-                                                               : javax.swing.SwingConstants.LEFT);
-                Object status = t.getModel().getValueAt(t.convertRowIndexToModel(row), STOCK_STATUS_COL);
-                boolean blocked = status != null && !"ACTIVE".equals(status.toString());
-                if (!selected) {
-                    // always set it: this renderer is reused for every cell and remembers the last color
-                    c.setForeground(blocked ? new java.awt.Color(179, 38, 30) : t.getForeground());
-                }
-                return c;
-            }
-        };
-        stockTable.setDefaultRenderer(Object.class, renderer);
-        stockTable.setDefaultRenderer(Integer.class, renderer);
-        stockTable.setDefaultRenderer(Double.class, renderer);
-    }
-    
-    private void loadFilterCombos() {
-        loadingFilters = true;
-        try {
-            bProd.loadCategoryFilter(productCategoryCB);
-            bSto.loadProductFilter(stockFilterProductCB);
-            bSto.loadStatusFilter(stockFilterStatusCB); 
-        } finally {
-            loadingFilters = false;
-        }
-    }
-    
-    private void setupSearchListeners() {
-        addSearchListener(categorySearchTF, () -> setCategoryTable());
-        addSearchListener(productSearchTF, () -> setProductTable());
-        addSearchListener(stockSearchTF, () -> setStockTable());
-
-        productCategoryCB.addActionListener(e -> { if (!loadingFilters) setProductTable(); });
-        stockFilterProductCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
-        stockFilterStatusCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
-
-        tabPannel.addChangeListener(e -> {
-            loadFilterCombos();
-            setProductTable();
-            setStockTable();
-        });
-    }
 
     private void addSearchListener(javax.swing.JTextField field, Runnable reload) {
         field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -390,25 +293,6 @@ public class Dashboard extends javax.swing.JFrame {
             @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
             @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { reload.run(); }
         });
-    }
-    
-    private void saveBarcodeToFile(String data, String FOLDER) {
-        try {
-            File folder = new File(FOLDER);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            Code128Writer writer = new Code128Writer();
-            BitMatrix bitMatrix = writer.encode(data, BarcodeFormat.CODE_128, 300, 100);
-
-            Path path = new File(folder, data + ".png").toPath();
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-
-            System.out.println("Barcode saved: " + path.toString());
-        } catch (Exception e) {
-            System.out.println("Barcode save failed: " + e.getMessage());
-        }
     }
 
     /**
@@ -3150,156 +3034,88 @@ public class Dashboard extends javax.swing.JFrame {
         if (result == null) return;
 
         orderId = result.orderId;
-        setStockTable();
+        bStocks.setStock(stockUI);
         bPrint.printSale(result);
         bSales.clearSale(salesUI);
         salesProductIDScanTF.requestFocus();
     }//GEN-LAST:event_salesCheckoutBtnActionPerformed
 
     private void stockRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockRefreshBtnActionPerformed
-        setStockTable();
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_stockRefreshBtnActionPerformed
 
     private void printStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printStockBtnActionPerformed
-        try {
-            setStockTable();
-            MessageFormat header = new MessageFormat("Stock List");
-            MessageFormat footer = new MessageFormat("-{0}-");
-            stockTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bStocks.printStock(stockUI);
     }//GEN-LAST:event_printStockBtnActionPerformed
 
     private void deleteStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteStockBtnActionPerformed
-        int i = stockTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a stock entry to delete.");
-            return;
-        }
- 
-        int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS STOCK ENTRY?", "CONFIRMATION", 0);
-        if (x != 0) {
-            return;
-        }
- 
-        try {
-            int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("DELETE FROM product_stock WHERE stock_id = ?");
-            ps.setInt(1, stockId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
- 
-            JOptionPane.showMessageDialog(null, "Delete successful");
-            setStockTable();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Delete failed: " + e.getMessage());
-        }
+        bStocks.deleteStock(this, stockUI);
     }//GEN-LAST:event_deleteStockBtnActionPerformed
 
     private void editStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editStockBtnActionPerformed
-        int i = stockTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a stock entry to edit.");
+        int id = bStocks.getSelectedStockId(this, stockUI, "edit");
+        if (id == -1) {
             return;
         }
-        int stockId = Integer.parseInt(stockTable.getValueAt(i, 0).toString());
- 
-        Stock stk = new Stock(this, true, stockId);
-        stk.setVisible(true);
-        setStockTable();
+        new Stock(this, true, id).setVisible(true);
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_editStockBtnActionPerformed
 
     private void addStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStockBtnActionPerformed
-        Stock stk = new Stock(this, true);
-        stk.setVisible(true);
-        setStockTable();
+        new Stock(this, true).setVisible(true);
+        bStocks.setStock(stockUI);
     }//GEN-LAST:event_addStockBtnActionPerformed
 
     private void productsRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsRefreshBtnActionPerformed
-        setCategoryTable();
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_productsRefreshBtnActionPerformed
 
     private void printProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printProductBtnActionPerformed
-        try {
-            setProductTable();
-            MessageFormat header = new MessageFormat("Product List");
-            MessageFormat footer = new MessageFormat("-{0}-");
-            productsTable.print(JTable.PrintMode.FIT_WIDTH, header, footer);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        bProduct.printProducts(productUI);
     }//GEN-LAST:event_printProductBtnActionPerformed
 
     private void deleteProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteProductBtnActionPerformed
-        int i = productsTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a product to delete.");
-            return;
-        }
- 
-        int x = JOptionPane.showConfirmDialog(null, "DO YOU WANT TO DELETE THIS PRODUCT?", "CONFIRMATION", 0);
-        if (x != 0) {
-            return;
-        }
- 
-        try {
-            int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mediscan_pos", "root", "");
-            PreparedStatement ps = con.prepareStatement("DELETE FROM products WHERE product_id = ?");
-            ps.setInt(1, productId);
-            ps.executeUpdate();
-            ps.close();
-            con.close();
- 
-            JOptionPane.showMessageDialog(null, "Delete successful");
-            setProductTable();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(null, "Cannot delete: this product has related stock or order records.");
-        }
+        bProduct.deleteProduct(this, productUI);
     }//GEN-LAST:event_deleteProductBtnActionPerformed
 
     private void editProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProductBtnActionPerformed
-        int i = productsTable.getSelectedRow();
-        if (i == -1) {
-            JOptionPane.showMessageDialog(null, "Please select a product to edit.");
+        int id = bProduct.getSelectedProductId(this, productUI, "edit");
+        if (id == -1) {
             return;
         }
-        int productId = Integer.parseInt(productsTable.getValueAt(i, 0).toString());
- 
-        Product prod = new Product(this, true, productId);
-        prod.setVisible(true);
-        setProductTable();
+        new Product(this, true, id).setVisible(true);
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_editProductBtnActionPerformed
 
     private void addProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addProductBtnActionPerformed
-        Product prod = new Product(this, true);
-        prod.setVisible(true);
-        setProductTable();
+        new Product(this, true).setVisible(true);
+        bProduct.setProducts(productUI);
     }//GEN-LAST:event_addProductBtnActionPerformed
 
     private void categoryRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoryRefreshBtnActionPerformed
-        setCategoryTable();
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_categoryRefreshBtnActionPerformed
 
     private void printCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printCategoryBtnActionPerformed
-        bCategory.printCategory(categoryTable);
+        bCategory.printCategory(categoryUI);
     }//GEN-LAST:event_printCategoryBtnActionPerformed
 
     private void deleteCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteCategoryBtnActionPerformed
-       bCategory.deleteCategory(categoryTable);
+       bCategory.deleteCategory(this, categoryUI);
     }//GEN-LAST:event_deleteCategoryBtnActionPerformed
 
     private void editCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editCategoryBtnActionPerformed
-        bCategory.editCategory(this, categoryTable);
+        int id = bCategory.getSelectedCategoryId(this, categoryUI, "edit");
+        if (id == -1) {
+            return;
+        }
+        new Call.Category(this, true, id).setVisible(true);
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_editCategoryBtnActionPerformed
 
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
-        bCategory.addCategory(this, categoryTable);
+        new Call.Category(this, true).setVisible(true);
+        bCategory.setCategory(categoryUI);
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 
     private void logoutDashboardBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutDashboardBtnActionPerformed
@@ -3309,7 +3125,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutDashboardBtnActionPerformed
 
     private void genBarProductBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genBarProductBtnActionPerformed
-        generateMissingBarcodes();
+        bProduct.generateMissingBarcodes(this);
     }//GEN-LAST:event_genBarProductBtnActionPerformed
 
     private void transRefreshBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transRefreshBtnActionPerformed
@@ -3431,90 +3247,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
     private void holdReleaseStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_holdReleaseStockBtnActionPerformed
-        String role = Session.role == null ? "" : Session.role.toLowerCase();
-        if (!role.equals("admin") && !role.equals("pharmacist")) {
-            JOptionPane.showMessageDialog(this, "Only an admin or pharmacist can hold or release a batch.");
-            return;
-        }
-
-        int row = stockTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a stock batch first.");
-            return;
-        }
-
-        int stockId = Integer.parseInt(stockTable.getValueAt(row, 0).toString());
-        String product = stockTable.getValueAt(row, 1).toString();
-        String batch = String.valueOf(stockTable.getValueAt(row, 2));
-        String status = stockTable.getValueAt(row, STOCK_STATUS_COL).toString();
-
-        try {
-            if ("RECALLED".equals(status)) {
-                JOptionPane.showMessageDialog(this, "This batch was recalled and cannot be released.");
-                return;
-            }
-
-            boolean isActive = "ACTIVE".equals(status);
-            String why = isActive ? null : bSto.getStatusReason(stockId);
-
-            // one button, one popup: what do you want to do with this batch?
-            String[] options = isActive
-                    ? new String[]{"Hold (temporary)", "Recall (permanent)", "Cancel"}
-                    : new String[]{"Release", "Recall (permanent)", "Cancel"};
-            int choice = JOptionPane.showOptionDialog(this,
-                    product + " (batch " + batch + ") is " + status + "."
-                    + (why == null ? "" : "\nHeld because: " + why)
-                    + "\n\nWhat do you want to do?",
-                    "HOLD / RELEASE BATCH", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, options, options[0]);
-            if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
-                return; // cancelled
-            }
-
-            String from = isActive ? "active" : "on_hold";
-            String to;
-            String reason = null;
-
-            if (choice == 0 && !isActive) {
-                to = "active"; // release: no reason needed
-            } else {
-                to = (choice == 0) ? "on_hold" : "recalled";
-                String what = (choice == 0) ? "holding" : "recalling";
-                reason = JOptionPane.showInputDialog(this,
-                        "Reason for " + what + " " + product + " (batch " + batch + "):",
-                        choice == 0 ? "HOLD BATCH" : "RECALL BATCH", JOptionPane.QUESTION_MESSAGE);
-                if (reason == null) {
-                    return; // cancelled
-                }
-                reason = reason.trim();
-                if (reason.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Please enter a reason.");
-                    return;
-                }
-                if (reason.length() > 255) {
-                    JOptionPane.showMessageDialog(this, "Reason is too long (255 characters max).");
-                    return;
-                }
-                if (choice == 1) {
-                    int sure = JOptionPane.showConfirmDialog(this,
-                            "A recalled batch can NEVER be sold or released again.\nRecall batch " + batch + "?",
-                            "CONFIRM RECALL", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if (sure != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                }
-            }
-
-            if (bSto.setStatus(stockId, from, to, reason) == 0) {
-                JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Batch " + batch + " is now " + to.toUpperCase().replace('_', ' ') + ".");
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not change the batch status: " + e.getMessage());
-        }
-        setStockTable();
+        bStocks.holdRelease(this, stockUI);
     }//GEN-LAST:event_holdReleaseStockBtnActionPerformed
 
     /**

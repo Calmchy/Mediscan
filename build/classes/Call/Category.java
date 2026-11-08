@@ -7,12 +7,13 @@ package Call;
 
 import Backend.bCategory;
 import Frontend.AppIcon;
-
+ 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -21,15 +22,15 @@ import javax.swing.JOptionPane;
 public class Category extends javax.swing.JDialog {
     private int categoryId = -1;
     private String title = "ADD CATEGORY";
-    private java.awt.Frame parent;
+    private final bCategory.CategoryFormFields ui = new bCategory.CategoryFormFields();
     
     /**
      * Creates new form addCategory
      */
     public Category(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.parent = parent;
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         title = "ADD CATEGORY";
@@ -41,6 +42,7 @@ public class Category extends javax.swing.JDialog {
     public Category(java.awt.Frame parent, boolean modal, int categoryId) {
         super(parent, modal);
         initComponents();
+        initFields();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         this.categoryId = categoryId;
@@ -51,8 +53,12 @@ public class Category extends javax.swing.JDialog {
         loadCategoryData();
     }
     
+    private void initFields() {
+        ui.nameTF = categoryNameTF;
+    }
+    
     private void loadCategoryData() {
-        bCategory.loadCategory(categoryNameTF, categoryId);
+        bCategory.loadCategory(ui, categoryId);
     }
     
 
@@ -188,13 +194,13 @@ public class Category extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCategoryBtnActionPerformed
-        if(bCategory.addCategory(parent, categoryNameTF, categoryId)) {
-           dispose(); 
+        if (bCategory.saveCategory(this, ui, categoryId)) {
+            dispose();
         }
     }//GEN-LAST:event_addCategoryBtnActionPerformed
 
     private void clearCategoryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearCategoryBtnActionPerformed
-        categoryNameTF.setText("");
+        bCategory.clearForm(ui);
     }//GEN-LAST:event_clearCategoryBtnActionPerformed
 
     
