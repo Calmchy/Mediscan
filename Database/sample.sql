@@ -79,36 +79,6 @@ INSERT INTO `customers` (`customer_id`, `first_name`, `last_name`, `middle_initi
 (10, 'Leo', 'Navarro', 'C.', '1979-01-23', 'leo.navarro@email.com', '09261234567', 9, '2026-09-24 17:46:33');
 
 -- ============================================
--- PRESCRIPTIONS
--- ============================================
-INSERT INTO `prescriptions` (`prescription_id`, `customer_id`, `product_id`, `doctor_name`, `dosage`, `quantity_prescribed`, `date_issued`, `status`) VALUES
-(1, 1, 1, 'Dr. Ramon Lopez', '500mg 3x daily', 21, '2026-07-15', 'ready'),
-(2, 2, 1, 'Dr. Ramon Lopez', '500mg 2x daily', 14, '2026-07-18', 'pending'),
-(3, 3, 3, 'Dr. Elisa Ong', '1 tab every 6 hrs', 10, '2026-07-10', 'picked_up'),
-(4, 4, 1, 'Dr. Ramon Lopez', '500mg 3x daily', 21, '2026-07-20', 'ready'),
-(5, 5, 3, 'Dr. Elisa Ong', '1 tab every 8 hrs', 12, '2026-07-22', 'pending'),
-(6, 6, 1, 'Dr. Mika Reyes', '500mg 2x daily', 14, '2026-07-25', 'pending'),
-(7, 7, 3, 'Dr. Elisa Ong', '1 tab every 6 hrs', 10, '2026-07-26', 'ready'),
-(8, 8, 1, 'Dr. Mika Reyes', '500mg 3x daily', 21, '2026-07-27', 'picked_up'),
-(9, 9, 3, 'Dr. Ramon Lopez', '1 tab every 8 hrs', 12, '2026-07-28', 'pending'),
-(10, 10, 1, 'Dr. Mika Reyes', '500mg 2x daily', 14, '2026-07-29', 'ready');
-
--- ============================================
--- REFILL_REMINDERS
--- ============================================
-INSERT INTO `refill_reminders` (`reminder_id`, `prescription_id`, `reminder_date`, `method`, `sent_status`) VALUES
-(1, 1, '2026-08-01', 'sms', 'pending'),
-(2, 2, '2026-08-02', 'email', 'pending'),
-(3, 3, '2026-08-03', 'sms', 'sent'),
-(4, 4, '2026-08-04', 'email', 'pending'),
-(5, 5, '2026-08-05', 'sms', 'pending'),
-(6, 6, '2026-08-06', 'email', 'sent'),
-(7, 7, '2026-08-07', 'sms', 'pending'),
-(8, 8, '2026-08-08', 'email', 'sent'),
-(9, 9, '2026-08-09', 'sms', 'pending'),
-(10, 10, '2026-08-10', 'email', 'pending');
-
--- ============================================
 -- ORDERS
 -- ============================================
 INSERT INTO `orders` (`order_id`, `user_id`, `customer_id`, `order_date`, `total_amount`) VALUES

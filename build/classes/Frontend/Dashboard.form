@@ -1832,7 +1832,7 @@
                               <Font name="Dialog" size="14" style="1"/>
                             </Property>
                             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                              <Table columnCount="8" rowCount="0">
+                              <Table columnCount="9" rowCount="0">
                                 <Column editable="false" title="STOCK ID" type="java.lang.Integer"/>
                                 <Column editable="false" title="PRODUCT NAME" type="java.lang.String"/>
                                 <Column editable="false" title="BATCH NO" type="java.lang.String"/>
@@ -1841,6 +1841,7 @@
                                 <Column editable="false" title="UNIT" type="java.lang.String"/>
                                 <Column editable="false" title="EXPIRY DATE" type="java.lang.String"/>
                                 <Column editable="false" title="DATE RECEIVED" type="java.lang.String"/>
+                                <Column editable="false" title="STATUS" type="java.lang.String"/>
                               </Table>
                             </Property>
                             <Property name="focusTraversalPolicyProvider" type="boolean" value="true"/>
@@ -1866,8 +1867,10 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="deleteStockBtn" min="-2" pref="186" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="holdReleaseStockBtn" pref="235" max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="printStockBtn" min="-2" pref="203" max="-2" attributes="0"/>
-                                  <EmptySpace pref="265" max="32767" attributes="0"/>
+                                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -1876,10 +1879,11 @@
                               <Group type="102" alignment="1" attributes="0">
                                   <EmptySpace max="32767" attributes="0"/>
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="printStockBtn" alignment="1" max="32767" attributes="0"/>
-                                      <Component id="deleteStockBtn" alignment="1" max="32767" attributes="0"/>
                                       <Component id="editStockBtn" alignment="1" max="32767" attributes="0"/>
-                                      <Component id="addStockBtn" alignment="1" min="-2" pref="43" max="-2" attributes="0"/>
+                                      <Component id="addStockBtn" alignment="1" pref="43" max="32767" attributes="0"/>
+                                      <Component id="deleteStockBtn" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="holdReleaseStockBtn" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="printStockBtn" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -1931,6 +1935,17 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addStockBtnActionPerformed"/>
                           </Events>
                         </Component>
+                        <Component class="javax.swing.JButton" name="holdReleaseStockBtn">
+                          <Properties>
+                            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                              <Font name="Dialog" size="18" style="1"/>
+                            </Property>
+                            <Property name="text" type="java.lang.String" value="HOLD / RELEASE"/>
+                          </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="holdReleaseStockBtnActionPerformed"/>
+                          </Events>
+                        </Component>
                       </SubComponents>
                     </Container>
                     <Container class="javax.swing.JPanel" name="jPanel7">
@@ -1952,6 +1967,10 @@
                                   <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
                                   <Component id="stockFilterProductCB" min="-2" pref="204" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="jLabel47" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="stockFilterStatusCB" min="-2" pref="171" max="-2" attributes="0"/>
                                   <EmptySpace max="32767" attributes="0"/>
                                   <Component id="stockRefreshBtn" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -1968,6 +1987,8 @@
                                       <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="stockSearchTF" alignment="3" min="-2" pref="27" max="-2" attributes="0"/>
                                       <Component id="stockRefreshBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jLabel47" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="stockFilterStatusCB" alignment="3" min="-2" pref="27" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="32767" attributes="0"/>
                               </Group>
@@ -2007,6 +2028,21 @@
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="stockRefreshBtnActionPerformed"/>
                           </Events>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="jLabel47">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="Status:"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JComboBox" name="stockFilterStatusCB">
+                          <Properties>
+                            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                              <StringArray count="0"/>
+                            </Property>
+                          </Properties>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                          </AuxValues>
                         </Component>
                       </SubComponents>
                     </Container>
@@ -3548,28 +3584,6 @@
                   </SubComponents>
                 </Container>
               </SubComponents>
-            </Container>
-            <Container class="javax.swing.JPanel" name="prescriptionTab">
-              <Constraints>
-                <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                  <JTabbedPaneConstraints tabName="PRESCRIPTIONS">
-                    <Property name="tabTitle" type="java.lang.String" value="PRESCRIPTIONS"/>
-                  </JTabbedPaneConstraints>
-                </Constraint>
-              </Constraints>
-
-              <Layout>
-                <DimensionLayout dim="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="1051" max="32767" attributes="0"/>
-                  </Group>
-                </DimensionLayout>
-                <DimensionLayout dim="1">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="644" max="32767" attributes="0"/>
-                  </Group>
-                </DimensionLayout>
-              </Layout>
             </Container>
             <Container class="javax.swing.JPanel" name="accountsTab">
               <Constraints>

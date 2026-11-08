@@ -204,7 +204,8 @@ public class bDashboard {
         String lowSql = "SELECT COUNT(*) FROM (SELECT p.product_id FROM products p "
                 + "LEFT JOIN product_stock ps ON ps.product_id = p.product_id "
                 + "GROUP BY p.product_id "
-                + "HAVING COALESCE(SUM(CASE WHEN ps.expiry_date IS NULL OR ps.expiry_date >= CURRENT_DATE "
+                + "HAVING COALESCE(SUM(CASE WHEN ps.status = 'active' "
+                + "AND (ps.expiry_date IS NULL OR ps.expiry_date >= CURRENT_DATE) "
                 + "THEN ps.quantity END), 0) <= ?) t";
         String expSql = "SELECT "
                 + "COALESCE(SUM(CASE WHEN expiry_date < CURRENT_DATE THEN 1 ELSE 0 END), 0) AS expired, "
@@ -586,10 +587,12 @@ public class bDashboard {
  
     /** LOW STOCK: products with 20 units or less (expired batches are not counted), lowest first. */
     public static void setLowStock(DashboardFields f) {
-        String sql = "SELECT p.name, COALESCE(SUM(CASE WHEN ps.expiry_date IS NULL OR ps.expiry_date >= CURRENT_DATE "
+        String sql = "SELECT p.name, COALESCE(SUM(CASE WHEN ps.status = 'active' "
+                + "AND (ps.expiry_date IS NULL OR ps.expiry_date >= CURRENT_DATE) "
                 + "THEN ps.quantity END), 0) AS units "
                 + "FROM products p LEFT JOIN product_stock ps ON ps.product_id = p.product_id "
                 + "GROUP BY p.product_id, p.name HAVING units <= ? ORDER BY units ASC, p.name";
+        
         DefaultTableModel model = (DefaultTableModel) f.lowStockTable.getModel();
         model.setRowCount(0);
         try (Connection con = DBConnection.getConnection();
