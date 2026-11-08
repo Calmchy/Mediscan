@@ -154,15 +154,14 @@ public class bReports {
     // 2) STOCK REPORT  (current stock per product, all batches summed)
     // ------------------------------------------------------------------
     public static void stockReport(File out) throws SQLException, IOException, DocumentException {
-        String sql =
-            "SELECT p.product_id, p.name, COALESCE(p.brand, '') AS brand, "
-          + "       COALESCE(cat.category_name, 'Uncategorized') AS category, "
-          + "       COALESCE(SUM(ps.quantity), 0) AS qty, p.selling_price "
-          + "FROM products p "
-          + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
-          + "LEFT JOIN product_stock ps ON ps.product_id = p.product_id "
-          + "GROUP BY p.product_id, p.name, p.brand, category, p.selling_price "
-          + "ORDER BY qty ASC, p.name";
+        String sql = "SELECT p.product_id, p.name, COALESCE(p.brand, '') AS brand, "
+                + "COALESCE(cat.category_name, 'Uncategorized') AS category, "
+                + "COALESCE(SUM(CASE WHEN ps.status = 'active' THEN ps.quantity END), 0) AS qty, p.selling_price "
+                + "FROM products p "
+                + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
+                + "LEFT JOIN product_stock ps ON ps.product_id = p.product_id "
+                + "GROUP BY p.product_id, p.name, p.brand, category, p.selling_price "
+                + "ORDER BY qty ASC, p.name";
  
         List<String[]> rows = new ArrayList<String[]>();
         double value = 0;

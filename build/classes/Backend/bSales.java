@@ -101,7 +101,8 @@ public class bSales {
  
     public static int getAvailableStock(int productId) throws SQLException {
         String sql = "SELECT COALESCE(SUM(quantity), 0) FROM product_stock "
-                + "WHERE product_id = ? AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)";
+                + "WHERE product_id = ? AND status = 'active' "
+                + "AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -462,7 +463,7 @@ public class bSales {
     private static List<BatchUsed> deductStockFEFO(Connection con, int productId, int quantity, String productName)
             throws Exception {
         String selectSql = "SELECT stock_id, quantity, cost_price FROM product_stock "
-                + "WHERE product_id = ? AND quantity > 0 "
+                + "WHERE product_id = ? AND quantity > 0 AND status = 'active' "
                 + "AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE) "
                 + "ORDER BY expiry_date IS NULL, expiry_date ASC FOR UPDATE";
 

@@ -309,7 +309,7 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     public void setStockTable() {
-        bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem());
+        bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem(), (String) stockFilterStatusCB.getSelectedItem());
     }
     
     /** Gives the stock table its STATUS column and shows held / recalled batches in red text. */
@@ -345,8 +345,9 @@ public class Dashboard extends javax.swing.JFrame {
                                                                : javax.swing.SwingConstants.LEFT);
                 Object status = t.getModel().getValueAt(t.convertRowIndexToModel(row), STOCK_STATUS_COL);
                 boolean blocked = status != null && !"ACTIVE".equals(status.toString());
-                if (blocked && !selected) {
-                    c.setForeground(new java.awt.Color(179, 38, 30));
+                if (!selected) {
+                    // always set it: this renderer is reused for every cell and remembers the last color
+                    c.setForeground(blocked ? new java.awt.Color(179, 38, 30) : t.getForeground());
                 }
                 return c;
             }
@@ -361,6 +362,7 @@ public class Dashboard extends javax.swing.JFrame {
         try {
             bProd.loadCategoryFilter(productCategoryCB);
             bSto.loadProductFilter(stockFilterProductCB);
+            bSto.loadStatusFilter(stockFilterStatusCB); 
         } finally {
             loadingFilters = false;
         }
@@ -373,6 +375,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         productCategoryCB.addActionListener(e -> { if (!loadingFilters) setProductTable(); });
         stockFilterProductCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
+        stockFilterStatusCB.addActionListener(e -> { if (!loadingFilters) setStockTable(); });
 
         tabPannel.addChangeListener(e -> {
             loadFilterCombos();
