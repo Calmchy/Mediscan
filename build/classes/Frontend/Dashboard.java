@@ -269,15 +269,15 @@ public class Dashboard extends javax.swing.JFrame {
         java.util.List<String> allowed;
         switch (role) {
             case "admin":
-                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS", "PRESCRIPTIONS", "ADMIN");
+                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS", "ADMIN");
                 tabPannel.setSelectedIndex(0);
                 break;
             case "pharmacist":
-                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS", "PRESCRIPTIONS");
+                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS");
                 tabPannel.setSelectedIndex(0);
                 break;
             case "cashier":
-                allowed = java.util.Arrays.asList("SALES", "TRANSACTION", "CUSTOMERS", "PRESCRIPTIONS");
+                allowed = java.util.Arrays.asList("SALES", "TRANSACTION", "CUSTOMERS");
                 tabPannel.setSelectedIndex(4);
                 break;
             default:
