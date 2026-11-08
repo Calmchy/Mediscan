@@ -39,6 +39,7 @@ import java.nio.file.Path;
  */
 public class Dashboard extends javax.swing.JFrame {
     private int orderId;
+    private static final int STOCK_STATUS_COL = 8;
     private static final String BARCODE_FOLDER_PRODUCT = System.getProperty("user.home") + "/MediScanBarcodes/Product/";
     private boolean loadingFilters = false;
     private final bDashboard.DashboardFields dashUI = new bDashboard.DashboardFields();
@@ -56,6 +57,7 @@ public class Dashboard extends javax.swing.JFrame {
         //this.setUndecorated(true); // para waray window border
         initComponents();
         //this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); // para ma full screen
+        setupStockTable();
         setLocationRelativeTo(null);
         setIconImage(AppIcon.getIcon().getImage());
         setupDashboardLayout();
@@ -310,6 +312,50 @@ public class Dashboard extends javax.swing.JFrame {
         bSto.setStock(stockTable, stockSearchTF.getText(), (String) stockFilterProductCB.getSelectedItem());
     }
     
+    /** Gives the stock table its STATUS column and shows held / recalled batches in red text. */
+    private void setupStockTable() {
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{"STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY",
+                    "UNIT", "EXPIRY DATE", "DATE RECEIVED", "STATUS"}) {
+            @Override public Class<?> getColumnClass(int c) {
+                switch (c) {
+                    case 0: case 4: return Integer.class;
+                    case 3: return Double.class;
+                    default: return Object.class;
+                }
+            }
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        stockTable.setModel(model);
+
+        int[] widths = {70, 220, 110, 90, 90, 90, 110, 120, 100};
+        for (int i = 0; i < widths.length; i++) {
+            stockTable.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+        }
+
+        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
+            private final java.text.DecimalFormat money = new java.text.DecimalFormat("0.##");
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable t, Object value,
+                    boolean selected, boolean focus, int row, int col) {
+                Object shown = (value instanceof Double) ? money.format(value) : value;
+                java.awt.Component c = super.getTableCellRendererComponent(t, shown, selected, focus, row, col);
+                setHorizontalAlignment(value instanceof Number ? javax.swing.SwingConstants.RIGHT
+                                                               : javax.swing.SwingConstants.LEFT);
+                Object status = t.getModel().getValueAt(t.convertRowIndexToModel(row), STOCK_STATUS_COL);
+                boolean blocked = status != null && !"ACTIVE".equals(status.toString());
+                if (blocked && !selected) {
+                    c.setForeground(new java.awt.Color(179, 38, 30));
+                }
+                return c;
+            }
+        };
+        stockTable.setDefaultRenderer(Object.class, renderer);
+        stockTable.setDefaultRenderer(Integer.class, renderer);
+        stockTable.setDefaultRenderer(Double.class, renderer);
+    }
+    
     private void loadFilterCombos() {
         loadingFilters = true;
         try {
@@ -481,6 +527,8 @@ public class Dashboard extends javax.swing.JFrame {
         stockSearchTF = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         stockRefreshBtn = new javax.swing.JButton();
+        jLabel47 = new javax.swing.JLabel();
+        stockFilterStatusCB = new javax.swing.JComboBox<>();
         salesTab = new javax.swing.JPanel();
         salesBG = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -1707,14 +1755,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED"
+                "STOCK ID", "PRODUCT NAME", "BATCH NO", "COST PRICE", "QUANTITY", "UNIT", "EXPIRY DATE", "DATE RECEIVED", "STATUS"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1814,6 +1862,8 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        jLabel47.setText("Status:");
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
@@ -1827,6 +1877,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jLabel4)
                 .addGap(3, 3, 3)
                 .addComponent(stockFilterProductCB, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel47)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(stockRefreshBtn)
                 .addContainerGap())
@@ -1840,7 +1894,9 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(jLabel4)
                     .addComponent(jLabel2)
                     .addComponent(stockSearchTF, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(stockRefreshBtn))
+                    .addComponent(stockRefreshBtn)
+                    .addComponent(jLabel47)
+                    .addComponent(stockFilterStatusCB, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -3372,7 +3428,72 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_dashExpiryReportBtnActionPerformed
 
     private void holdReleaseStockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_holdReleaseStockBtnActionPerformed
-        // TODO add your handling code here:
+        String role = Session.role == null ? "" : Session.role.toLowerCase();
+        if (!role.equals("admin") && !role.equals("pharmacist")) {
+            JOptionPane.showMessageDialog(this, "Only an admin or pharmacist can hold or release a batch.");
+            return;
+        }
+
+        int row = stockTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a stock batch first.");
+            return;
+        }
+
+        int stockId = Integer.parseInt(stockTable.getValueAt(row, 0).toString());
+        String product = stockTable.getValueAt(row, 1).toString();
+        String batch = String.valueOf(stockTable.getValueAt(row, 2));
+        String status = stockTable.getValueAt(row, STOCK_STATUS_COL).toString();
+
+        try {
+            if ("RECALLED".equals(status)) {
+                JOptionPane.showMessageDialog(this, "This batch was recalled and cannot be released.");
+                return;
+            }
+
+            if ("ACTIVE".equals(status)) {
+                // ACTIVE -> ON HOLD (a reason is required)
+                String reason = JOptionPane.showInputDialog(this,
+                        "Reason for holding " + product + " (batch " + batch + "):",
+                        "HOLD BATCH", JOptionPane.QUESTION_MESSAGE);
+                if (reason == null) {
+                    return; // cancelled
+                }
+                reason = reason.trim();
+                if (reason.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please enter a reason for the hold.");
+                    return;
+                }
+                if (reason.length() > 255) {
+                    JOptionPane.showMessageDialog(this, "Reason is too long (255 characters max).");
+                    return;
+                }
+                if (bSto.setStatus(stockId, "active", "on_hold", reason) == 0) {
+                    JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Batch " + batch + " is now ON HOLD and cannot be sold.");
+                }
+            } else {
+                // ON HOLD -> ACTIVE
+                String why = bSto.getStatusReason(stockId);
+                int x = JOptionPane.showConfirmDialog(this,
+                        "Release " + product + " (batch " + batch + ") back to selling?"
+                        + (why == null ? "" : "\n\nHeld because: " + why),
+                        "RELEASE BATCH", JOptionPane.YES_NO_OPTION);
+                if (x != JOptionPane.YES_OPTION) {
+                    return;
+                }
+                if (bSto.setStatus(stockId, "on_hold", "active", null) == 0) {
+                    JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Batch " + batch + " is ACTIVE again.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(this, "Could not change the batch status: " + e.getMessage());
+        }
+        setStockTable();
     }//GEN-LAST:event_holdReleaseStockBtnActionPerformed
 
     /**
@@ -3517,6 +3638,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel45;
     private javax.swing.JLabel jLabel46;
+    private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel50;
@@ -3605,6 +3727,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel salesWarningRequireL;
     private javax.swing.JPanel stockBG;
     private javax.swing.JComboBox<String> stockFilterProductCB;
+    private javax.swing.JComboBox<String> stockFilterStatusCB;
     private javax.swing.JButton stockRefreshBtn;
     private javax.swing.JTextField stockSearchTF;
     private javax.swing.JPanel stockTab;
