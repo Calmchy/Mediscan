@@ -3454,43 +3454,61 @@ public class Dashboard extends javax.swing.JFrame {
                 return;
             }
 
-            if ("ACTIVE".equals(status)) {
-                // ACTIVE -> ON HOLD (a reason is required)
-                String reason = JOptionPane.showInputDialog(this,
-                        "Reason for holding " + product + " (batch " + batch + "):",
-                        "HOLD BATCH", JOptionPane.QUESTION_MESSAGE);
+            boolean isActive = "ACTIVE".equals(status);
+            String why = isActive ? null : bSto.getStatusReason(stockId);
+
+            // one button, one popup: what do you want to do with this batch?
+            String[] options = isActive
+                    ? new String[]{"Hold (temporary)", "Recall (permanent)", "Cancel"}
+                    : new String[]{"Release", "Recall (permanent)", "Cancel"};
+            int choice = JOptionPane.showOptionDialog(this,
+                    product + " (batch " + batch + ") is " + status + "."
+                    + (why == null ? "" : "\nHeld because: " + why)
+                    + "\n\nWhat do you want to do?",
+                    "HOLD / RELEASE BATCH", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                    null, options, options[0]);
+            if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
+                return; // cancelled
+            }
+
+            String from = isActive ? "active" : "on_hold";
+            String to;
+            String reason = null;
+
+            if (choice == 0 && !isActive) {
+                to = "active"; // release: no reason needed
+            } else {
+                to = (choice == 0) ? "on_hold" : "recalled";
+                String what = (choice == 0) ? "holding" : "recalling";
+                reason = JOptionPane.showInputDialog(this,
+                        "Reason for " + what + " " + product + " (batch " + batch + "):",
+                        choice == 0 ? "HOLD BATCH" : "RECALL BATCH", JOptionPane.QUESTION_MESSAGE);
                 if (reason == null) {
                     return; // cancelled
                 }
                 reason = reason.trim();
                 if (reason.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Please enter a reason for the hold.");
+                    JOptionPane.showMessageDialog(this, "Please enter a reason.");
                     return;
                 }
                 if (reason.length() > 255) {
                     JOptionPane.showMessageDialog(this, "Reason is too long (255 characters max).");
                     return;
                 }
-                if (bSto.setStatus(stockId, "active", "on_hold", reason) == 0) {
-                    JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Batch " + batch + " is now ON HOLD and cannot be sold.");
+                if (choice == 1) {
+                    int sure = JOptionPane.showConfirmDialog(this,
+                            "A recalled batch can NEVER be sold or released again.\nRecall batch " + batch + "?",
+                            "CONFIRM RECALL", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (sure != JOptionPane.YES_OPTION) {
+                        return;
+                    }
                 }
+            }
+
+            if (bSto.setStatus(stockId, from, to, reason) == 0) {
+                JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
             } else {
-                // ON HOLD -> ACTIVE
-                String why = bSto.getStatusReason(stockId);
-                int x = JOptionPane.showConfirmDialog(this,
-                        "Release " + product + " (batch " + batch + ") back to selling?"
-                        + (why == null ? "" : "\n\nHeld because: " + why),
-                        "RELEASE BATCH", JOptionPane.YES_NO_OPTION);
-                if (x != JOptionPane.YES_OPTION) {
-                    return;
-                }
-                if (bSto.setStatus(stockId, "on_hold", "active", null) == 0) {
-                    JOptionPane.showMessageDialog(this, "This batch was changed by someone else. Refreshing the list.");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Batch " + batch + " is ACTIVE again.");
-                }
+                JOptionPane.showMessageDialog(this, "Batch " + batch + " is now " + to.toUpperCase().replace('_', ' ') + ".");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
