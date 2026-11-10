@@ -181,9 +181,10 @@ public class bDashboard {
         Timestamp end = Timestamp.valueOf(to.plusDays(1).atStartOfDay());
  
         String salesSql = "SELECT COUNT(*) AS txn, COALESCE(SUM(total_amount), 0) AS total "
-                + "FROM orders WHERE order_date >= ? AND order_date < ?";
+                + "FROM orders WHERE order_date >= ? AND order_date < ? AND status = 'completed'";
         String itemsSql = "SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi "
-                + "JOIN orders o ON oi.order_id = o.order_id WHERE o.order_date >= ? AND o.order_date < ?";
+                + "JOIN orders o ON oi.order_id = o.order_id WHERE o.order_date >= ? AND o.order_date < ? "
+                + "AND o.status = 'completed'";
         String lowSql = "SELECT COUNT(*) FROM (SELECT p.product_id FROM products p "
                 + "LEFT JOIN product_stock ps ON ps.product_id = p.product_id "
                 + "GROUP BY p.product_id "
@@ -282,7 +283,7 @@ public class bDashboard {
             buckets.putIfAbsent(bucketLabel(d, totalDays), 0.0);
         }
         String sql = "SELECT DATE(order_date) AS d, SUM(total_amount) AS total FROM orders "
-                + "WHERE order_date >= ? AND order_date < ? GROUP BY DATE(order_date)";
+                + "WHERE order_date >= ? AND order_date < ? AND status = 'completed' GROUP BY DATE(order_date)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setTimestamp(1, start);
             ps.setTimestamp(2, end);
@@ -302,7 +303,7 @@ public class bDashboard {
                 + "FROM order_items oi JOIN orders o ON oi.order_id = o.order_id "
                 + "JOIN products p ON oi.product_id = p.product_id "
                 + "LEFT JOIN categories c ON p.category_id = c.category_id "
-                + "WHERE o.order_date >= ? AND o.order_date < ? "
+                + "WHERE o.order_date >= ? AND o.order_date < ? AND o.status = 'completed' "
                 + "GROUP BY COALESCE(c.category_name, 'Uncategorized') ORDER BY total DESC";
         Map<String, Double> result = new LinkedHashMap<>();
         double others = 0;
@@ -329,7 +330,7 @@ public class bDashboard {
             throws Exception {
         String sql = "SELECT p.name, SUM(oi.quantity) AS units FROM order_items oi "
                 + "JOIN orders o ON oi.order_id = o.order_id JOIN products p ON oi.product_id = p.product_id "
-                + "WHERE o.order_date >= ? AND o.order_date < ? "
+                + "WHERE o.order_date >= ? AND o.order_date < ? AND o.status = 'completed' "
                 + "GROUP BY p.product_id, p.name ORDER BY units DESC, p.name LIMIT 5";
         Map<String, Integer> result = new LinkedHashMap<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {

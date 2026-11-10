@@ -13,7 +13,7 @@ create table users (
     last_name varchar(50) not null,
     middle_initial char(50),
     role enum('admin', 'pharmacist', 'cashier') not null default 'cashier',
-    must_change_password tinyint(1) NOT NULL DEFAULT 1,
+    must_change_password tinyint(1) not null default 1,
     created_by int default null,
     created_at timestamp default current_timestamp,
     foreign key (created_by) references users(user_id)
@@ -83,9 +83,15 @@ create table orders (
     total_amount decimal(10,2) not null default 0.00,
 	payment_amount decimal(10,2) not null default 0.00,
 	change_amount decimal(10,2) not null default 0.00,
+    status enum('completed', 'voided') not null default 'completed',
+    void_reason varchar(255) default null,
+    voided_by int default null,
+    voided_at datetime default null,
     foreign key (user_id) references users(user_id)
         on delete restrict on update cascade,
     foreign key (customer_id) references customers(customer_id)
+        on delete set null on update cascade,
+    foreign key (voided_by) references users(user_id)
         on delete set null on update cascade
 );
 
@@ -136,3 +142,4 @@ create table product_price_history (
 create index idx_stock_expiry on product_stock(product_id, expiry_date);
 create index idx_batches_order_item on order_item_batches(order_item_id);
 create index idx_price_history_product on product_price_history(product_id, changed_at);
+create index idx_orders_status_date on orders(status, order_date);

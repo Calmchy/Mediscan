@@ -93,14 +93,14 @@ public class bReports {
         String sql =
             "SELECT o.order_id, o.order_date, "
           + "       CONCAT(u.first_name, ' ', u.last_name) AS cashier, "
-          + "       COALESCE(CONCAT(c.first_name, ' ', c.last_name), 'N/A') AS customer, "
+          + "       c.first_name AS c_first, c.middle_initial AS c_mi, c.last_name AS c_last, "
           + "       COALESCE(SUM(oi.quantity), 0) AS items, o.total_amount "
           + "FROM orders o "
           + "JOIN users u ON u.user_id = o.user_id "
           + "LEFT JOIN customers c ON c.customer_id = o.customer_id "
           + "LEFT JOIN order_items oi ON oi.order_id = o.order_id "
-          + "WHERE DATE(o.order_date) BETWEEN ? AND ? "
-          + "GROUP BY o.order_id, o.order_date, cashier, customer, o.total_amount "
+          + "WHERE DATE(o.order_date) BETWEEN ? AND ? AND o.status = 'completed' "
+          + "GROUP BY o.order_id, o.order_date, cashier, c.first_name, c.middle_initial, c.last_name, o.total_amount "
           + "ORDER BY o.order_date";
  
         List<String[]> rows = new ArrayList<String[]>();
@@ -120,7 +120,7 @@ public class bReports {
                         String.valueOf(rs.getInt("order_id")),
                         dt.format(rs.getTimestamp("order_date")),
                         rs.getString("cashier"),
-                        rs.getString("customer"),
+                        bTransaction.formatCustomerName(rs.getString("c_first"), rs.getString("c_mi"), rs.getString("c_last")),
                         String.valueOf(rs.getInt("items")),
                         money(rs.getDouble("total_amount"))
                     });

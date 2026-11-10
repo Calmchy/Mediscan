@@ -60,6 +60,8 @@ public class bPrint {
         public double total, cash, change;
         public boolean reprint;
         public String reprintedAt;
+        public boolean voided;
+        public String voidReason, voidedAt;
     }
     
     public static void printSale(bSales.CheckoutResult r) {
@@ -111,7 +113,7 @@ public class bPrint {
         try (Connection con = DBConnection.getConnection()) {
             boolean hasPayment = hasColumn(con, "orders", "payment_amount")
                     && hasColumn(con, "orders", "change_amount");
-            String headSql = "SELECT order_date, total_amount, "
+            String headSql = "SELECT order_date, total_amount, status, void_reason, voided_at, "
                     + (hasPayment ? "payment_amount, change_amount " : "0 AS payment_amount, 0 AS change_amount ")
                     + "FROM orders WHERE order_id = ?";
  
@@ -127,6 +129,12 @@ public class bPrint {
                     d.total = rs.getDouble("total_amount");
                     d.cash = rs.getDouble("payment_amount");
                     d.change = rs.getDouble("change_amount");
+                    d.voided = "voided".equalsIgnoreCase(rs.getString("status"));
+                    if (d.voided) {
+                        d.voidReason = rs.getString("void_reason");
+                        java.sql.Timestamp at = rs.getTimestamp("voided_at");
+                        d.voidedAt = at == null ? "" : at.toLocalDateTime().format(DT_FMT);
+                    }
                     if (d.cash == 0) {
                         d.cash = d.total;
                         d.change = 0;
@@ -152,7 +160,7 @@ public class bPrint {
 
     public static PageFormat pageFormat(PageFormat pf, ReceiptData d) {
         Paper paper = pf.getPaper();
-        double bodyHeight = d.lines.size() + (d.reprint ? 1 : 0);
+        double bodyHeight = d.lines.size() + (d.reprint ? 1 : 0) + (d.voided ? 3 : 0);
         double headerHeight = 5.0;
         double footerHeight = 5.0;
         double width = cmToPoints(8);
@@ -222,6 +230,11 @@ public class bPrint {
                 drawCentered(g2d, "*** REPRINT ***", left, right, y); y += lineH;
                 g2d.setFont(normalFont);
             }
+            if (d.voided) {
+                g2d.setFont(boldFont);
+                drawCentered(g2d, "*** VOID ***", left, right, y); y += lineH;
+                g2d.setFont(normalFont);
+            }
             g2d.drawString(divider, left, y); y += lineH + 4;
  
             for (Line it : d.lines) {
@@ -262,7 +275,22 @@ public class bPrint {
  
             if (d.reprint) {
                 y += 4;
-                drawCentered(g2d, "Reprinted: " + d.reprintedAt, left, right, y);
+                drawCentered(g2d, "Reprinted: " + d.reprintedAt, left, right, y); y += lineH;
+            }
+
+            if (d.voided) {
+                y += 4;
+                g2d.setFont(boldFont);
+                drawCentered(g2d, "*** VOID ***", left, right, y); y += lineH;
+                g2d.setFont(normalFont);
+                drawCentered(g2d, "Voided: " + (d.voidedAt == null ? "" : d.voidedAt), left, right, y); y += lineH;
+                if (d.voidReason != null && !d.voidReason.isEmpty()) {
+                    String reason = "Reason: " + d.voidReason;
+                    while (reason.length() > 1 && fm.stringWidth(reason) > blockWidth) {
+                        reason = reason.substring(0, reason.length() - 1);
+                    }
+                    drawCentered(g2d, reason, left, right, y);
+                }
             }
  
             return PAGE_EXISTS;
