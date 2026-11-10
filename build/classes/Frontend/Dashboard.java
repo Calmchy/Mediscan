@@ -257,7 +257,7 @@ public class Dashboard extends javax.swing.JFrame {
         java.util.List<String> allowed;
         switch (role) {
             case "admin":
-                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS", "ADMIN");
+                allowed = java.util.Arrays.asList("DASHBOARD", "CATEGORY", "PRODUCTS", "STOCK", "SALES", "TRANSACTION", "CUSTOMERS", "ACCOUNTS");
                 tabPannel.setSelectedIndex(0);
                 break;
             case "pharmacist":
@@ -464,7 +464,6 @@ public class Dashboard extends javax.swing.JFrame {
         transOrderTypeL = new javax.swing.JLabel();
         transStatusCaptionL = new javax.swing.JLabel();
         transStatusL = new javax.swing.JLabel();
-        transVoidBtn = new javax.swing.JButton();
         jLabel39 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
         transChangeL = new javax.swing.JLabel();
@@ -483,6 +482,7 @@ public class Dashboard extends javax.swing.JFrame {
         transTotalTF = new javax.swing.JLabel();
         transReprintReceiptBtn = new javax.swing.JButton();
         transPrintListBtn = new javax.swing.JButton();
+        transVoidBtn = new javax.swing.JButton();
         transTotalSalesL = new javax.swing.JLabel();
         jLabel31 = new javax.swing.JLabel();
         transactionsCountL = new javax.swing.JLabel();
@@ -2313,15 +2313,15 @@ public class Dashboard extends javax.swing.JFrame {
         transOrderTypeL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         transOrderTypeL.setText("walk_in");
 
-        jLabel39.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        jLabel39.setText("Order type");
+        transStatusCaptionL.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        transStatusCaptionL.setText("Status");
 
         transStatusL.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         transStatusL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         transStatusL.setText("COMPLETED");
 
-        transStatusCaptionL.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        transStatusCaptionL.setText("Status");
+        jLabel39.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jLabel39.setText("Order type");
 
         jLabel29.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel29.setText("Change");
@@ -3000,7 +3000,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminResetPassBtn.setBackground(new java.awt.Color(221, 161, 40));
         adminResetPassBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminResetPassBtn.setForeground(new java.awt.Color(26, 31, 46));
         adminResetPassBtn.setText("RESET PASSWORD");
         adminResetPassBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3008,7 +3010,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        adminPrintBtn.setBackground(new java.awt.Color(79, 172, 255));
         adminPrintBtn.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        adminPrintBtn.setForeground(new java.awt.Color(26, 31, 46));
         adminPrintBtn.setText("PRINT");
         adminPrintBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3115,7 +3119,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addComponent(accountsBG, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        tabPannel.addTab("ADMIN", accountsTab);
+        tabPannel.addTab("ACCOUNTS", accountsTab);
 
         javax.swing.GroupLayout backgroundLayout = new javax.swing.GroupLayout(background);
         background.setLayout(backgroundLayout);
@@ -3142,7 +3146,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, 771, Short.MAX_VALUE)
+            .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, 825, Short.MAX_VALUE)
         );
 
         pack();
