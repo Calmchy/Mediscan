@@ -1302,7 +1302,7 @@ public class Dashboard extends javax.swing.JFrame {
         tabPannel.addTab("DASHBOARD", mainDashboardTab);
 
         categoryTable.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        categoryTable.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        categoryTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         categoryTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -1754,10 +1754,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(deleteStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(holdReleaseStockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                .addComponent(holdReleaseStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(printStockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2238,6 +2238,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         tabPannel.addTab("SALES", salesTab);
 
+        transOrderListTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         transOrderListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -2273,6 +2274,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
+        transactionDetailsTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         transactionDetailsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -2689,6 +2691,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         customerSearchTF.getAccessibleContext().setAccessibleDescription("");
 
+        customerTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         customerTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -2713,6 +2716,17 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jScrollPane9.setViewportView(customerTable);
+        if (customerTable.getColumnModel().getColumnCount() > 0) {
+            customerTable.getColumnModel().getColumn(2).setMinWidth(85);
+            customerTable.getColumnModel().getColumn(2).setPreferredWidth(85);
+            customerTable.getColumnModel().getColumn(2).setMaxWidth(85);
+            customerTable.getColumnModel().getColumn(3).setMinWidth(50);
+            customerTable.getColumnModel().getColumn(3).setPreferredWidth(50);
+            customerTable.getColumnModel().getColumn(3).setMaxWidth(50);
+            customerTable.getColumnModel().getColumn(4).setMinWidth(100);
+            customerTable.getColumnModel().getColumn(4).setPreferredWidth(100);
+            customerTable.getColumnModel().getColumn(4).setMaxWidth(100);
+        }
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -2994,6 +3008,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        adminAccountTable.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         adminAccountTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -3018,6 +3033,17 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jScrollPane8.setViewportView(adminAccountTable);
+        if (adminAccountTable.getColumnModel().getColumnCount() > 0) {
+            adminAccountTable.getColumnModel().getColumn(3).setMinWidth(80);
+            adminAccountTable.getColumnModel().getColumn(3).setPreferredWidth(90);
+            adminAccountTable.getColumnModel().getColumn(3).setMaxWidth(100);
+            adminAccountTable.getColumnModel().getColumn(5).setMinWidth(160);
+            adminAccountTable.getColumnModel().getColumn(5).setPreferredWidth(160);
+            adminAccountTable.getColumnModel().getColumn(5).setMaxWidth(160);
+            adminAccountTable.getColumnModel().getColumn(6).setMinWidth(115);
+            adminAccountTable.getColumnModel().getColumn(6).setPreferredWidth(120);
+            adminAccountTable.getColumnModel().getColumn(6).setMaxWidth(125);
+        }
 
         javax.swing.GroupLayout accountsBGLayout = new javax.swing.GroupLayout(accountsBG);
         accountsBG.setLayout(accountsBGLayout);

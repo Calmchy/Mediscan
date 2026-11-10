@@ -241,19 +241,27 @@ public class bProduct {
             }
         });
     }
+    
+    private static boolean usesPackSize(String unitType) {
+        return "tablet".equals(unitType) || "capsule".equals(unitType);
+    }
  
     private static void setupUnitTypeToggle(ProductFormFields f) {
         if (f.unitTypeCB.getItemCount() == 0) {
             f.unitTypeCB.addItem("tablet");
+            f.unitTypeCB.addItem("capsule");
+            f.unitTypeCB.addItem("syrup");
+            f.unitTypeCB.addItem("ml");
+            f.unitTypeCB.addItem("box");
             f.unitTypeCB.addItem("piece");
         }
  
-        f.packSizeTF.setEnabled("tablet".equals(f.unitTypeCB.getSelectedItem()));
+        f.packSizeTF.setEnabled(usesPackSize((String) f.unitTypeCB.getSelectedItem()));
  
         f.unitTypeCB.addItemListener(e -> {
-            boolean tablet = "tablet".equals(f.unitTypeCB.getSelectedItem());
-            f.packSizeTF.setEnabled(tablet);
-            if (!tablet) {
+            boolean packed = usesPackSize((String) f.unitTypeCB.getSelectedItem());
+            f.packSizeTF.setEnabled(packed);
+            if (!packed) {
                 f.packSizeTF.setText("");
             }
         });
@@ -327,7 +335,7 @@ public class bProduct {
         }
  
         Integer packSize = null;
-        if ("tablet".equals(unitType) && !packSizeText.isEmpty()) {
+        if (usesPackSize(unitType) && !packSizeText.isEmpty()) {
             try {
                 packSize = Integer.parseInt(packSizeText);
             } catch (NumberFormatException e) {
