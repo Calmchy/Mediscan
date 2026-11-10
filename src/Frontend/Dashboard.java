@@ -47,7 +47,8 @@ public class Dashboard extends javax.swing.JFrame {
         setupDashboardLayout();
         
         bTransaction.loadCashierFilter(transCashierCB);
-        bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+        bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF, transStatusL);
+        bTransaction.installStatusRenderer(transOrderListTable);
         
         addSearchListener(transOrderIDTF, () -> reloadOrders());
         transFromDC.addPropertyChangeListener("date", e -> reloadOrders());
@@ -63,6 +64,7 @@ public class Dashboard extends javax.swing.JFrame {
                 showSelectedOrder();
             }
         });
+        showSelectedOrder(); // sets the initial state of the VOID button
 
         salesProductIDScanTF.setFocusable(true);
         salesProductIDScanTF.requestFocus();
@@ -220,14 +222,17 @@ public class Dashboard extends javax.swing.JFrame {
     
     private void showSelectedOrder() {
         int id = bTransaction.getSelectedOrderId(transOrderListTable);
+        int row = transOrderListTable.getSelectedRow();
+        Object status = row < 0 ? null : transOrderListTable.getValueAt(row, bTransaction.COL_STATUS);
+        bTransaction.updateVoidButton(transVoidBtn, status, id);
         if (id < 0) {
             bTransaction.clearOrderDetails(transactionDetailsTable, transOrderIDL, transDateTimeL,
-                    transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+                    transCashierFNL, transCustFNL, transPaymentL, transChangeL, transOrderTypeL, transTotalTF, transStatusL);
             return;
         }
         bTransaction.loadOrderDetails(id, transactionDetailsTable,
                 transOrderIDL, transDateTimeL, transCashierFNL, transCustFNL,
-                transPaymentL, transChangeL, transOrderTypeL, transTotalTF);
+                transPaymentL, transChangeL, transOrderTypeL, transTotalTF, transStatusL);
     }
     
     private void reloadOrders() {
@@ -457,6 +462,9 @@ public class Dashboard extends javax.swing.JFrame {
         transactionDetailsTable = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
         transOrderTypeL = new javax.swing.JLabel();
+        transStatusCaptionL = new javax.swing.JLabel();
+        transStatusL = new javax.swing.JLabel();
+        transVoidBtn = new javax.swing.JButton();
         jLabel39 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
         transChangeL = new javax.swing.JLabel();
@@ -2244,14 +2252,14 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Oder ID", "DATE & TIME", "CASHIER", "ITEMS", "TOTAL"
+                "Order ID", "DATE & TIME", "CASHIER", "CUSTOMER", "ITEMS", "TOTAL", "STATUS"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Double.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Double.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2307,6 +2315,13 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel39.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel39.setText("Order type");
+
+        transStatusL.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
+        transStatusL.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        transStatusL.setText("COMPLETED");
+
+        transStatusCaptionL.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        transStatusCaptionL.setText("Status");
 
         jLabel29.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
         jLabel29.setText("Change");
@@ -2375,6 +2390,16 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        transVoidBtn.setBackground(new java.awt.Color(192, 57, 43));
+        transVoidBtn.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        transVoidBtn.setForeground(new java.awt.Color(255, 255, 255));
+        transVoidBtn.setText("VOID TRANSACTION");
+        transVoidBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transVoidBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -2418,13 +2443,20 @@ public class Dashboard extends javax.swing.JFrame {
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jLabel39)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(transOrderTypeL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(transOrderTypeL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(transStatusCaptionL)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(transStatusL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addContainerGap())
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(transReprintReceiptBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(transPrintListBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(transVoidBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(transTotalTF, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2464,6 +2496,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel39)
                     .addComponent(transOrderTypeL))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(transStatusCaptionL)
+                    .addComponent(transStatusL))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel37)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2472,6 +2508,8 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(transReprintReceiptBtn)
                     .addComponent(transPrintListBtn))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(transVoidBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -3250,6 +3288,14 @@ public class Dashboard extends javax.swing.JFrame {
         bTransaction.printList(transOrderListTable);
     }//GEN-LAST:event_transPrintListBtnActionPerformed
 
+    private void transVoidBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transVoidBtnActionPerformed
+        int row = transOrderListTable.getSelectedRow();
+        Object status = row < 0 ? null : transOrderListTable.getValueAt(row, bTransaction.COL_STATUS);
+        if (bTransaction.promptVoid(this, bTransaction.getSelectedOrderId(transOrderListTable), status)) {
+            reloadOrders();
+        }
+    }//GEN-LAST:event_transVoidBtnActionPerformed
+
     private void tabPannelStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPannelStateChanged
         int selectedIndex = tabPannel.getSelectedIndex();
         if (tabPannel.getTitleAt(selectedIndex) == "SALES") {
@@ -3612,9 +3658,12 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton transPrintListBtn;
     private javax.swing.JButton transRefreshBtn;
     private javax.swing.JButton transReprintReceiptBtn;
+    private javax.swing.JLabel transStatusCaptionL;
+    private javax.swing.JLabel transStatusL;
     private com.toedter.calendar.JDateChooser transToDC;
     private javax.swing.JLabel transTotalSalesL;
     private javax.swing.JLabel transTotalTF;
+    private javax.swing.JButton transVoidBtn;
     private javax.swing.JPanel transactionBG;
     private javax.swing.JTable transactionDetailsTable;
     private javax.swing.JPanel transactionTab;
